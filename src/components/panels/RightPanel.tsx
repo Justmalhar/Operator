@@ -12,7 +12,11 @@ const TABS: { id: RightTab; label: string }[] = [
   { id: "checks", label: "Checks" },
 ];
 
-export function RightPanel() {
+interface RightPanelProps {
+  onOpenFile?: (filename: string, filePath: string) => void;
+}
+
+export function RightPanel({ onOpenFile }: RightPanelProps) {
   const [activeTab, setActiveTab] = useState<RightTab>("files");
 
   return (
@@ -22,8 +26,12 @@ export function RightPanel() {
     >
       {/* Tab bar */}
       <div
-        className="vscode-tab-bar flex shrink-0 items-stretch"
-        style={{ height: "35px" }}
+        className="flex shrink-0 items-stretch gap-0"
+        style={{
+          height: "35px",
+          backgroundColor: "var(--vscode-sidebar-background)",
+          borderBottom: "1px solid var(--vscode-panel-border)",
+        }}
       >
         {TABS.map((tab) => {
           const isActive = tab.id === activeTab;
@@ -33,11 +41,14 @@ export function RightPanel() {
               type="button"
               onClick={() => setActiveTab(tab.id)}
               className={cn(
-                "vscode-tab flex h-full items-center px-3 text-[12px] font-medium transition-colors duration-75",
-                isActive && "active",
+                "relative flex h-full items-center px-3 text-[11px] font-medium uppercase tracking-wider transition-colors duration-75",
+                isActive
+                  ? "text-[var(--vscode-panel-title-active-foreground)]"
+                  : "text-[var(--vscode-panel-title-inactive-foreground)] hover:text-[var(--vscode-panel-title-active-foreground)]",
               )}
             >
               {tab.label}
+              {isActive && <span className="panel-tab-underline" />}
             </button>
           );
         })}
@@ -45,7 +56,7 @@ export function RightPanel() {
 
       {/* Panel content */}
       <div className="min-h-0 flex-1">
-        {activeTab === "files" && <FileTree />}
+        {activeTab === "files" && <FileTree onOpenFile={onOpenFile} />}
         {activeTab === "changes" && <ChangesTab />}
         {activeTab === "checks" && <ChecksTab />}
       </div>

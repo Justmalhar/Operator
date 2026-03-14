@@ -1,4 +1,4 @@
-import { ChevronDown, Cpu, GitBranch, Sliders } from "lucide-react";
+import { ChevronDown, Cpu, GitBranch, Gauge } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,16 +26,18 @@ interface StatusBarProps {
 function ContextBar({ used, max }: { used: number; max: number }) {
   const pct = Math.min((used / max) * 100, 100);
   const color = pct > 80 ? "#f14c4c" : pct > 60 ? "#cca700" : "var(--vscode-focus-border, #007fd4)";
+  const tokensK = Math.round(used / 1000);
+  const maxK = Math.round(max / 1000);
   return (
     <div className="flex items-center gap-1.5">
-      <Sliders className="h-3 w-3 opacity-50" />
-      <div className="relative h-1 w-16 overflow-hidden rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.1)" }}>
+      <Gauge className="h-3 w-3 opacity-40" />
+      <div className="relative h-[3px] w-16 overflow-hidden rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.08)" }}>
         <div
           className="absolute inset-y-0 left-0 rounded-full transition-all"
           style={{ width: `${pct}%`, backgroundColor: color }}
         />
       </div>
-      <span className="text-[10px] opacity-40">{Math.round(pct)}%</span>
+      <span className="text-[10px] tabular-nums opacity-35">{tokensK}k/{maxK}k</span>
     </div>
   );
 }
@@ -58,22 +60,22 @@ export function StatusBar({
 
   return (
     <div
-      className="flex items-center justify-between gap-2 px-3 py-1.5"
-      style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
+      className="flex items-center justify-between gap-2 px-5 py-1.5"
+      style={{ borderTop: "1px solid var(--vscode-panel-border, rgba(255,255,255,0.06))" }}
     >
       {/* Left cluster */}
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-0.5">
         {/* Context mode */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              className="flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium transition-colors hover:bg-white/5"
-              style={{ color: "var(--vscode-editor-foreground)", opacity: 0.65 }}
+              className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors hover:bg-white/5"
+              style={{ color: "var(--vscode-editor-foreground)", opacity: 0.55 }}
             >
               <Cpu className="h-3 w-3" />
               {contextMode === "local" ? "Local" : "Full Access"}
-              <ChevronDown className="h-3 w-3 opacity-50" />
+              <ChevronDown className="h-2.5 w-2.5 opacity-50" />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="min-w-[160px]" style={dropdownStyle}>
@@ -104,20 +106,23 @@ export function StatusBar({
           </DropdownMenuContent>
         </DropdownMenu>
 
+        {/* Separator */}
+        <span className="mx-0.5 h-3 w-px" style={{ backgroundColor: "rgba(255,255,255,0.08)" }} />
+
         {/* Edit mode */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              className="flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium transition-colors hover:bg-white/5"
+              className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors hover:bg-white/5"
               style={{
                 color: "var(--vscode-editor-foreground)",
-                opacity: editMode === "auto" ? 0.65 : 1,
+                opacity: editMode === "auto" ? 0.55 : 0.8,
               }}
             >
               <GitBranch className="h-3 w-3" />
-              {editMode === "auto" ? "Edit Auto" : "Edit Ask"}
-              <ChevronDown className="h-3 w-3 opacity-50" />
+              {editMode === "auto" ? "Auto" : "Ask"}
+              <ChevronDown className="h-2.5 w-2.5 opacity-50" />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="min-w-[160px]" style={dropdownStyle}>
@@ -148,23 +153,25 @@ export function StatusBar({
           </DropdownMenuContent>
         </DropdownMenu>
 
+        {/* Separator */}
+        <span className="mx-0.5 h-3 w-px" style={{ backgroundColor: "rgba(255,255,255,0.08)" }} />
+
         {/* Plan mode toggle */}
         <button
           type="button"
           onClick={() => onPlanModeChange(!planMode)}
           className={cn(
-            "flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium transition-colors hover:bg-white/5",
+            "flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors hover:bg-white/5",
           )}
           style={{
             color: planMode ? "var(--vscode-focus-border, #007fd4)" : "var(--vscode-editor-foreground)",
-            opacity: planMode ? 1 : 0.65,
+            opacity: planMode ? 1 : 0.55,
           }}
         >
-          <span className="text-[10px]">⟁</span>
-          Plan Mode
+          Plan
           {planMode && (
             <span
-              className="rounded px-1 py-0.5 text-[9px] font-semibold"
+              className="rounded px-1 py-px text-[9px] font-bold"
               style={{ backgroundColor: "var(--vscode-focus-border, #007fd4)", color: "#fff" }}
             >
               ON

@@ -52,6 +52,21 @@
   border-right: 1px solid var(--vscode-activity-bar-border, transparent);
 }
 
+.vscode-activity-item {
+  color: var(--vscode-activity-bar-inactive, var(--vscode-activity-bar-foreground));
+}
+
+.vscode-activity-item:hover {
+  background-color: var(--vscode-list-hover-background);
+  color: var(--vscode-activity-bar-foreground);
+}
+
+.vscode-activity-item.selected,
+.vscode-activity-item[aria-selected="true"] {
+  background-color: var(--vscode-list-inactive-selection-background);
+  color: var(--vscode-activity-bar-foreground);
+}
+
 /* Primary sidebar (file explorer, search, etc.) */
 .vscode-sidebar {
   background-color: var(--vscode-sidebar-background);
@@ -114,12 +129,12 @@
 .vscode-panel-title {
   color: var(--vscode-panel-title-inactive-foreground);
   cursor: pointer;
+  position: relative;
 }
 
 .vscode-panel-title.active,
 .vscode-panel-title[aria-selected="true"] {
-  color:        var(--vscode-panel-title-active-foreground);
-  border-bottom: 1px solid var(--vscode-panel-title-active-border);
+  color: var(--vscode-panel-title-active-foreground);
 }
 
 /* Title bar */
@@ -159,6 +174,28 @@
 .vscode-list-item.inactive-selected {
   background-color: var(--vscode-list-inactive-selection-background);
   color:            var(--vscode-list-inactive-selection-foreground, inherit);
+}
+
+.vscode-sidebar .vscode-sidebar-item.selected,
+.vscode-sidebar .vscode-sidebar-item[aria-selected="true"] {
+  background-color: var(--vscode-list-inactive-selection-background);
+  color: var(--vscode-list-active-selection-foreground, var(--vscode-sidebar-foreground));
+}
+
+.vscode-sidebar .vscode-sidebar-item.selected:hover,
+.vscode-sidebar .vscode-sidebar-item[aria-selected="true"]:hover {
+  background-color: var(--vscode-list-inactive-selection-background);
+}
+
+.vscode-sidebar-count {
+  color: var(--vscode-sidebar-section-header-foreground);
+  opacity: 0.85;
+}
+
+.vscode-sidebar .vscode-sidebar-item.selected .vscode-sidebar-count,
+.vscode-sidebar .vscode-sidebar-item[aria-selected="true"] .vscode-sidebar-count {
+  color: var(--vscode-sidebar-foreground);
+  opacity: 0.95;
 }
 
 /* Input / Dropdown */

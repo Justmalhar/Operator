@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { Copy, GitFork, RotateCcw } from "lucide-react";
 import { UserMessage } from "./UserMessage";
 import { ToolCallMessage, type ToolCall } from "./ToolCallMessage";
 import { FileChangeBadges } from "./FileChangeBadges";
@@ -100,15 +101,58 @@ const MOCK_MESSAGES: Message[] = [
   },
 ];
 
+// ── Message action buttons (visible on hover) ─────────────────────────────────
+
+function MessageActions({ content }: { content: string }) {
+  return (
+    <div
+      className="absolute right-4 top-3 z-10 flex items-center overflow-hidden rounded-md opacity-0 shadow-md transition-opacity duration-100 group-hover:opacity-100"
+      style={{
+        backgroundColor: "var(--vscode-dropdown-background, #252526)",
+        border: "1px solid var(--vscode-dropdown-border, rgba(255,255,255,0.08))",
+      }}
+    >
+      <button
+        type="button"
+        title="Copy message"
+        onClick={() => navigator.clipboard.writeText(content)}
+        className="flex h-[26px] w-[28px] items-center justify-center transition-colors hover:bg-white/8"
+        style={{ color: "var(--vscode-tab-inactive-foreground)" }}
+      >
+        <Copy className="h-3.5 w-3.5" />
+      </button>
+      <button
+        type="button"
+        title="Fork from here"
+        className="flex h-[26px] w-[28px] items-center justify-center transition-colors hover:bg-white/8"
+        style={{ color: "var(--vscode-tab-inactive-foreground)" }}
+      >
+        <GitFork className="h-3.5 w-3.5" />
+      </button>
+      <button
+        type="button"
+        title="Revert to here"
+        className="flex h-[26px] w-[28px] items-center justify-center transition-colors hover:bg-white/8"
+        style={{ color: "var(--vscode-tab-inactive-foreground)" }}
+      >
+        <RotateCcw className="h-3.5 w-3.5" />
+      </button>
+    </div>
+  );
+}
+
+// ── Agent message ─────────────────────────────────────────────────────────────
+
 function AgentMessage({ message }: { message: AgentMsg }) {
   return (
-    <div className="px-3 py-2">
+    <div className="px-5 py-3">
+      {/* Agent identity row */}
       <div
-        className="mb-1.5 flex items-center gap-2 text-[11px]"
+        className="mb-2 flex items-center gap-2 text-[11px]"
         style={{ color: "var(--vscode-tab-inactive-foreground)" }}
       >
         <span
-          className="flex h-[18px] w-[18px] items-center justify-center rounded text-[10px] font-bold"
+          className="flex h-[20px] w-[20px] items-center justify-center rounded-md text-[10px] font-bold"
           style={{
             background: "linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)",
             color: "#fff",
@@ -116,30 +160,40 @@ function AgentMessage({ message }: { message: AgentMsg }) {
         >
           O
         </span>
-        <span>Operator</span>
-        {message.timestamp && <span>· {message.timestamp}</span>}
+        <span className="font-medium" style={{ color: "var(--vscode-sidebar-foreground)" }}>Operator</span>
+        {message.timestamp && (
+          <span className="opacity-60">{message.timestamp}</span>
+        )}
         {message.duration && (
-          <span>· {(message.duration / 1000).toFixed(0)}s</span>
+          <span className="opacity-60">{(message.duration / 1000).toFixed(0)}s</span>
         )}
       </div>
 
+      {/* Tool calls */}
       {message.toolCalls && message.toolCalls.length > 0 && (
-        <ToolCallMessage toolCalls={message.toolCalls} duration={message.duration} />
+        <ToolCallMessage
+          toolCalls={message.toolCalls}
+          duration={message.duration}
+        />
       )}
 
+      {/* Message body */}
       <div
-        className="text-[13px] leading-relaxed"
-        style={{ color: "var(--vscode-sidebar-foreground)", whiteSpace: "pre-wrap" }}
+        className="text-[13px] leading-[1.6]"
+        style={{ color: "var(--vscode-editor-foreground)", whiteSpace: "pre-wrap" }}
       >
         {message.content}
       </div>
 
+      {/* File changes */}
       {message.fileChanges && message.fileChanges.length > 0 && (
         <FileChangeBadges changes={message.fileChanges} />
       )}
     </div>
   );
 }
+
+// ── MessageList ───────────────────────────────────────────────────────────────
 
 interface MessageListProps {
   workspaceId?: string;
@@ -154,14 +208,29 @@ export function MessageList({ workspaceId: _workspaceId }: MessageListProps) {
 
   return (
     <div className="vscode-scrollable h-full overflow-y-auto">
-      <div className="pb-4 pt-2">
-        {MOCK_MESSAGES.map((msg) =>
-          msg.role === "user" ? (
-            <UserMessage key={msg.id} text={msg.content} timestamp={msg.timestamp} />
-          ) : (
-            <AgentMessage key={msg.id} message={msg} />
-          ),
-        )}
+      <div className="mx-auto max-w-[720px] pb-4 pt-3">
+        {MOCK_MESSAGES.map((msg, i) => (
+          <div key={msg.id}>
+            {msg.role === "user" ? (
+              <div className="group relative">
+                <UserMessage text={msg.content} timestamp={msg.timestamp} />
+                <MessageActions content={msg.content} />
+              </div>
+            ) : (
+              <div className="group relative">
+                <AgentMessage message={msg} />
+                <MessageActions content={msg.content} />
+              </div>
+            )}
+            {/* Separator between message pairs */}
+            {i < MOCK_MESSAGES.length - 1 && MOCK_MESSAGES[i + 1].role === "user" && (
+              <div
+                className="mx-5 my-1"
+                style={{ borderTop: "1px solid var(--vscode-panel-border)", opacity: 0.4 }}
+              />
+            )}
+          </div>
+        ))}
       </div>
       <div ref={bottomRef} />
     </div>

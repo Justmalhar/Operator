@@ -38,7 +38,6 @@ export function TerminalTab() {
       { id: crypto.randomUUID(), type: "command", text: `$ ${cmd}` },
     ];
 
-    // Simple mock responses
     if (cmd === "ls") {
       newLines.push({ id: crypto.randomUUID(), type: "output", text: "CLAUDE.md  src/  assets/  package.json" });
     } else if (cmd === "clear") {
@@ -76,8 +75,8 @@ export function TerminalTab() {
 
   return (
     <div
-      className="flex h-full flex-col font-mono text-[12px]"
-      style={{ backgroundColor: "var(--vscode-editor-background)" }}
+      className="vscode-panel flex h-full flex-col text-[12px]"
+      style={{ fontFamily: "'SF Mono', Menlo, Monaco, 'Cascadia Code', monospace" }}
       onClick={() => inputRef.current?.focus()}
     >
       {/* Output */}
@@ -85,15 +84,15 @@ export function TerminalTab() {
         {lines.map((line) => (
           <div
             key={line.id}
+            className="leading-[1.6]"
             style={{
               color:
                 line.type === "command"
-                  ? "var(--vscode-sidebar-foreground)"
+                  ? "var(--vscode-editor-foreground)"
                   : line.type === "error"
                     ? "#f48771"
                     : "var(--vscode-tab-inactive-foreground)",
               whiteSpace: "pre-wrap",
-              lineHeight: "1.5",
             }}
           >
             {line.text || "\u00A0"}
@@ -105,14 +104,14 @@ export function TerminalTab() {
       {/* Input */}
       <form
         onSubmit={handleSubmit}
-        className="flex shrink-0 items-center gap-1 px-3 py-1.5"
-        style={{ borderTop: "1px solid var(--vscode-sidebar-section-header-border)" }}
+        className="flex shrink-0 items-center gap-1.5 px-3 py-1.5"
+        style={{ borderTop: "1px solid var(--vscode-sidebar-section-header-border, rgba(255,255,255,0.06))" }}
       >
-        <span style={{ color: "#4ec994" }}>$</span>
+        <span className="font-bold" style={{ color: "#4ec994" }}>$</span>
         <input
           ref={inputRef}
           className="min-w-0 flex-1 bg-transparent text-[12px] focus:outline-none"
-          style={{ color: "var(--vscode-sidebar-foreground)", fontFamily: "inherit" }}
+          style={{ color: "var(--vscode-editor-foreground)", fontFamily: "inherit" }}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
