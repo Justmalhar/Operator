@@ -13,7 +13,10 @@ import { TodosPanel } from "@/components/todos/TodosPanel";
 import { cn } from "@/lib/utils";
 import { SidebarLayout } from "@/components/layout/SidebarLayout";
 import { NewChatPage } from "@/components/chat/NewChatPage";
-import { ChevronRight, FileCode2, FileImage, FileText, Globe, Table2 } from "lucide-react";
+import { RightPanel } from "@/components/panels/RightPanel";
+import { BottomPanel } from "@/components/panels/BottomPanel";
+import { ChatPanel } from "@/components/chat/ChatPanel";
+import { ChevronRight, FileCode2, FileImage, FileText, Globe, Table2, PanelRight, PanelBottom } from "lucide-react";
 
 interface ExplorerEntry {
   id: string;
@@ -94,6 +97,8 @@ function App() {
   const [filename, setFilename] = useState("");
   const [activeWorkspaceId, setActiveWorkspaceId] = useState<string | null>("ws-los-angeles");
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({ docs: true, preview: true });
+  const [showRightPanel, setShowRightPanel] = useState(true);
+  const [showBottomPanel, setShowBottomPanel] = useState(true);
 
   const explorerSections = useMemo(() => {
     return seededEntries.reduce<Record<string, ExplorerEntry[]>>((groups, entry) => {
@@ -148,7 +153,34 @@ function App() {
             Operator
           </span>
         </div>
-        <div className="w-[78px] shrink-0" />
+        <div className="flex items-center gap-1 pr-2">
+          <button
+            type="button"
+            onClick={() => setShowRightPanel((v) => !v)}
+            className={cn(
+              "flex h-6 w-6 items-center justify-center rounded transition-colors duration-75",
+              showRightPanel ? "opacity-100" : "opacity-40",
+            )}
+            style={{ color: "var(--vscode-titlebar-foreground)" }}
+            aria-label="Toggle right panel"
+            title="Toggle right panel"
+          >
+            <PanelRight className="h-3.5 w-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowBottomPanel((v) => !v)}
+            className={cn(
+              "flex h-6 w-6 items-center justify-center rounded transition-colors duration-75",
+              showBottomPanel ? "opacity-100" : "opacity-40",
+            )}
+            style={{ color: "var(--vscode-titlebar-foreground)" }}
+            aria-label="Toggle bottom panel"
+            title="Toggle bottom panel"
+          >
+            <PanelBottom className="h-3.5 w-3.5" />
+          </button>
+        </div>
       </div>
 
       {/* ── Main content ──────────────────────────────────────────────── */}
@@ -235,15 +267,45 @@ function App() {
           <TodosPanel />
         </aside>
 
-        {/* 4. Main editor area */}
-        <div className="vscode-editor flex min-w-0 flex-1 flex-col">
-          <WorkspacePane
-            activeTabId={activeTabId}
-            tabs={tabs}
-            onTabClose={closeTab}
-            onTabSelect={setActiveTabId}
-            emptyState={<NewChatPage />}
-          />
+        {/* 4. Main content: chat + editor + right panel */}
+        <div className="flex min-w-0 flex-1 flex-col">
+          {/* Top area: chat + editor + right panel */}
+          <div className="flex min-h-0 flex-1">
+            {/* Chat panel */}
+            {activeWorkspaceId && (
+              <div
+                className="flex w-[320px] shrink-0 flex-col"
+                style={{ borderRight: "1px solid var(--vscode-sidebar-section-header-border)" }}
+              >
+                <ChatPanel workspaceId={activeWorkspaceId} />
+              </div>
+            )}
+
+            {/* Editor area */}
+            <div className="vscode-editor flex min-w-0 flex-1 flex-col">
+              <WorkspacePane
+                activeTabId={activeTabId}
+                tabs={tabs}
+                onTabClose={closeTab}
+                onTabSelect={setActiveTabId}
+                emptyState={<NewChatPage />}
+              />
+            </div>
+
+            {/* Right panel */}
+            {showRightPanel && (
+              <div className="w-[260px] shrink-0">
+                <RightPanel />
+              </div>
+            )}
+          </div>
+
+          {/* Bottom panel */}
+          {showBottomPanel && (
+            <div className="h-[200px] shrink-0">
+              <BottomPanel />
+            </div>
+          )}
         </div>
       </div>
 
