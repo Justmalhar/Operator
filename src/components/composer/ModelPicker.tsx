@@ -1,60 +1,95 @@
-import { useState } from "react";
-import { ChevronDown, Sparkles } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { ChevronDown } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
-const MODELS = [
-  { id: "claude-sonnet-4-6", label: "Sonnet 4.6" },
-  { id: "claude-opus-4-6", label: "Opus 4.6" },
-  { id: "claude-haiku-4-5", label: "Haiku 4.5" },
+export type ModelId =
+  | "claude-opus-4-6"
+  | "claude-sonnet-4-6"
+  | "claude-haiku-4-5"
+  | "gpt-4o"
+  | "gemini-2-5-pro";
+
+interface Model {
+  id: ModelId;
+  label: string;
+  badge?: string;
+  provider: "anthropic" | "openai" | "google";
+}
+
+const MODELS: Model[] = [
+  { id: "claude-opus-4-6", label: "Claude Opus 4.6", badge: "Powerful", provider: "anthropic" },
+  { id: "claude-sonnet-4-6", label: "Claude Sonnet 4.6", badge: "Fast", provider: "anthropic" },
+  { id: "claude-haiku-4-5", label: "Claude Haiku 4.5", badge: "Lite", provider: "anthropic" },
+  { id: "gpt-4o", label: "GPT 4o", provider: "openai" },
+  { id: "gemini-2-5-pro", label: "Gemini 2.5 Pro", provider: "google" },
 ];
 
-export function ModelPicker() {
-  const [selectedId, setSelectedId] = useState("claude-sonnet-4-6");
-  const [open, setOpen] = useState(false);
-  const selected = MODELS.find((m) => m.id === selectedId) ?? MODELS[0];
+const SHORT_LABEL: Record<ModelId, string> = {
+  "claude-opus-4-6": "Opus 4.6",
+  "claude-sonnet-4-6": "Sonnet 4.6",
+  "claude-haiku-4-5": "Haiku 4.5",
+  "gpt-4o": "GPT 4o",
+  "gemini-2-5-pro": "Gemini 2.5",
+};
 
+interface ModelPickerProps {
+  value?: ModelId;
+  onChange?: (id: ModelId) => void;
+}
+
+export function ModelPicker({ value = "claude-sonnet-4-6", onChange }: ModelPickerProps) {
   return (
-    <div className="relative">
-      <button
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        className="vscode-list-item flex items-center gap-1 rounded px-2 py-[3px] text-[12px] transition-colors duration-75"
-        style={{ color: "var(--vscode-tab-inactive-foreground)" }}
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          className="flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium transition-colors hover:bg-white/5"
+          style={{ color: "var(--vscode-editor-foreground)", opacity: 0.75 }}
+        >
+          {SHORT_LABEL[value]}
+          <ChevronDown className="h-3 w-3 opacity-60" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align="start"
+        className="min-w-[180px]"
+        style={{
+          backgroundColor: "var(--vscode-dropdown-background, #252526)",
+          border: "1px solid var(--vscode-dropdown-border, rgba(255,255,255,0.1))",
+          color: "var(--vscode-dropdown-foreground, #cccccc)",
+        }}
       >
-        <Sparkles className="h-3 w-3" />
-        <span>{selected?.label}</span>
-        <ChevronDown className="h-3 w-3" />
-      </button>
-
-      {open && (
-        <>
-          <div
-            className="fixed inset-0 z-10"
-            onClick={() => setOpen(false)}
-          />
-          <div
-            className="absolute bottom-full left-0 z-20 mb-1 min-w-[140px] rounded border py-1 shadow-lg"
+        <DropdownMenuLabel className="text-[10px] font-semibold uppercase tracking-wider opacity-50">
+          Model
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator style={{ backgroundColor: "rgba(255,255,255,0.06)" }} />
+        {MODELS.map((m) => (
+          <DropdownMenuItem
+            key={m.id}
+            onClick={() => onChange?.(m.id)}
+            className="flex items-center justify-between gap-3 text-[12px]"
             style={{
-              backgroundColor: "var(--vscode-sidebar-background)",
-              borderColor: "var(--vscode-sidebar-section-header-border)",
+              backgroundColor: value === m.id ? "rgba(255,255,255,0.06)" : undefined,
             }}
           >
-            {MODELS.map((model) => (
-              <button
-                key={model.id}
-                type="button"
-                onClick={() => { setSelectedId(model.id); setOpen(false); }}
-                className={cn(
-                  "vscode-list-item flex w-full items-center px-3 py-1.5 text-left text-[12px] transition-colors duration-75",
-                  selectedId === model.id && "selected",
-                )}
+            <span>{m.label}</span>
+            {m.badge && (
+              <span
+                className="rounded px-1 py-0.5 text-[10px]"
+                style={{ backgroundColor: "rgba(255,255,255,0.08)", opacity: 0.7 }}
               >
-                {model.label}
-              </button>
-            ))}
-          </div>
-        </>
-      )}
-    </div>
+                {m.badge}
+              </span>
+            )}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
