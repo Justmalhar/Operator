@@ -12,6 +12,7 @@ import type { WorkspaceFileTab } from "@/components/workspace/WorkspaceTabs";
 import { TodosPanel } from "@/components/todos/TodosPanel";
 import { cn } from "@/lib/utils";
 import { SidebarLayout } from "@/components/layout/SidebarLayout";
+import { NewChatPage } from "@/components/chat/NewChatPage";
 import { ChevronRight, FileCode2, FileImage, FileText, Globe, Table2 } from "lucide-react";
 
 interface ExplorerEntry {
@@ -241,21 +242,7 @@ function App() {
             tabs={tabs}
             onTabClose={closeTab}
             onTabSelect={setActiveTabId}
-            emptyState={
-              <div className="flex h-full flex-col items-center justify-center gap-4" style={{ backgroundColor: "var(--vscode-editor-background)" }}>
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl" style={{ backgroundColor: "var(--vscode-sidebar-background)" }}>
-                  <FileCode2 className="h-7 w-7" style={{ color: "var(--vscode-tab-inactive-foreground)" }} />
-                </div>
-                <div className="text-center">
-                  <p className="text-[13px] font-medium" style={{ color: "var(--vscode-editor-foreground)" }}>
-                    No file open
-                  </p>
-                  <p className="mt-1 text-[12px]" style={{ color: "var(--vscode-tab-inactive-foreground)" }}>
-                    Select a file from the Explorer to get started
-                  </p>
-                </div>
-              </div>
-            }
+            emptyState={<NewChatPage />}
           />
         </div>
       </div>
