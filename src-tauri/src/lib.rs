@@ -1,3 +1,5 @@
+mod logging;
+
 pub mod commands;
 pub mod config;
 pub mod db;
@@ -25,8 +27,12 @@ pub fn run() {
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .setup(|app| {
+            // Init tracing first so all subsequent setup steps are observable.
+            let log_dir = app.path().app_log_dir()?;
+            std::fs::create_dir_all(&log_dir)?;
+            logging::init_logging(&log_dir);
+
             let handle = app.handle().clone();
-            // Initialise DB on the Tauri async runtime.
             let pool = tauri::async_runtime::block_on(async {
                 db::schema::init_db(&handle)
                     .await
@@ -35,7 +41,7 @@ pub fn run() {
             app.manage(AppState { db: pool });
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![])
+        .invoke_handler(tauri::generate_handler![logging::log_frontend_events])
         .run(tauri::generate_context!())
         .expect("error while running Operator");
 }

@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "operator-scaffold",
+  "productName": "Operator",
   "version": "0.1.0",
   "identifier": "com.operator.app",
   "build": {
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "operator-scaffold",
+        "title": "Operator",
         "width": 800,
         "height": 600
       }
