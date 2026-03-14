@@ -9,6 +9,7 @@ import apiDesignDoc from "../docs/05-api-design.md?raw";
 import indexHtmlSource from "../index.html?raw";
 import { WorkspacePane } from "@/components/workspace/WorkspacePane";
 import type { WorkspaceFileTab } from "@/components/workspace/WorkspaceTabs";
+import { TodosPanel } from "@/components/todos/TodosPanel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -187,6 +188,10 @@ function App() {
             </section>
           ))}
         </div>
+      </aside>
+
+      <aside className="flex w-[280px] flex-col border-r border-white/8">
+        <TodosPanel />
       </aside>
 
       <section className="flex min-w-0 flex-1 flex-col">
