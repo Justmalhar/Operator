@@ -1,0 +1,217 @@
+{
+  "mcp_servers": [
+    {
+      "id": "github-mcp",
+      "name": "GitHub MCP Server",
+      "author": "@modelcontextprotocol",
+      "description": "GitHub's official MCP server. Manage issues, PRs, repos, and code search directly from your agent.",
+      "icon_url": "https://github.githubassets.com/favicons/favicon.svg",
+      "category": "DevTools",
+      "tags": ["git", "github", "pr", "issues", "code-search"],
+      "transport": "stdio",
+      "install_command": "npx @modelcontextprotocol/server-github",
+      "config_schema": [
+        { "key": "GITHUB_PERSONAL_ACCESS_TOKEN", "description": "GitHub PAT with repo and read:org scopes", "required": true }
+      ],
+      "tools": ["create_issue", "list_issues", "create_pull_request", "list_pull_requests", "merge_pull_request", "search_code", "get_file_contents", "create_repository"],
+      "stars": 27885,
+      "is_installed": false,
+      "is_verified": true,
+      "source_url": "https://github.com/modelcontextprotocol/servers/tree/main/src/github",
+      "created_at": "2025-11-01T00:00:00Z",
+      "updated_at": "2026-02-15T00:00:00Z"
+    },
+    {
+      "id": "context7",
+      "name": "Context7",
+      "author": "@upstash",
+      "description": "Up-to-date library documentation and code examples for any prompt. Pulls live docs so your agent never hallucinates APIs.",
+      "icon_url": "https://context7.com/favicon.ico",
+      "category": "AI",
+      "tags": ["documentation", "libraries", "code-examples", "context"],
+      "transport": "http",
+      "install_command": "npx @upstash/context7-mcp",
+      "config_schema": [],
+      "tools": ["resolve-library-id", "query-docs"],
+      "stars": 49822,
+      "is_installed": true,
+      "is_verified": true,
+      "source_url": "https://github.com/upstash/context7",
+      "created_at": "2025-10-15T00:00:00Z",
+      "updated_at": "2026-03-01T00:00:00Z"
+    },
+    {
+      "id": "chrome-devtools-mcp",
+      "name": "Chrome DevTools MCP",
+      "author": "@ChromeDevTools",
+      "description": "Chrome DevTools for coding agents. Inspect elements, run audits, capture screenshots, and debug JavaScript in the browser.",
+      "icon_url": "https://www.google.com/chrome/static/images/chrome-logo.svg",
+      "category": "DevTools",
+      "tags": ["browser", "debugging", "chrome", "devtools", "accessibility"],
+      "transport": "stdio",
+      "install_command": "npx @chrome-devtools/mcp-server",
+      "config_schema": [
+        { "key": "CHROME_EXECUTABLE_PATH", "description": "Path to Chrome/Chromium executable (optional, auto-detected)", "required": false }
+      ],
+      "tools": ["navigate_page", "take_screenshot", "evaluate_script", "get_console_messages", "lighthouse_audit", "take_snapshot", "click", "fill", "hover"],
+      "stars": 28970,
+      "is_installed": true,
+      "is_verified": true,
+      "source_url": "https://github.com/ChromeDevTools/mcp-server",
+      "created_at": "2025-12-01T00:00:00Z",
+      "updated_at": "2026-03-05T00:00:00Z"
+    },
+    {
+      "id": "mcp-toolbox-databases",
+      "name": "MCP Toolbox for Databases",
+      "author": "@googleapis",
+      "description": "Open-source MCP server supporting 30+ datasources including PostgreSQL, MySQL, BigQuery, Spanner, and AlloyDB.",
+      "icon_url": "https://www.gstatic.com/devrel-devsite/prod/v45f61cf7e7209f8607c8ea46a0b19d61fb58ca03d81db2fa04dac5dbeb8bc63a/cloud/images/favicons/onecloud/super_cloud.png",
+      "category": "Data",
+      "tags": ["database", "sql", "postgresql", "mysql", "bigquery", "spanner"],
+      "transport": "stdio",
+      "install_command": "npx @googleapis/genai-toolbox",
+      "config_schema": [
+        { "key": "DATABASE_URL", "description": "Connection string for your primary database", "required": true },
+        { "key": "DB_TYPE", "description": "Database type: postgres | mysql | bigquery | spanner", "required": true }
+      ],
+      "tools": ["execute_query", "list_tables", "describe_table", "insert_row", "update_row", "delete_row", "run_migration"],
+      "stars": 13411,
+      "is_installed": false,
+      "is_verified": true,
+      "source_url": "https://github.com/googleapis/genai-toolbox",
+      "created_at": "2026-01-05T00:00:00Z",
+      "updated_at": "2026-02-20T00:00:00Z"
+    },
+    {
+      "id": "filesystem-mcp",
+      "name": "Filesystem MCP",
+      "author": "@modelcontextprotocol",
+      "description": "Secure local filesystem access with configurable allowed directories. Read, write, move, and search files safely.",
+      "icon_url": "https://modelcontextprotocol.io/favicon.ico",
+      "category": "Infrastructure",
+      "tags": ["filesystem", "files", "directories", "local"],
+      "transport": "stdio",
+      "install_command": "npx @modelcontextprotocol/server-filesystem /path/to/allowed/dir",
+      "config_schema": [
+        { "key": "ALLOWED_DIRECTORIES", "description": "Comma-separated list of absolute paths the server can access", "required": true }
+      ],
+      "tools": ["read_file", "write_file", "list_directory", "create_directory", "move_file", "search_files", "get_file_info"],
+      "stars": 18540,
+      "is_installed": false,
+      "is_verified": true,
+      "source_url": "https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem",
+      "created_at": "2025-11-01T00:00:00Z",
+      "updated_at": "2026-02-10T00:00:00Z"
+    },
+    {
+      "id": "slack-mcp",
+      "name": "Slack MCP",
+      "author": "@modelcontextprotocol",
+      "description": "Read channels, post messages, and manage Slack workspaces from your agent. Supports threads, reactions, and file uploads.",
+      "icon_url": "https://a.slack-edge.com/80588/marketing/img/meta/slack_hash_128.png",
+      "category": "Communication",
+      "tags": ["slack", "messaging", "team", "notifications"],
+      "transport": "stdio",
+      "install_command": "npx @modelcontextprotocol/server-slack",
+      "config_schema": [
+        { "key": "SLACK_BOT_TOKEN", "description": "Slack Bot OAuth token (xoxb-...)", "required": true },
+        { "key": "SLACK_TEAM_ID", "description": "Slack workspace team ID", "required": true }
+      ],
+      "tools": ["list_channels", "post_message", "read_channel", "add_reaction", "upload_file", "create_thread_reply"],
+      "stars": 9240,
+      "is_installed": false,
+      "is_verified": true,
+      "source_url": "https://github.com/modelcontextprotocol/servers/tree/main/src/slack",
+      "created_at": "2025-11-15T00:00:00Z",
+      "updated_at": "2026-02-01T00:00:00Z"
+    },
+    {
+      "id": "playwright-mcp",
+      "name": "Playwright MCP",
+      "author": "@microsoft",
+      "description": "Browser automation via Playwright. Navigate pages, fill forms, take screenshots, and run end-to-end tests from any agent.",
+      "icon_url": "https://playwright.dev/img/playwright-logo.svg",
+      "category": "DevTools",
+      "tags": ["browser", "automation", "testing", "playwright", "e2e"],
+      "transport": "stdio",
+      "install_command": "npx @playwright/mcp-server",
+      "config_schema": [
+        { "key": "BROWSER", "description": "Browser to use: chromium | firefox | webkit (default: chromium)", "required": false },
+        { "key": "HEADLESS", "description": "Run headless: true | false (default: true)", "required": false }
+      ],
+      "tools": ["browser_navigate", "browser_click", "browser_fill", "browser_take_screenshot", "browser_snapshot", "browser_evaluate", "browser_wait_for", "browser_close"],
+      "stars": 22190,
+      "is_installed": true,
+      "is_verified": true,
+      "source_url": "https://github.com/microsoft/playwright-mcp",
+      "created_at": "2025-12-10T00:00:00Z",
+      "updated_at": "2026-03-01T00:00:00Z"
+    },
+    {
+      "id": "linear-mcp",
+      "name": "Linear MCP",
+      "author": "@linear",
+      "description": "Manage Linear issues, projects, and cycles. Create, update, and triage engineering work directly from your agent.",
+      "icon_url": "https://linear.app/favicon.ico",
+      "category": "Productivity",
+      "tags": ["linear", "issues", "project-management", "engineering"],
+      "transport": "http",
+      "install_command": "npx @linear/mcp-server",
+      "config_schema": [
+        { "key": "LINEAR_API_KEY", "description": "Linear personal API key", "required": true }
+      ],
+      "tools": ["list_issues", "create_issue", "update_issue", "list_projects", "list_cycles", "assign_issue", "set_issue_status"],
+      "stars": 7810,
+      "is_installed": false,
+      "is_verified": true,
+      "source_url": "https://github.com/linear/linear-mcp",
+      "created_at": "2026-01-20T00:00:00Z",
+      "updated_at": "2026-03-01T00:00:00Z"
+    },
+    {
+      "id": "supabase-mcp",
+      "name": "Supabase MCP",
+      "author": "@supabase",
+      "description": "Full Supabase access for agents — query tables, run migrations, manage auth users, and inspect storage buckets.",
+      "icon_url": "https://supabase.com/favicon/favicon-32x32.png",
+      "category": "Data",
+      "tags": ["supabase", "postgresql", "database", "auth", "storage"],
+      "transport": "stdio",
+      "install_command": "npx @supabase/mcp-server-supabase",
+      "config_schema": [
+        { "key": "SUPABASE_URL", "description": "Your Supabase project URL", "required": true },
+        { "key": "SUPABASE_SERVICE_ROLE_KEY", "description": "Service role key (full DB access)", "required": true }
+      ],
+      "tools": ["execute_sql", "list_tables", "list_auth_users", "list_storage_buckets", "get_project_info", "run_migration"],
+      "stars": 11340,
+      "is_installed": false,
+      "is_verified": true,
+      "source_url": "https://github.com/supabase/mcp-server-supabase",
+      "created_at": "2026-01-10T00:00:00Z",
+      "updated_at": "2026-02-28T00:00:00Z"
+    },
+    {
+      "id": "vercel-mcp",
+      "name": "Vercel MCP",
+      "author": "@vercel",
+      "description": "Deploy projects, inspect logs, manage environment variables, and monitor deployments via Vercel's API.",
+      "icon_url": "https://vercel.com/favicon.ico",
+      "category": "Infrastructure",
+      "tags": ["vercel", "deployment", "ci-cd", "serverless", "edge"],
+      "transport": "http",
+      "install_command": "npx @vercel/mcp-server",
+      "config_schema": [
+        { "key": "VERCEL_TOKEN", "description": "Vercel personal access token", "required": true },
+        { "key": "VERCEL_TEAM_ID", "description": "Team ID for team-owned projects (optional)", "required": false }
+      ],
+      "tools": ["list_deployments", "create_deployment", "get_deployment_logs", "list_projects", "add_env_variable", "remove_env_variable", "rollback_deployment"],
+      "stars": 8920,
+      "is_installed": false,
+      "is_verified": true,
+      "source_url": "https://github.com/vercel/vercel-mcp-server",
+      "created_at": "2026-02-01T00:00:00Z",
+      "updated_at": "2026-03-10T00:00:00Z"
+    }
+  ]
+}
