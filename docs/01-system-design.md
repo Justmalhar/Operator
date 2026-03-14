@@ -1,6 +1,6 @@
 # Operator — System Design
 
-*Version 1.0 · March 2026 · Mobiiworld FZ LLC*
+*Version 1.0 · March 2026 ·
 
 ---
 
@@ -43,6 +43,7 @@ Operator is a cross-platform desktop application (macOS, Windows, Linux) for orc
 ## 3. Technology Stack
 
 ### 3.1 Desktop Shell
+
 | Layer | Technology | Rationale |
 |---|---|---|
 | App framework | **Tauri 2.x** | Native webview, Rust core, 5–10 MB binary, ~35 MB RAM idle |
@@ -53,6 +54,7 @@ Operator is a cross-platform desktop application (macOS, Windows, Linux) for orc
 | Rust edition | **2021** | Modern async, stable toolchain |
 
 ### 3.2 Key Rust Crates
+
 | Crate | Purpose |
 |---|---|
 | `git2` (libgit2 bindings) | Worktree create/delete/list, branch ops, checkpoint refs |
@@ -70,6 +72,7 @@ Operator is a cross-platform desktop application (macOS, Windows, Linux) for orc
 | `chrono` | Timestamps for checkpoints, memory freshness |
 
 ### 3.3 Key React Packages (see `08-react-packages.md` for full spec)
+
 | Package | Purpose |
 |---|---|
 | `@xterm/xterm` + `@xterm/addon-fit` | Embedded PTY terminal |
@@ -102,6 +105,7 @@ Operator App (Tauri)
 ```
 
 Key invariants:
+
 - One PTY process per workspace, max
 - Processes use `portable-pty` Rust crate — full PTY, not just stdio pipe
 - Each process runs inside its worktree directory as cwd
@@ -110,6 +114,7 @@ Key invariants:
 ### 4.2 Checkpoint Process
 
 Before each agent turn:
+
 1. Rust hook fires (registered via Claude Code's hook system)
 2. `git2` commits all working tree state to `refs/operator/checkpoints/<workspace_id>/<turn_id>`
 3. Turn ID + git SHA stored in SQLite
@@ -118,6 +123,7 @@ Before each agent turn:
 ### 4.3 Port Allocation
 
 Each workspace receives 10 consecutive ports:
+
 ```rust
 OPERATOR_PORT = BASE_PORT + (workspace_index * 10)
 // e.g. workspace 0 → 3000–3009, workspace 1 → 3010–3019
@@ -143,6 +149,7 @@ invoke("create_workspace",  ─────────────────�
 ```
 
 Events (Rust → React, streamed):
+
 ```
 emit("agent_output", { workspaceId, chunk })     // PTY output streaming
 emit("checkpoint_created", { workspaceId, turnId })
@@ -169,6 +176,7 @@ React: xterm.js write(chunk)
 ## 6. Storage Architecture
 
 ### 6.1 Local SQLite Database
+
 Path: `~/Library/Application Support/com.operator.app/operator.db` (macOS)
 
 Tables: see `04-database-schema.md`
@@ -212,17 +220,21 @@ Tables: see `04-database-schema.md`
 ## 7. Security Model
 
 ### 7.1 Credential Storage
+
 - API keys stored in OS keychain via `keyring` crate (macOS Keychain, Windows Credential Manager, Linux Secret Service)
 - Never stored in SQLite, operator.json, or any file on disk
 - IPC commands never transmit raw credentials to frontend
 
 ### 7.2 Tauri Capability System
+
 Operator exposes only named commands to the webview. No direct filesystem, network, or OS access from JS. All sensitive operations go through Rust command handlers with explicit capability declarations in `tauri.conf.json`.
 
 ### 7.3 Agent Sandboxing
+
 Agents run with user-level permissions (same as the logged-in user). No additional sandboxing in v1.0. Enterprise plan adds optional macOS seatbelt (sandbox-exec) or Docker-based workspace isolation.
 
 ### 7.4 Data Residency
+
 - Source code: local filesystem only — never uploaded to Operator servers
 - Chat history: local SQLite only
 - Model API traffic: direct to provider (Anthropic, OpenAI) — never routed through Operator servers

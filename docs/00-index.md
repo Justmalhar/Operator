@@ -1,6 +1,6 @@
 # Operator — Documentation Index
 
-*Version 1.0 · March 2026 · Mobiiworld FZ LLC*
+*Version 1.0 · March 2026 
 
 > Cross-platform AI agent orchestration desktop app. Built with Tauri + React + Rust.
 
