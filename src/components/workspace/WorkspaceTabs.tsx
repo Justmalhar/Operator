@@ -45,55 +45,62 @@ export function WorkspaceTabs({
   const activeTab = tabs.find((tab) => tab.id === activeTabId) ?? tabs[0] ?? null;
 
   return (
-    <div className={cn("flex h-full min-h-0 flex-col bg-[#1e1e1e]", className)}>
-      <div className="border-b border-white/8 bg-[#181818]">
-        <ScrollArea className="w-full whitespace-nowrap">
-          <div className="flex min-w-full items-stretch">
-            {tabs.map((tab) => {
-              const isActive = tab.id === activeTab?.id;
-              const kind = getViewerKind(tab.filename);
-              const Icon = tabIcons[kind];
+    <div className={cn("vscode-editor flex h-full min-h-0 flex-col", className)}>
+      {/* Tab bar */}
+      {tabs.length > 0 && (
+        <div className="vscode-tab-bar shrink-0 overflow-hidden">
+          <ScrollArea className="w-full whitespace-nowrap">
+            <div className="flex min-w-full items-stretch">
+              {tabs.map((tab) => {
+                const isActive = tab.id === activeTab?.id;
+                const kind = getViewerKind(tab.filename);
+                const Icon = tabIcons[kind];
 
-              return (
-                <div
-                  key={tab.id}
-                  className={cn(
-                    "group flex h-9 min-w-[180px] max-w-[260px] items-center gap-2 border-r border-white/8 px-3 text-sm transition-colors",
-                    isActive ? "bg-[#1e1e1e] text-white" : "bg-[#2d2d2d] text-[#c5c5c5] hover:bg-[#323233]",
-                  )}
-                >
-                  <button
-                    className="flex min-w-0 flex-1 items-center gap-2 text-left"
-                    type="button"
-                    onClick={() => onTabSelect(tab.id)}
-                  >
-                    <Icon className="size-4 shrink-0 text-[#8b8b8b]" />
-                    <span className="truncate">{tab.filename}</span>
-                    {tab.dirty ? <span className="text-[#4fc1ff]">*</span> : null}
-                  </button>
-                  <button
+                return (
+                  <div
+                    key={tab.id}
                     className={cn(
-                      "rounded p-0.5 text-[#8b8b8b] transition-colors hover:bg-black/20 hover:text-white",
-                      !isActive ? "opacity-0 group-hover:opacity-100" : "",
+                      "vscode-tab group flex h-[35px] min-w-[140px] max-w-[220px] items-center gap-1.5 px-3 text-[13px] transition-colors duration-75",
+                      isActive && "active",
                     )}
-                    type="button"
-                    onClick={() => onTabClose(tab.id)}
                   >
-                    <X className="size-3.5" />
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
-      </div>
+                    <button
+                      className="flex min-w-0 flex-1 items-center gap-1.5 text-left"
+                      type="button"
+                      onClick={() => onTabSelect(tab.id)}
+                    >
+                      <Icon className="h-3.5 w-3.5 shrink-0" style={{ color: isActive ? "var(--vscode-tab-active-foreground)" : "var(--vscode-tab-inactive-foreground)", opacity: 0.7 }} />
+                      <span className="truncate">{tab.filename}</span>
+                      {tab.dirty && <span style={{ color: "var(--vscode-focus-border)" }}>●</span>}
+                    </button>
+                    <button
+                      className={cn(
+                        "flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded transition-all duration-75",
+                        !isActive && "opacity-0 group-hover:opacity-100",
+                      )}
+                      style={{ color: "var(--vscode-tab-inactive-foreground)" }}
+                      type="button"
+                      aria-label="Close tab"
+                      onClick={() => onTabClose(tab.id)}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
+        </div>
+      )}
+
+      {/* Content */}
       <div className="min-h-0 flex-1">
         {activeTab ? (
           <FileViewer filePath={activeTab.filePath} filename={activeTab.filename} />
         ) : (
           emptyState ?? (
-            <div className="flex h-full items-center justify-center text-sm text-[#8b8b8b]">
+            <div className="flex h-full items-center justify-center text-[13px]" style={{ color: "var(--vscode-tab-inactive-foreground)" }}>
               Open a file from the explorer to preview it here.
             </div>
           )

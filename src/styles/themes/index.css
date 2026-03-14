@@ -56,15 +56,15 @@
 .vscode-sidebar {
   background-color: var(--vscode-sidebar-background);
   color:            var(--vscode-sidebar-foreground);
-  border-right: 1px solid var(--vscode-sidebar-border, transparent);
+  border-right: 1px solid var(--vscode-sidebar-section-header-border, var(--vscode-sidebar-border, transparent));
 }
 
 .vscode-sidebar-title {
   color: var(--vscode-sidebar-title-foreground);
   text-transform: uppercase;
-  font-size: 0.6875rem;
+  font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
 }
 
 .vscode-sidebar-section-header {
@@ -213,6 +213,11 @@
 
 .vscode-button-secondary:hover {
   background-color: var(--vscode-button-secondary-hover);
+}
+
+/* Tab close button hover */
+.vscode-tab button:hover {
+  background-color: var(--vscode-tab-close-hover, rgba(255, 255, 255, 0.1));
 }
 
 /* Focus ring — applied to interactive elements */

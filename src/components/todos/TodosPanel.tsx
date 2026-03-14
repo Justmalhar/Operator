@@ -12,37 +12,38 @@ export function TodosPanel() {
     lastAddedId.current = id;
   }
 
-  function handleAddNext() {
-    handleAdd();
-  }
-
-  function handleDelete(id: string) {
-    deleteTodo(id);
-  }
-
   return (
-    <div className="flex h-full flex-col bg-[#111111] text-[#f3f3f3]">
-      <div className="flex items-center justify-between px-4 py-4">
-        <h2 className="text-base font-semibold text-[#f3f3f3]">Your todos</h2>
+    <div className="flex h-full flex-col">
+      {/* Header */}
+      <div className="vscode-sidebar-section-header flex shrink-0 items-center justify-between px-4" style={{ height: "35px" }}>
+        <span className="vscode-sidebar-title">Todos</span>
         <button
           type="button"
           onClick={handleAdd}
-          className="flex items-center gap-1.5 rounded-md px-2 py-1 text-sm text-[#8b8b8b] transition-colors hover:bg-white/6 hover:text-[#d4d4d4]"
+          className="vscode-list-item flex h-[22px] w-[22px] items-center justify-center rounded transition-colors duration-75"
+          style={{ color: "var(--vscode-sidebar-section-header-foreground)" }}
+          aria-label="Add todo"
         >
           <Plus className="h-3.5 w-3.5" />
-          <span>Add</span>
         </button>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-auto">
+      {/* List */}
+      <div className="vscode-scrollable min-h-0 flex-1 overflow-y-auto py-1">
         {todos.length === 0 ? (
-          <div
-            className="flex cursor-text items-center gap-3 px-4 py-1.5"
+          <button
+            type="button"
+            className="vscode-list-item flex w-full items-center gap-2.5 px-4 py-[5px] text-left transition-colors duration-75"
             onClick={handleAdd}
           >
-            <div className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border border-[#3a3a3a]" />
-            <span className="text-sm text-[#4a4a4a]">Enter todo...</span>
-          </div>
+            <span
+              className="flex h-[14px] w-[14px] shrink-0 items-center justify-center rounded-[4px] border transition-colors"
+              style={{ borderColor: "var(--vscode-list-inactive-selection-background)" }}
+            />
+            <span className="text-[13px]" style={{ color: "var(--vscode-input-placeholder-foreground)" }}>
+              Add a todo...
+            </span>
+          </button>
         ) : (
           todos.map((todo) => (
             <TodoItem
@@ -51,8 +52,8 @@ export function TodosPanel() {
               autoFocus={todo.id === lastAddedId.current}
               onToggle={toggleTodo}
               onTextChange={updateTodo}
-              onDelete={handleDelete}
-              onAddNext={handleAddNext}
+              onDelete={deleteTodo}
+              onAddNext={handleAdd}
             />
           ))
         )}
