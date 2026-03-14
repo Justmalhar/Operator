@@ -39,11 +39,11 @@ const SHORT_LABEL: Record<ModelId, string> = {
 };
 
 interface ModelPickerProps {
-  value: ModelId;
-  onChange: (id: ModelId) => void;
+  value?: ModelId;
+  onChange?: (id: ModelId) => void;
 }
 
-export function ModelPicker({ value, onChange }: ModelPickerProps) {
+export function ModelPicker({ value = "claude-sonnet-4-6", onChange }: ModelPickerProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -72,7 +72,7 @@ export function ModelPicker({ value, onChange }: ModelPickerProps) {
         {MODELS.map((m) => (
           <DropdownMenuItem
             key={m.id}
-            onClick={() => onChange(m.id)}
+            onClick={() => onChange?.(m.id)}
             className="flex items-center justify-between gap-3 text-[12px]"
             style={{
               backgroundColor: value === m.id ? "rgba(255,255,255,0.06)" : undefined,

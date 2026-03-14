@@ -107,7 +107,6 @@ export function Composer({ onSend, disabled, className }: ComposerProps) {
       size: f.size,
     }));
     setAttachments((prev) => [...prev, ...newAttachments]);
-    // Reset input
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
@@ -180,10 +179,7 @@ export function Composer({ onSend, disabled, className }: ComposerProps) {
       </div>
 
       {/* Toolbar row */}
-      <div
-        className="flex items-center gap-1 px-2 pb-2"
-        style={{ borderTop: "none" }}
-      >
+      <div className="flex items-center gap-1 px-2 pb-2">
         {/* Left tools */}
         <div className="flex flex-1 items-center gap-0.5">
           {/* Add attachment */}

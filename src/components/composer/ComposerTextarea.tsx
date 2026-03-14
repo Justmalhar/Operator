@@ -16,7 +16,7 @@ export function ComposerTextarea({
   onChange,
   onSubmit,
   onSlashCommand,
-  placeholder = "Add code, sharing, or to add files, /for commands",
+  placeholder = "Ask Operator anything, @ to add files, / for commands...",
   disabled,
   className,
 }: ComposerTextareaProps) {
@@ -38,7 +38,7 @@ export function ComposerTextarea({
     }
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      onSubmit();
+      if (!disabled && value.trim()) onSubmit();
       return;
     }
   }

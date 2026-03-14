@@ -25,11 +25,11 @@ const OPTIONS: ThinkingOption[] = [
 ];
 
 interface ReasoningPickerProps {
-  value: ThinkingLevel;
-  onChange: (level: ThinkingLevel) => void;
+  value?: ThinkingLevel;
+  onChange?: (level: ThinkingLevel) => void;
 }
 
-export function ReasoningPicker({ value, onChange }: ReasoningPickerProps) {
+export function ReasoningPicker({ value = "off", onChange }: ReasoningPickerProps) {
   const isActive = value !== "off";
 
   return (
@@ -66,7 +66,7 @@ export function ReasoningPicker({ value, onChange }: ReasoningPickerProps) {
         {OPTIONS.map((opt) => (
           <DropdownMenuItem
             key={opt.id}
-            onClick={() => onChange(opt.id)}
+            onClick={() => onChange?.(opt.id)}
             className="flex flex-col items-start gap-0.5 text-[12px]"
             style={{
               backgroundColor: value === opt.id ? "rgba(255,255,255,0.06)" : undefined,
