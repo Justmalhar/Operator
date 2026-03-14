@@ -1,0 +1,106 @@
+/**
+ * Nord Theme
+ * by arcticicestudio — https://www.nordtheme.com
+ *
+ * Apply: <html data-vscode-theme="nord">
+ */
+[data-vscode-theme="nord"] {
+  /* ── Base / Editor ─────────────────────────────────────────────────────── */
+  --vscode-editor-background:             #2e3440;
+  --vscode-editor-foreground:             #d8dee9;
+  --vscode-editor-line-highlight:         #3b4252;
+  --vscode-editor-selection:              #434c5e;
+  --vscode-editor-inactive-selection:     #434c5e80;
+  --vscode-editor-cursor:                 #d8dee9;
+  --vscode-editor-find-match:             #88c0d066;
+  --vscode-editor-find-match-highlight:   #88c0d033;
+
+  /* ── Activity Bar ─────────────────────────────────────────────────────── */
+  --vscode-activity-bar-background:       #2e3440;
+  --vscode-activity-bar-foreground:       #d8dee9;
+  --vscode-activity-bar-inactive:         #4c566a;
+  --vscode-activity-bar-badge-background: #5e81ac;
+
+  /* ── Sidebar ──────────────────────────────────────────────────────────── */
+  --vscode-sidebar-background:            #2e3440;
+  --vscode-sidebar-foreground:            #d8dee9;
+  --vscode-sidebar-title-foreground:      #81a1c1;
+  --vscode-sidebar-section-header-background: #3b4252;
+  --vscode-sidebar-section-header-foreground: #81a1c1;
+
+  /* ── Tab Bar / Tabs ───────────────────────────────────────────────────── */
+  --vscode-tab-bar-background:            #2e3440;
+  --vscode-tab-active-background:         #3b4252;
+  --vscode-tab-active-foreground:         #eceff4;
+  --vscode-tab-inactive-background:       #2e3440;
+  --vscode-tab-inactive-foreground:       #4c566a;
+  --vscode-tab-hover-background:          #3b425280;
+  --vscode-tab-border:                    #2e3440;
+
+  /* ── Panel ────────────────────────────────────────────────────────────── */
+  --vscode-panel-background:              #2e3440;
+  --vscode-panel-foreground:              #d8dee9;
+  --vscode-panel-border:                  #3b4252;
+  --vscode-panel-title-active-foreground: #eceff4;
+  --vscode-panel-title-active-border:     #88c0d0;
+  --vscode-panel-title-inactive-foreground: #4c566a;
+
+  /* ── Title Bar ────────────────────────────────────────────────────────── */
+  --vscode-titlebar-background:           #2e3440;
+  --vscode-titlebar-foreground:           #d8dee9;
+  --vscode-titlebar-inactive-background:  #2e3440;
+  --vscode-titlebar-inactive-foreground:  #4c566a;
+
+  /* ── Status Bar ───────────────────────────────────────────────────────── */
+  --vscode-statusbar-background:          #3b4252;
+  --vscode-statusbar-foreground:          #d8dee9;
+  --vscode-statusbar-hover-background:    #434c5e;
+
+  /* ── List / Tree ──────────────────────────────────────────────────────── */
+  --vscode-list-hover-background:         #3b4252;
+  --vscode-list-active-selection-background: #4c566a;
+  --vscode-list-active-selection-foreground: #eceff4;
+  --vscode-list-inactive-selection-background: #3b4252;
+  --vscode-list-highlight-foreground:     #88c0d0;
+
+  /* ── Input / Dropdown ─────────────────────────────────────────────────── */
+  --vscode-input-background:              #3b4252;
+  --vscode-input-foreground:              #d8dee9;
+  --vscode-input-border:                  #4c566a;
+  --vscode-input-placeholder-foreground:  #4c566a;
+  --vscode-dropdown-background:           #3b4252;
+  --vscode-dropdown-foreground:           #d8dee9;
+  --vscode-dropdown-border:               #4c566a;
+
+  /* ── Scrollbar ────────────────────────────────────────────────────────── */
+  --vscode-scrollbar-slider-background:   #4c566a40;
+  --vscode-scrollbar-slider-hover:        #4c566a80;
+  --vscode-scrollbar-slider-active:       #4c566acc;
+
+  /* ── Badge / Button / Focus ───────────────────────────────────────────── */
+  --vscode-badge-background:              #5e81ac;
+  --vscode-badge-foreground:              #eceff4;
+  --vscode-button-background:             #5e81ac;
+  --vscode-button-hover-background:       #81a1c1;
+  --vscode-focus-border:                  #5e81ac;
+
+  /* ── Terminal ─────────────────────────────────────────────────────────── */
+  --vscode-terminal-background:           #2e3440;
+  --vscode-terminal-foreground:           #d8dee9;
+  --vscode-terminal-ansi-black:           #3b4252;
+  --vscode-terminal-ansi-red:             #bf616a;
+  --vscode-terminal-ansi-green:           #a3be8c;
+  --vscode-terminal-ansi-yellow:          #ebcb8b;
+  --vscode-terminal-ansi-blue:            #81a1c1;
+  --vscode-terminal-ansi-magenta:         #b48ead;
+  --vscode-terminal-ansi-cyan:            #88c0d0;
+  --vscode-terminal-ansi-white:           #e5e9f0;
+  --vscode-terminal-ansi-bright-black:    #4c566a;
+  --vscode-terminal-ansi-bright-red:      #bf616a;
+  --vscode-terminal-ansi-bright-green:    #a3be8c;
+  --vscode-terminal-ansi-bright-yellow:   #ebcb8b;
+  --vscode-terminal-ansi-bright-blue:     #81a1c1;
+  --vscode-terminal-ansi-bright-magenta:  #b48ead;
+  --vscode-terminal-ansi-bright-cyan:     #8fbcbb;
+  --vscode-terminal-ansi-bright-white:    #eceff4;
+}

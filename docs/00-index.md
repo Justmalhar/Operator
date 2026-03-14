@@ -22,6 +22,7 @@
 | 10 | [Settings](10-settings.md) | All settings panels, app settings schema, per-repo settings, env vars panel |
 | 11 | [Rendering Performance](11-rendering-performance.md) | WebGL terminal, diff virtualization, message list virtualization, IPC optimization |
 | 12 | [Directory Structure](12-dir-structure.md) | Full repo layout, runtime filesystem paths, DB and log file locations |
+| 13 | [VSCode Themes](13-vscode-themes.md) | Theme system: token reference, adding themes, utility classes, TypeScript API |
 
 ---
 
