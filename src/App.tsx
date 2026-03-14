@@ -16,7 +16,7 @@ import { NewChatPage } from "@/components/chat/NewChatPage";
 import { RightPanel } from "@/components/panels/RightPanel";
 import { BottomPanel } from "@/components/panels/BottomPanel";
 import { ChatPanel } from "@/components/chat/ChatPanel";
-import { ChevronRight, FileCode2, FileImage, FileText, Globe, Table2, PanelRight, PanelBottom } from "lucide-react";
+import { ChevronRight, FileCode2, FileImage, FileText, Globe, Table2 } from "lucide-react";
 
 interface ExplorerEntry {
   id: string;
@@ -97,9 +97,6 @@ function App() {
   const [filename, setFilename] = useState("");
   const [activeWorkspaceId, setActiveWorkspaceId] = useState<string | null>("ws-los-angeles");
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({ docs: true, preview: true });
-  const [showRightPanel, setShowRightPanel] = useState(true);
-  const [showBottomPanel, setShowBottomPanel] = useState(true);
-
   const explorerSections = useMemo(() => {
     return seededEntries.reduce<Record<string, ExplorerEntry[]>>((groups, entry) => {
       groups[entry.section] ??= [];
@@ -144,45 +141,6 @@ function App() {
 
   return (
     <div className="flex h-screen flex-col overflow-hidden" style={{ backgroundColor: "var(--vscode-editor-background)" }}>
-      {/* ── Title bar ─────────────────────────────────────────────────── */}
-      <div className="vscode-titlebar flex shrink-0 items-center" data-tauri-drag-region>
-        {/* Traffic light spacing on macOS */}
-        <div className="w-[78px] shrink-0" />
-        <div className="flex min-w-0 flex-1 items-center justify-center">
-          <span className="text-[12px] font-medium" style={{ color: "var(--vscode-titlebar-foreground)", opacity: 0.8 }}>
-            Operator
-          </span>
-        </div>
-        <div className="flex items-center gap-1 pr-2">
-          <button
-            type="button"
-            onClick={() => setShowRightPanel((v) => !v)}
-            className={cn(
-              "flex h-6 w-6 items-center justify-center rounded transition-colors duration-75",
-              showRightPanel ? "opacity-100" : "opacity-40",
-            )}
-            style={{ color: "var(--vscode-titlebar-foreground)" }}
-            aria-label="Toggle right panel"
-            title="Toggle right panel"
-          >
-            <PanelRight className="h-3.5 w-3.5" />
-          </button>
-          <button
-            type="button"
-            onClick={() => setShowBottomPanel((v) => !v)}
-            className={cn(
-              "flex h-6 w-6 items-center justify-center rounded transition-colors duration-75",
-              showBottomPanel ? "opacity-100" : "opacity-40",
-            )}
-            style={{ color: "var(--vscode-titlebar-foreground)" }}
-            aria-label="Toggle bottom panel"
-            title="Toggle bottom panel"
-          >
-            <PanelBottom className="h-3.5 w-3.5" />
-          </button>
-        </div>
-      </div>
-
       {/* ── Main content ──────────────────────────────────────────────── */}
       <div className="flex min-h-0 flex-1">
         {/* 1. Primary sidebar: workspaces */}
@@ -293,19 +251,15 @@ function App() {
             </div>
 
             {/* Right panel */}
-            {showRightPanel && (
-              <div className="w-[260px] shrink-0">
-                <RightPanel />
-              </div>
-            )}
+            <div className="w-[260px] shrink-0">
+              <RightPanel />
+            </div>
           </div>
 
           {/* Bottom panel */}
-          {showBottomPanel && (
-            <div className="h-[200px] shrink-0">
-              <BottomPanel />
-            </div>
-          )}
+          <div className="h-[200px] shrink-0">
+            <BottomPanel />
+          </div>
         </div>
       </div>
 
