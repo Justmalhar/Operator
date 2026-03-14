@@ -13,6 +13,7 @@ import { TodosPanel } from "@/components/todos/TodosPanel";
 import { cn } from "@/lib/utils";
 import { SidebarLayout } from "@/components/layout/SidebarLayout";
 import { ChevronRight, FileCode2, FileImage, FileText, Globe, Table2 } from "lucide-react";
+import { Composer } from "@/components/composer/Composer";
 
 interface ExplorerEntry {
   id: string;
@@ -256,6 +257,10 @@ function App() {
                 </div>
               </div>
             }
+          />
+          {/* Composer */}
+          <Composer
+            onSend={(msg, atts) => console.log("Send:", msg, atts)}
           />
         </div>
       </div>
