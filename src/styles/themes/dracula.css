@@ -1,0 +1,106 @@
+/**
+ * Dracula Official Theme
+ * by Dracula Theme — https://draculatheme.com/visual-studio-code
+ *
+ * Apply: <html data-vscode-theme="dracula">
+ */
+[data-vscode-theme="dracula"] {
+  /* ── Base / Editor ─────────────────────────────────────────────────────── */
+  --vscode-editor-background:             #282a36;
+  --vscode-editor-foreground:             #f8f8f2;
+  --vscode-editor-line-highlight:         #44475a;
+  --vscode-editor-selection:              #44475a;
+  --vscode-editor-inactive-selection:     #44475a80;
+  --vscode-editor-cursor:                 #f8f8f0;
+  --vscode-editor-find-match:             #ffb86c80;
+  --vscode-editor-find-match-highlight:   #ffffff40;
+
+  /* ── Activity Bar ─────────────────────────────────────────────────────── */
+  --vscode-activity-bar-background:       #21222c;
+  --vscode-activity-bar-foreground:       #f8f8f2;
+  --vscode-activity-bar-inactive:         #6272a4;
+  --vscode-activity-bar-badge-background: #bd93f9;
+
+  /* ── Sidebar ──────────────────────────────────────────────────────────── */
+  --vscode-sidebar-background:            #21222c;
+  --vscode-sidebar-foreground:            #f8f8f2;
+  --vscode-sidebar-title-foreground:      #6272a4;
+  --vscode-sidebar-section-header-background: #282a36;
+  --vscode-sidebar-section-header-foreground: #6272a4;
+
+  /* ── Tab Bar / Tabs ───────────────────────────────────────────────────── */
+  --vscode-tab-bar-background:            #191a21;
+  --vscode-tab-active-background:         #282a36;
+  --vscode-tab-active-foreground:         #f8f8f2;
+  --vscode-tab-inactive-background:       #21222c;
+  --vscode-tab-inactive-foreground:       #6272a4;
+  --vscode-tab-hover-background:          #282a3680;
+  --vscode-tab-border:                    #191a21;
+
+  /* ── Panel ────────────────────────────────────────────────────────────── */
+  --vscode-panel-background:              #282a36;
+  --vscode-panel-foreground:              #f8f8f2;
+  --vscode-panel-border:                  #191a21;
+  --vscode-panel-title-active-foreground: #f8f8f2;
+  --vscode-panel-title-active-border:     #bd93f9;
+  --vscode-panel-title-inactive-foreground: #6272a4;
+
+  /* ── Title Bar ────────────────────────────────────────────────────────── */
+  --vscode-titlebar-background:           #21222c;
+  --vscode-titlebar-foreground:           #f8f8f2;
+  --vscode-titlebar-inactive-background:  #21222c;
+  --vscode-titlebar-inactive-foreground:  #6272a4;
+
+  /* ── Status Bar ───────────────────────────────────────────────────────── */
+  --vscode-statusbar-background:          #191a21;
+  --vscode-statusbar-foreground:          #f8f8f2;
+  --vscode-statusbar-hover-background:    #44475a;
+
+  /* ── List / Tree ──────────────────────────────────────────────────────── */
+  --vscode-list-hover-background:         #44475a;
+  --vscode-list-active-selection-background: #44475a;
+  --vscode-list-active-selection-foreground: #f8f8f2;
+  --vscode-list-inactive-selection-background: #282a36;
+  --vscode-list-highlight-foreground:     #bd93f9;
+
+  /* ── Input / Dropdown ─────────────────────────────────────────────────── */
+  --vscode-input-background:              #44475a;
+  --vscode-input-foreground:              #f8f8f2;
+  --vscode-input-border:                  #6272a4;
+  --vscode-input-placeholder-foreground:  #6272a4;
+  --vscode-dropdown-background:           #44475a;
+  --vscode-dropdown-foreground:           #f8f8f2;
+  --vscode-dropdown-border:               #6272a4;
+
+  /* ── Scrollbar ────────────────────────────────────────────────────────── */
+  --vscode-scrollbar-slider-background:   #6272a440;
+  --vscode-scrollbar-slider-hover:        #6272a480;
+  --vscode-scrollbar-slider-active:       #6272a4cc;
+
+  /* ── Badge / Button / Focus ───────────────────────────────────────────── */
+  --vscode-badge-background:              #bd93f9;
+  --vscode-badge-foreground:              #282a36;
+  --vscode-button-background:             #6272a4;
+  --vscode-button-hover-background:       #44475a;
+  --vscode-focus-border:                  #bd93f9;
+
+  /* ── Terminal ─────────────────────────────────────────────────────────── */
+  --vscode-terminal-background:           #282a36;
+  --vscode-terminal-foreground:           #f8f8f2;
+  --vscode-terminal-ansi-black:           #21222c;
+  --vscode-terminal-ansi-red:             #ff5555;
+  --vscode-terminal-ansi-green:           #50fa7b;
+  --vscode-terminal-ansi-yellow:          #f1fa8c;
+  --vscode-terminal-ansi-blue:            #bd93f9;
+  --vscode-terminal-ansi-magenta:         #ff79c6;
+  --vscode-terminal-ansi-cyan:            #8be9fd;
+  --vscode-terminal-ansi-white:           #f8f8f2;
+  --vscode-terminal-ansi-bright-black:    #6272a4;
+  --vscode-terminal-ansi-bright-red:      #ff6e6e;
+  --vscode-terminal-ansi-bright-green:    #69ff94;
+  --vscode-terminal-ansi-bright-yellow:   #ffffa5;
+  --vscode-terminal-ansi-bright-blue:     #d6acff;
+  --vscode-terminal-ansi-bright-magenta:  #ff92df;
+  --vscode-terminal-ansi-bright-cyan:     #a4ffff;
+  --vscode-terminal-ansi-bright-white:    #ffffff;
+}

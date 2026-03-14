@@ -2,7 +2,11 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./styles/tailwind.css";
+import "./styles/themes/index.css";
+import { restoreTheme } from "./styles/themes/themes";
 import { logger } from "./lib/logger";
+
+restoreTheme();
 
 logger.info("app starting", { version: import.meta.env.VITE_APP_VERSION ?? "dev" }, "main");
 

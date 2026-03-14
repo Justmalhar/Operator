@@ -1,0 +1,250 @@
+/**
+ * VSCode Themes — index
+ *
+ * Import this file once in your app entry point:
+ *   import "@/styles/themes/index.css"
+ *
+ * Then apply a theme by setting the attribute on <html>:
+ *   document.documentElement.setAttribute("data-vscode-theme", "dracula")
+ *
+ * Or in JSX:
+ *   <html data-vscode-theme="one-dark-pro">
+ *
+ * Available themes:
+ *   dark-default     — VSCode Dark+ (built-in default)
+ *   light-default    — VSCode Light+ (built-in default)
+ *   one-dark-pro     — One Dark Pro by binaryify
+ *   github-dark      — GitHub Dark by GitHub/Primer
+ *   dracula          — Dracula Official
+ *   monokai          — Monokai Classic
+ *   nord             — Nord by arcticicestudio
+ *   solarized-dark   — Solarized Dark by Ethan Schoonover
+ *
+ * Token reference — see vscode-tokens.css for the full list of
+ * --vscode-* custom properties and their descriptions.
+ */
+
+/* Token definitions & Dark+ defaults (applied to :root) */
+@import "./vscode-tokens.css";
+
+/* Built-in themes */
+@import "./dark-default.css";
+@import "./light-default.css";
+
+/* Community themes */
+@import "./one-dark-pro.css";
+@import "./github-dark.css";
+@import "./dracula.css";
+@import "./monokai.css";
+@import "./nord.css";
+@import "./solarized-dark.css";
+
+/**
+ * Convenience utility classes for VSCode-style UI chrome.
+ * These map --vscode-* tokens to background/color so you can
+ * write semantic class names in your components.
+ */
+
+/* Activity bar (leftmost icon strip) */
+.vscode-activity-bar {
+  background-color: var(--vscode-activity-bar-background);
+  color:            var(--vscode-activity-bar-foreground);
+  border-right: 1px solid var(--vscode-activity-bar-border, transparent);
+}
+
+/* Primary sidebar (file explorer, search, etc.) */
+.vscode-sidebar {
+  background-color: var(--vscode-sidebar-background);
+  color:            var(--vscode-sidebar-foreground);
+  border-right: 1px solid var(--vscode-sidebar-border, transparent);
+}
+
+.vscode-sidebar-title {
+  color: var(--vscode-sidebar-title-foreground);
+  text-transform: uppercase;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.vscode-sidebar-section-header {
+  background-color: var(--vscode-sidebar-section-header-background);
+  color:            var(--vscode-sidebar-section-header-foreground);
+  border-bottom: 1px solid var(--vscode-sidebar-section-header-border, transparent);
+}
+
+/* Tab bar (row of open file tabs) */
+.vscode-tab-bar {
+  background-color: var(--vscode-tab-bar-background);
+  border-bottom: 1px solid var(--vscode-tab-border);
+}
+
+.vscode-tab {
+  background-color: var(--vscode-tab-inactive-background);
+  color:            var(--vscode-tab-inactive-foreground);
+  border-right: 1px solid var(--vscode-tab-border);
+  cursor: pointer;
+}
+
+.vscode-tab:hover {
+  background-color: var(--vscode-tab-hover-background);
+  color:            var(--vscode-tab-hover-foreground, var(--vscode-tab-active-foreground));
+}
+
+.vscode-tab.active,
+.vscode-tab[aria-selected="true"] {
+  background-color: var(--vscode-tab-active-background);
+  color:            var(--vscode-tab-active-foreground);
+  border-top: 1px solid var(--vscode-tab-active-border-top, transparent);
+}
+
+/* Editor area */
+.vscode-editor {
+  background-color: var(--vscode-editor-background);
+  color:            var(--vscode-editor-foreground);
+}
+
+/* Bottom panel (terminal, problems, output) */
+.vscode-panel {
+  background-color: var(--vscode-panel-background);
+  color:            var(--vscode-panel-foreground);
+  border-top: 1px solid var(--vscode-panel-border);
+}
+
+.vscode-panel-title {
+  color: var(--vscode-panel-title-inactive-foreground);
+  cursor: pointer;
+}
+
+.vscode-panel-title.active,
+.vscode-panel-title[aria-selected="true"] {
+  color:        var(--vscode-panel-title-active-foreground);
+  border-bottom: 1px solid var(--vscode-panel-title-active-border);
+}
+
+/* Title bar */
+.vscode-titlebar {
+  background-color: var(--vscode-titlebar-background);
+  color:            var(--vscode-titlebar-foreground);
+  border-bottom: 1px solid var(--vscode-titlebar-border, transparent);
+}
+
+/* Status bar */
+.vscode-statusbar {
+  background-color: var(--vscode-statusbar-background);
+  color:            var(--vscode-statusbar-foreground);
+  border-top: 1px solid var(--vscode-statusbar-border, transparent);
+}
+
+.vscode-statusbar-item:hover {
+  background-color: var(--vscode-statusbar-hover-background);
+}
+
+/* List items (file tree rows, search results, etc.) */
+.vscode-list-item {
+  color: var(--vscode-list-foreground, inherit);
+}
+
+.vscode-list-item:hover {
+  background-color: var(--vscode-list-hover-background);
+  color:            var(--vscode-list-hover-foreground, inherit);
+}
+
+.vscode-list-item.selected,
+.vscode-list-item[aria-selected="true"] {
+  background-color: var(--vscode-list-active-selection-background);
+  color:            var(--vscode-list-active-selection-foreground);
+}
+
+.vscode-list-item.inactive-selected {
+  background-color: var(--vscode-list-inactive-selection-background);
+  color:            var(--vscode-list-inactive-selection-foreground, inherit);
+}
+
+/* Input / Dropdown */
+.vscode-input {
+  background-color: var(--vscode-input-background);
+  color:            var(--vscode-input-foreground);
+  border: 1px solid var(--vscode-input-border, transparent);
+  outline: none;
+}
+
+.vscode-input:focus {
+  border-color: var(--vscode-focus-border);
+}
+
+.vscode-input::placeholder {
+  color: var(--vscode-input-placeholder-foreground);
+}
+
+.vscode-dropdown {
+  background-color: var(--vscode-dropdown-background);
+  color:            var(--vscode-dropdown-foreground);
+  border: 1px solid var(--vscode-dropdown-border, transparent);
+}
+
+/* Badge (notification dot) */
+.vscode-badge {
+  background-color: var(--vscode-badge-background);
+  color:            var(--vscode-badge-foreground);
+  border-radius: 9999px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  min-width: 1rem;
+  text-align: center;
+}
+
+/* Button */
+.vscode-button {
+  background-color: var(--vscode-button-background);
+  color:            var(--vscode-button-foreground, #ffffff);
+  border: none;
+  cursor: pointer;
+}
+
+.vscode-button:hover {
+  background-color: var(--vscode-button-hover-background);
+}
+
+.vscode-button-secondary {
+  background-color: var(--vscode-button-secondary-background);
+  color:            var(--vscode-button-secondary-foreground);
+}
+
+.vscode-button-secondary:hover {
+  background-color: var(--vscode-button-secondary-hover);
+}
+
+/* Focus ring — applied to interactive elements */
+.vscode-focusable:focus-visible {
+  outline: 1px solid var(--vscode-focus-border);
+  outline-offset: -1px;
+}
+
+/* Scrollbar — applied via scrollbar-color (Firefox) and ::-webkit-scrollbar (Chromium) */
+.vscode-scrollable {
+  scrollbar-color: var(--vscode-scrollbar-slider-background) var(--vscode-scrollbar-background, transparent);
+  scrollbar-width: thin;
+}
+
+.vscode-scrollable::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.vscode-scrollable::-webkit-scrollbar-track {
+  background: var(--vscode-scrollbar-background, transparent);
+}
+
+.vscode-scrollable::-webkit-scrollbar-thumb {
+  background-color: var(--vscode-scrollbar-slider-background);
+  border-radius: 0;
+}
+
+.vscode-scrollable::-webkit-scrollbar-thumb:hover {
+  background-color: var(--vscode-scrollbar-slider-hover);
+}
+
+.vscode-scrollable::-webkit-scrollbar-thumb:active {
+  background-color: var(--vscode-scrollbar-slider-active);
+}

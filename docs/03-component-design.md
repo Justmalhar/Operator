@@ -448,35 +448,45 @@ All stores persist relevant slices to `tauri-plugin-store` (Tauri's local storag
 
 ## 4. Theme System
 
-Operator uses CSS custom properties for theming.
+> Full reference: [docs/13-vscode-themes.md](13-vscode-themes.md)
 
-```css
-/* Dark theme (default) */
-:root[data-theme="dark"] {
-  --bg-primary: #0d0d0d;
-  --bg-secondary: #141414;
-  --bg-tertiary: #1a1a1a;
-  --bg-elevated: #1f1f1f;
-  --border: rgba(255,255,255,0.08);
-  --text-primary: #e8e8e8;
-  --text-secondary: #9a9a9a;
-  --text-tertiary: #5a5a5a;
-  --accent-blue: #4d9fff;
-  --accent-green: #3ccc74;
-  --accent-amber: #f59e0b;
-  --accent-red: #f04444;
-  --accent-purple: #a78bfa;
-}
+Operator ships a VSCode-faithful theme system. Themes are pure CSS custom
+properties scoped to `[data-vscode-theme="<id>"]` on `<html>`.
 
-/* Light theme */
-:root[data-theme="light"] {
-  --bg-primary: #ffffff;
-  --bg-secondary: #f5f5f5;
-  /* ... */
-}
+**Files:**
+```
+src/styles/themes/
+├── vscode-tokens.css   ← all --vscode-* token definitions (Dark+ defaults on :root)
+├── index.css           ← imports all themes + .vscode-* utility classes
+├── themes.ts           ← THEMES[], applyTheme(), restoreTheme(), getCurrentTheme()
+├── dark-default.css    ← VSCode Dark+
+├── light-default.css   ← VSCode Light+
+├── one-dark-pro.css
+├── github-dark.css
+├── dracula.css
+├── monokai.css
+├── nord.css
+└── solarized-dark.css
 ```
 
-Tailwind config extends with these tokens so both utility classes and component styles stay consistent.
+**Runtime API:**
+```typescript
+import { applyTheme, restoreTheme, THEMES } from "@/styles/themes/themes";
+
+restoreTheme();           // call once in main.tsx before render
+applyTheme("dracula");    // sets data-vscode-theme + persists to localStorage
+```
+
+**Zustand wiring** — `useAppStore` exposes `theme` + `setTheme`:
+```typescript
+setTheme: (id: VscodeThemeId) => { applyTheme(id); set({ theme: id }); }
+```
+
+**Token namespaces:**
+- `--vscode-*` → IDE chrome (sidebar, tabs, panels, status bar, activity bar)
+- shadcn `--background/--foreground/--primary/…` → generic UI widgets
+
+Do **not** merge the two namespaces. See [docs/13-vscode-themes.md](13-vscode-themes.md) for the complete token table and instructions for adding themes.
 
 ---
 

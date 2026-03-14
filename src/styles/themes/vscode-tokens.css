@@ -1,0 +1,179 @@
+/**
+ * VSCode Theme Token Definitions
+ *
+ * CSS custom properties mirroring VSCode's workbench color contributions.
+ * Apply a theme by adding [data-vscode-theme="theme-name"] to <html> or <body>.
+ * Defaults below use VSCode Dark+ values.
+ *
+ * Usage:
+ *   background-color: var(--vscode-editor-background);
+ *   color: var(--vscode-editor-foreground);
+ *
+ * Sections:
+ *   - Base / Editor
+ *   - Activity Bar
+ *   - Sidebar
+ *   - Tab Bar / Tabs
+ *   - Panel (Terminal, Problems, Output, Debug)
+ *   - Title Bar
+ *   - Status Bar
+ *   - List / Tree
+ *   - Input / Dropdown
+ *   - Scrollbar
+ *   - Badge / Notification Dot
+ *   - Button
+ *   - Focus
+ *   - Terminal (ANSI colors)
+ */
+
+:root,
+[data-vscode-theme] {
+  /* ── Base / Editor ─────────────────────────────────────────────────────── */
+  --vscode-editor-background:             #1e1e1e;
+  --vscode-editor-foreground:             #d4d4d4;
+  --vscode-editor-line-highlight:         #2a2d2e;
+  --vscode-editor-selection:              #264f78;
+  --vscode-editor-inactive-selection:     #3a3d41;
+  --vscode-editor-indent-guide:           #404040;
+  --vscode-editor-ruler:                  #5a5a5a;
+  --vscode-editor-cursor:                 #aeafad;
+  --vscode-editor-find-match:             #515c6a;
+  --vscode-editor-find-match-highlight:   #ea5c0055;
+
+  /* ── Activity Bar ─────────────────────────────────────────────────────── */
+  --vscode-activity-bar-background:       #333333;
+  --vscode-activity-bar-foreground:       #ffffff;
+  --vscode-activity-bar-inactive:         #ffffff66;
+  --vscode-activity-bar-border:           transparent;
+  --vscode-activity-bar-active-border:    #ffffff;
+  --vscode-activity-bar-badge-background: #007acc;
+  --vscode-activity-bar-badge-foreground: #ffffff;
+
+  /* ── Sidebar ──────────────────────────────────────────────────────────── */
+  --vscode-sidebar-background:            #252526;
+  --vscode-sidebar-foreground:            #cccccc;
+  --vscode-sidebar-border:                transparent;
+  --vscode-sidebar-title-foreground:      #bbbbbe;
+  --vscode-sidebar-section-header-background: #00000033;
+  --vscode-sidebar-section-header-foreground: #bbbbbb;
+  --vscode-sidebar-section-header-border: #cccccc33;
+
+  /* ── Tab Bar / Tabs ───────────────────────────────────────────────────── */
+  --vscode-tab-bar-background:            #252526;
+  --vscode-tab-active-background:         #1e1e1e;
+  --vscode-tab-active-foreground:         #ffffff;
+  --vscode-tab-active-border:             transparent;
+  --vscode-tab-active-border-top:         transparent;
+  --vscode-tab-inactive-background:       #2d2d2d;
+  --vscode-tab-inactive-foreground:       #ffffff80;
+  --vscode-tab-hover-background:          #1e1e1e80;
+  --vscode-tab-hover-foreground:          #ffffff;
+  --vscode-tab-border:                    #252526;
+  --vscode-tab-unfocused-active-background: #1e1e1e;
+  --vscode-tab-unfocused-active-foreground: #ffffff80;
+  --vscode-tab-close-hover:               #ffffff33;
+
+  /* ── Panel (Terminal / Problems / Output) ─────────────────────────────── */
+  --vscode-panel-background:              #1e1e1e;
+  --vscode-panel-foreground:              #d4d4d4;
+  --vscode-panel-border:                  #80808059;
+  --vscode-panel-drag-and-drop-border:    #007fd4;
+  --vscode-panel-title-active-foreground: #e7e7e7;
+  --vscode-panel-title-active-border:     #e7e7e7;
+  --vscode-panel-title-inactive-foreground: #e7e7e780;
+  --vscode-panel-section-border:          #80808059;
+  --vscode-panel-section-header-background: #00000033;
+  --vscode-panel-section-header-foreground: #bbbbbb;
+
+  /* ── Title Bar ────────────────────────────────────────────────────────── */
+  --vscode-titlebar-background:           #3c3c3c;
+  --vscode-titlebar-foreground:           #cccccc;
+  --vscode-titlebar-inactive-background:  #3c3c3c;
+  --vscode-titlebar-inactive-foreground:  #cccccc80;
+  --vscode-titlebar-border:               transparent;
+
+  /* ── Status Bar ───────────────────────────────────────────────────────── */
+  --vscode-statusbar-background:          #007acc;
+  --vscode-statusbar-foreground:          #ffffff;
+  --vscode-statusbar-border:              transparent;
+  --vscode-statusbar-hover-background:    #0062a3;
+  --vscode-statusbar-item-active-background: #00000040;
+  --vscode-statusbar-no-folder-background: #68217a;
+  --vscode-statusbar-debugging-background: #cc6633;
+  --vscode-statusbar-debugging-foreground: #ffffff;
+
+  /* ── List / Tree ──────────────────────────────────────────────────────── */
+  --vscode-list-background:               transparent;
+  --vscode-list-foreground:               #cccccc;
+  --vscode-list-hover-background:         #2a2d2e;
+  --vscode-list-hover-foreground:         #cccccc;
+  --vscode-list-active-selection-background: #094771;
+  --vscode-list-active-selection-foreground: #ffffff;
+  --vscode-list-inactive-selection-background: #37373d;
+  --vscode-list-inactive-selection-foreground: #cccccc;
+  --vscode-list-focus-background:         #062f4a;
+  --vscode-list-focus-foreground:         #ffffff;
+  --vscode-list-drop-background:          #062f4a;
+  --vscode-list-highlight-foreground:     #2aaaff;
+  --vscode-list-indent-guide:             #606060;
+  --vscode-list-tree-indent-guide-stroke: #585858;
+
+  /* ── Input / Dropdown ─────────────────────────────────────────────────── */
+  --vscode-input-background:              #3c3c3c;
+  --vscode-input-foreground:              #cccccc;
+  --vscode-input-border:                  transparent;
+  --vscode-input-placeholder-foreground:  #cccccc80;
+  --vscode-input-active-option-background: #007fd466;
+  --vscode-input-active-option-border:    #007fd4;
+  --vscode-input-active-option-foreground: #ffffff;
+  --vscode-dropdown-background:           #3c3c3c;
+  --vscode-dropdown-foreground:           #f0f0f0;
+  --vscode-dropdown-border:               #3c3c3c;
+  --vscode-dropdown-list-background:      #3c3c3c;
+
+  /* ── Scrollbar ────────────────────────────────────────────────────────── */
+  --vscode-scrollbar-background:          transparent;
+  --vscode-scrollbar-slider-background:   #79797966;
+  --vscode-scrollbar-slider-hover:        #646464b3;
+  --vscode-scrollbar-slider-active:       #bfbfbf66;
+
+  /* ── Badge ────────────────────────────────────────────────────────────── */
+  --vscode-badge-background:              #007acc;
+  --vscode-badge-foreground:              #ffffff;
+
+  /* ── Button ───────────────────────────────────────────────────────────── */
+  --vscode-button-background:             #0e639c;
+  --vscode-button-foreground:             #ffffff;
+  --vscode-button-hover-background:       #1177bb;
+  --vscode-button-secondary-background:   #3a3d41;
+  --vscode-button-secondary-foreground:   #ffffff;
+  --vscode-button-secondary-hover:        #45494e;
+
+  /* ── Focus ────────────────────────────────────────────────────────────── */
+  --vscode-focus-border:                  #007fd4;
+  --vscode-contras-border:                transparent;
+  --vscode-contras-active-border:         transparent;
+
+  /* ── Terminal (ANSI) ──────────────────────────────────────────────────── */
+  --vscode-terminal-background:           #1e1e1e;
+  --vscode-terminal-foreground:           #cccccc;
+  --vscode-terminal-cursor-foreground:    #ffffff;
+  --vscode-terminal-selection-background: #264f78;
+  /* ANSI colors */
+  --vscode-terminal-ansi-black:           #000000;
+  --vscode-terminal-ansi-red:             #cd3131;
+  --vscode-terminal-ansi-green:           #0dbc79;
+  --vscode-terminal-ansi-yellow:          #e5e510;
+  --vscode-terminal-ansi-blue:            #2472c8;
+  --vscode-terminal-ansi-magenta:         #bc3fbc;
+  --vscode-terminal-ansi-cyan:            #11a8cd;
+  --vscode-terminal-ansi-white:           #e5e5e5;
+  --vscode-terminal-ansi-bright-black:    #666666;
+  --vscode-terminal-ansi-bright-red:      #f14c4c;
+  --vscode-terminal-ansi-bright-green:    #23d18b;
+  --vscode-terminal-ansi-bright-yellow:   #f5f543;
+  --vscode-terminal-ansi-bright-blue:     #3b8eea;
+  --vscode-terminal-ansi-bright-magenta:  #d670d6;
+  --vscode-terminal-ansi-bright-cyan:     #29b8db;
+  --vscode-terminal-ansi-bright-white:    #e5e5e5;
+}
