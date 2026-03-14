@@ -1,19 +1,11 @@
-.logo.vite:hover {
-  filter: drop-shadow(0 0 2em #747bff);
-}
-
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafb);
-}
+/* ── Base Typography & Reset ──────────────────────────────────────── */
 :root {
-  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
-  font-size: 16px;
-  line-height: 24px;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue",
+    system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.45;
   font-weight: 400;
-
-  color: #0f0f0f;
-  background-color: #f6f6f6;
-
+  letter-spacing: -0.01em;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -21,101 +13,65 @@
   -webkit-text-size-adjust: 100%;
 }
 
-.container {
-  margin: 0;
-  padding-top: 10vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  text-align: center;
+/* Prevent text selection on UI chrome */
+.vscode-titlebar,
+.vscode-statusbar,
+.vscode-sidebar-title,
+.vscode-sidebar-section-header,
+.vscode-tab-bar {
+  user-select: none;
+  -webkit-user-select: none;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: 0.75s;
-}
-
-.logo.tauri:hover {
-  filter: drop-shadow(0 0 2em #24c8db);
-}
-
-.row {
-  display: flex;
-  justify-content: center;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-
-a:hover {
-  color: #535bf2;
-}
-
-h1 {
-  text-align: center;
-}
-
+/* Neutralise browser default button/input styling */
 input,
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  color: #0f0f0f;
-  background-color: #ffffff;
-  transition: border-color 0.25s;
-  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
+button,
+textarea,
+select {
+  font: inherit;
+  letter-spacing: inherit;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  outline: none;
 }
 
 button {
   cursor: pointer;
 }
 
-button:hover {
-  border-color: #396cd8;
-}
-button:active {
-  border-color: #396cd8;
-  background-color: #e8e8e8;
+a {
+  color: var(--vscode-focus-border);
+  text-decoration: none;
 }
 
-input,
-button {
-  outline: none;
+a:hover {
+  text-decoration: underline;
 }
 
-#greet-input {
-  margin-right: 5px;
+/* ── Title Bar ───────────────────────────────────────────────────── */
+.vscode-titlebar {
+  height: 38px;
+  -webkit-app-region: drag;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    color: #f6f6f6;
-    background-color: #2f2f2f;
-  }
-
-  a:hover {
-    color: #24c8db;
-  }
-
-  input,
-  button {
-    color: #ffffff;
-    background-color: #0f0f0f98;
-  }
-  button:active {
-    background-color: #0f0f0f69;
-  }
+.vscode-titlebar button,
+.vscode-titlebar input {
+  -webkit-app-region: no-drag;
 }
+
+/* ── Smooth transitions for interactive elements ─────────────────── */
+.vscode-list-item,
+.vscode-tab,
+.vscode-button {
+  transition: background-color 75ms ease, color 75ms ease, opacity 75ms ease;
+}
+
+/* ── Markdown Preview ─────────────────────────────────────────────── */
 .markdown-preview {
-  color: #d4d4d4;
+  color: var(--vscode-editor-foreground, #d4d4d4);
   line-height: 1.75;
 }
 
@@ -125,7 +81,7 @@ button {
 .markdown-preview h4 {
   margin-top: 2rem;
   margin-bottom: 1rem;
-  color: #ffffff;
+  color: var(--vscode-tab-active-foreground, #ffffff);
   font-weight: 600;
 }
 
@@ -151,18 +107,18 @@ button {
 }
 
 .markdown-preview code {
-  border-radius: 0.35rem;
-  background: rgba(255, 255, 255, 0.08);
-  padding: 0.15rem 0.35rem;
-  font-family: "SF Mono", "Menlo", "Monaco", "Courier New", monospace;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.07);
+  padding: 0.12rem 0.3rem;
+  font-family: "SF Mono", "Menlo", "Monaco", "Cascadia Code", "Courier New", monospace;
   font-size: 0.92em;
 }
 
 .markdown-preview pre {
   overflow-x: auto;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 0.9rem;
-  background: #111111;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 4px;
+  background: var(--vscode-editor-background, #1e1e1e);
   padding: 1rem;
 }
 
@@ -174,31 +130,32 @@ button {
 .markdown-preview table {
   width: 100%;
   border-collapse: collapse;
-  overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 0.9rem;
+  border-radius: 4px;
+  overflow: hidden;
 }
 
 .markdown-preview th,
 .markdown-preview td {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 0.75rem 0.9rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  padding: 0.6rem 0.8rem;
   text-align: left;
 }
 
 .markdown-preview th {
   background: rgba(255, 255, 255, 0.04);
-  color: #ffffff;
+  color: var(--vscode-tab-active-foreground, #ffffff);
   font-weight: 600;
 }
 
 .markdown-preview blockquote {
-  border-left: 3px solid #0e639c;
+  border-left: 2px solid var(--vscode-focus-border, #007fd4);
   margin-left: 0;
   padding-left: 1rem;
-  color: #b0b0b0;
+  color: var(--vscode-tab-inactive-foreground, #ffffff80);
 }
 
+/* ── DOCX Preview ─────────────────────────────────────────────────── */
 .docx-preview-host .docx-preview-surface {
   display: flex;
   flex-direction: column;
@@ -207,5 +164,5 @@ button {
 
 .docx-preview-host section.docx {
   margin: 0 auto;
-  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.28);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.32);
 }

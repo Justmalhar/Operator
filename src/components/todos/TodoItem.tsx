@@ -15,9 +15,7 @@ export function TodoItem({ todo, autoFocus, onToggle, onTextChange, onDelete, on
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (autoFocus) {
-      inputRef.current?.focus();
-    }
+    if (autoFocus) inputRef.current?.focus();
   }, [autoFocus]);
 
   function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
@@ -31,36 +29,39 @@ export function TodoItem({ todo, autoFocus, onToggle, onTextChange, onDelete, on
   }
 
   return (
-    <div className="group flex items-center gap-3 px-4 py-1.5">
+    <div className="vscode-list-item group flex items-center gap-2.5 px-4 py-[5px] transition-colors duration-75">
+      {/* Checkbox */}
       <button
         type="button"
         onClick={() => onToggle(todo.id)}
-        className={cn(
-          "flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border transition-colors",
-          todo.completed
-            ? "border-[#5a5a5a] bg-[#5a5a5a]"
-            : "border-[#5a5a5a] hover:border-[#8b8b8b]",
-        )}
+        className="flex h-[14px] w-[14px] shrink-0 items-center justify-center rounded-[4px] border transition-all duration-150"
+        style={{
+          borderColor: todo.completed ? "var(--vscode-focus-border)" : "var(--vscode-list-inactive-selection-background)",
+          backgroundColor: todo.completed ? "var(--vscode-focus-border)" : "transparent",
+        }}
         aria-label={todo.completed ? "Mark incomplete" : "Mark complete"}
       >
         {todo.completed && (
-          <svg width="10" height="8" viewBox="0 0 10 8" fill="none" className="shrink-0">
-            <path d="M1 4L3.5 6.5L9 1" stroke="#f3f3f3" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          <svg width="8" height="6" viewBox="0 0 8 6" fill="none" className="shrink-0">
+            <path d="M1 3L3 5L7 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         )}
       </button>
 
+      {/* Text */}
       <input
         ref={inputRef}
         type="text"
         value={todo.text}
-        placeholder="Enter todo..."
+        placeholder="Todo..."
         onChange={(e) => onTextChange(todo.id, e.target.value)}
         onKeyDown={handleKeyDown}
-        className={cn(
-          "min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-[#4a4a4a]",
-          todo.completed ? "text-[#5a5a5a] line-through" : "text-[#d4d4d4]",
-        )}
+        className={cn("min-w-0 flex-1 bg-transparent text-[13px] outline-none", todo.completed && "line-through")}
+        style={{
+          color: todo.completed
+            ? "var(--vscode-tab-inactive-foreground)"
+            : "var(--vscode-list-foreground, var(--vscode-sidebar-foreground))",
+        }}
       />
     </div>
   );

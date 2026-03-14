@@ -10,9 +10,9 @@ import indexHtmlSource from "../index.html?raw";
 import { WorkspacePane } from "@/components/workspace/WorkspacePane";
 import type { WorkspaceFileTab } from "@/components/workspace/WorkspaceTabs";
 import { TodosPanel } from "@/components/todos/TodosPanel";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { SidebarLayout } from "@/components/layout/SidebarLayout";
+import { ChevronRight, FileCode2, FileImage, FileText, Globe, Table2 } from "lucide-react";
 
 interface ExplorerEntry {
   id: string;
@@ -73,11 +73,26 @@ const seededEntries: ExplorerEntry[] = [
   },
 ];
 
+function getFileIcon(filename: string) {
+  const ext = filename.split(".").pop()?.toLowerCase();
+  switch (ext) {
+    case "md": return FileText;
+    case "html": return Globe;
+    case "svg":
+    case "png":
+    case "jpg": return FileImage;
+    case "csv": return Table2;
+    default: return FileCode2;
+  }
+}
+
 function App() {
   const [tabs, setTabs] = useState<WorkspaceFileTab[]>([]);
   const [activeTabId, setActiveTabId] = useState<string | null>(null);
   const [filePath, setFilePath] = useState("");
   const [filename, setFilename] = useState("");
+  const [activeWorkspaceId, setActiveWorkspaceId] = useState<string | null>("ws-los-angeles");
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({ docs: true, preview: true });
 
   const explorerSections = useMemo(() => {
     return seededEntries.reduce<Record<string, ExplorerEntry[]>>((groups, entry) => {
@@ -88,139 +103,179 @@ function App() {
   }, []);
 
   function openTab(nextTab: WorkspaceFileTab) {
-    setTabs((currentTabs) => {
-      const existingTab = currentTabs.find((tab) => tab.id === nextTab.id || tab.filePath === nextTab.filePath);
-      if (existingTab) {
-        setActiveTabId(existingTab.id);
-        return currentTabs;
+    setTabs((current) => {
+      const existing = current.find(
+        (t) => t.id === nextTab.id || t.filePath === nextTab.filePath,
+      );
+      if (existing) {
+        setActiveTabId(existing.id);
+        return current;
       }
-
-      return [...currentTabs, nextTab];
+      return [...current, nextTab];
     });
     setActiveTabId(nextTab.id);
   }
 
-  function handleFileOpen(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    if (!filePath.trim() || !filename.trim()) {
-      return;
-    }
-
-    openTab({
-      id: `${filename}-${filePath}`,
-      filePath: filePath.trim(),
-      filename: filename.trim(),
-    });
+  function handleFileOpen(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!filePath.trim() || !filename.trim()) return;
+    openTab({ id: `${filename}-${filePath}`, filePath: filePath.trim(), filename: filename.trim() });
+    setFilePath("");
+    setFilename("");
   }
 
   function closeTab(tabId: string) {
-    setTabs((currentTabs) => {
-      const nextTabs = currentTabs.filter((tab) => tab.id !== tabId);
-
-      if (activeTabId === tabId) {
-        setActiveTabId(nextTabs[nextTabs.length - 1]?.id ?? null);
-      }
-
-      return nextTabs;
+    setTabs((current) => {
+      const next = current.filter((t) => t.id !== tabId);
+      if (activeTabId === tabId) setActiveTabId(next[next.length - 1]?.id ?? null);
+      return next;
     });
   }
 
+  function toggleSection(section: string) {
+    setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
+  }
+
   return (
-    <main className="flex h-screen bg-[#111111] text-[#f3f3f3]">
-      <aside className="flex w-[300px] flex-col border-r border-white/8 bg-[linear-gradient(180deg,#181818_0%,#121212_100%)]">
-        <div className="border-b border-white/8 px-5 py-4">
-          <p className="text-xs uppercase tracking-[0.18em] text-[#8b8b8b]">Operator</p>
-          <h1 className="mt-2 text-xl font-semibold text-white">Viewer Workbench</h1>
-          <p className="mt-2 text-sm leading-6 text-[#9d9d9d]">
-            The docs drove the implementation: dark-first viewer surfaces, VS Code-like file tabs,
-            CodeMirror-backed text rendering, and heavier previews lazy-loaded only when opened.
-          </p>
+    <div className="flex h-screen flex-col overflow-hidden" style={{ backgroundColor: "var(--vscode-editor-background)" }}>
+      {/* ── Title bar ─────────────────────────────────────────────────── */}
+      <div className="vscode-titlebar flex shrink-0 items-center" data-tauri-drag-region>
+        {/* Traffic light spacing on macOS */}
+        <div className="w-[78px] shrink-0" />
+        <div className="flex min-w-0 flex-1 items-center justify-center">
+          <span className="text-[12px] font-medium" style={{ color: "var(--vscode-titlebar-foreground)", opacity: 0.8 }}>
+            Operator
+          </span>
         </div>
+        <div className="w-[78px] shrink-0" />
+      </div>
 
-        <form className="border-b border-white/8 px-5 py-4" onSubmit={handleFileOpen}>
-          <p className="mb-3 text-xs uppercase tracking-[0.18em] text-[#8b8b8b]">Open Local File</p>
-          <div className="space-y-3">
-            <Input
-              className="border-white/10 bg-white/5 text-sm text-white placeholder:text-[#6f6f6f]"
-              placeholder="/absolute/path/to/file.pdf"
-              value={filePath}
-              onChange={(event) => setFilePath(event.currentTarget.value)}
-            />
-            <Input
-              className="border-white/10 bg-white/5 text-sm text-white placeholder:text-[#6f6f6f]"
-              placeholder="filename.pdf"
-              value={filename}
-              onChange={(event) => setFilename(event.currentTarget.value)}
-            />
-            <Button className="w-full bg-[#0e639c] text-white hover:bg-[#1177bb]" type="submit">
-              Open In Tab
-            </Button>
+      {/* ── Main content ──────────────────────────────────────────────── */}
+      <div className="flex min-h-0 flex-1">
+        {/* 1. Primary sidebar: workspaces */}
+        <SidebarLayout
+          activeWorkspaceId={activeWorkspaceId}
+          onWorkspaceSelect={setActiveWorkspaceId}
+        />
+
+        {/* 2. Explorer panel */}
+        <aside className="vscode-sidebar vscode-scrollable flex w-[220px] shrink-0 flex-col overflow-y-auto">
+          {/* Panel title */}
+          <div className="vscode-sidebar-section-header flex shrink-0 items-center px-4" style={{ height: "35px" }}>
+            <span className="vscode-sidebar-title">Explorer</span>
           </div>
-        </form>
 
-        <div className="min-h-0 flex-1 overflow-auto px-4 py-4">
+          {/* Open file form */}
+          <div className="shrink-0 px-3 py-2.5" style={{ borderBottom: "1px solid var(--vscode-sidebar-section-header-border)" }}>
+            <form className="flex flex-col gap-1.5" onSubmit={handleFileOpen}>
+              <input
+                className="vscode-input vscode-focusable w-full rounded px-2 py-1 text-[12px]"
+                placeholder="File path..."
+                value={filePath}
+                onChange={(e) => setFilePath(e.currentTarget.value)}
+              />
+              <input
+                className="vscode-input vscode-focusable w-full rounded px-2 py-1 text-[12px]"
+                placeholder="Filename..."
+                value={filename}
+                onChange={(e) => setFilename(e.currentTarget.value)}
+              />
+              <button
+                type="submit"
+                className="vscode-button vscode-focusable w-full rounded py-1 text-[12px] font-medium"
+              >
+                Open in Tab
+              </button>
+            </form>
+          </div>
+
+          {/* File sections */}
           {Object.entries(explorerSections).map(([section, entries]) => (
-            <section key={section} className="mb-6">
-              <p className="mb-2 px-2 text-[11px] uppercase tracking-[0.18em] text-[#6f6f6f]">{section}</p>
-              <div className="space-y-1">
-                {entries.map((entry) => (
-                  <button
-                    key={entry.id}
-                    className={cn(
-                      "flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm transition-colors hover:bg-white/6",
-                      activeTabId === entry.id ? "bg-white/8 text-white" : "text-[#c5c5c5]",
-                    )}
-                    type="button"
-                    onClick={() =>
-                      openTab({
-                        id: entry.id,
-                        filePath: entry.filePath,
-                        filename: entry.filename,
-                      })
-                    }
-                  >
-                    <span className="truncate">{entry.filename}</span>
-                    <span className="text-[11px] uppercase tracking-[0.08em] text-[#6f6f6f]">open</span>
-                  </button>
-                ))}
-              </div>
-            </section>
+            <div key={section}>
+              <button
+                type="button"
+                onClick={() => toggleSection(section)}
+                className="vscode-sidebar-section-header flex w-full items-center gap-1 px-3 text-left"
+                style={{ height: "22px" }}
+              >
+                <ChevronRight
+                  className={cn("h-3 w-3 shrink-0 transition-transform duration-150", expandedSections[section] && "rotate-90")}
+                  style={{ color: "var(--vscode-sidebar-section-header-foreground)" }}
+                />
+                <span className="vscode-sidebar-title">{section}</span>
+              </button>
+              {expandedSections[section] && (
+                <div className="py-0.5">
+                  {entries.map((entry) => {
+                    const Icon = getFileIcon(entry.filename);
+                    return (
+                      <button
+                        key={entry.id}
+                        type="button"
+                        className={cn(
+                          "vscode-list-item vscode-focusable flex w-full items-center gap-2 px-4 py-[3px] text-left text-[13px] transition-colors duration-75",
+                          activeTabId === entry.id && "selected",
+                        )}
+                        onClick={() => openTab({ id: entry.id, filePath: entry.filePath, filename: entry.filename })}
+                      >
+                        <Icon className="h-3.5 w-3.5 shrink-0" style={{ color: "var(--vscode-list-tree-indent-guide-stroke)" }} />
+                        <span className="min-w-0 flex-1 truncate">{entry.filename}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           ))}
-        </div>
-      </aside>
+        </aside>
 
-      <aside className="flex w-[280px] flex-col border-r border-white/8">
-        <TodosPanel />
-      </aside>
+        {/* 3. Todos panel */}
+        <aside className="vscode-sidebar flex w-[200px] shrink-0 flex-col">
+          <TodosPanel />
+        </aside>
 
-      <section className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center justify-between border-b border-white/8 bg-[#181818] px-5 py-3">
-          <div>
-            <p className="text-sm font-medium text-white">Open Files</p>
-            <p className="text-xs text-[#8b8b8b]">
-              Supported viewers: code, markdown, image, csv, xlsx, pdf, docx, pptx, html
-            </p>
-          </div>
-          <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-[#8b8b8b]">
-            Close parity target: VS Code workbench tabs
-          </div>
-        </header>
-        <div className="min-h-0 flex-1">
+        {/* 4. Main editor area */}
+        <div className="vscode-editor flex min-w-0 flex-1 flex-col">
           <WorkspacePane
             activeTabId={activeTabId}
             tabs={tabs}
             onTabClose={closeTab}
             onTabSelect={setActiveTabId}
             emptyState={
-              <div className="flex h-full items-center justify-center bg-[#1e1e1e] text-sm text-[#8b8b8b]">
-                Open a file from the left explorer or paste a filesystem path above.
+              <div className="flex h-full flex-col items-center justify-center gap-4" style={{ backgroundColor: "var(--vscode-editor-background)" }}>
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl" style={{ backgroundColor: "var(--vscode-sidebar-background)" }}>
+                  <FileCode2 className="h-7 w-7" style={{ color: "var(--vscode-tab-inactive-foreground)" }} />
+                </div>
+                <div className="text-center">
+                  <p className="text-[13px] font-medium" style={{ color: "var(--vscode-editor-foreground)" }}>
+                    No file open
+                  </p>
+                  <p className="mt-1 text-[12px]" style={{ color: "var(--vscode-tab-inactive-foreground)" }}>
+                    Select a file from the Explorer to get started
+                  </p>
+                </div>
               </div>
             }
           />
         </div>
-      </section>
-    </main>
+      </div>
+
+      {/* ── Status bar ────────────────────────────────────────────────── */}
+      <div className="vscode-statusbar flex h-[22px] shrink-0 items-center justify-between px-2.5 text-[11px]">
+        <div className="flex items-center gap-3">
+          <span className="flex items-center gap-1">
+            <span className="inline-block h-[6px] w-[6px] rounded-full" style={{ backgroundColor: "#0dbc79" }} />
+            Ready
+          </span>
+          {activeWorkspaceId && (
+            <span style={{ opacity: 0.8 }}>Los Angeles</span>
+          )}
+        </div>
+        <div className="flex items-center gap-3" style={{ opacity: 0.8 }}>
+          <span>Operator v0.1.0</span>
+        </div>
+      </div>
+    </div>
   );
 }
 
