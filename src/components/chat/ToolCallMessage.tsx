@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronRight, CheckCircle2, XCircle, Clock } from "lucide-react";
+import { ChevronRight, CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface ToolCall {
@@ -16,11 +16,11 @@ interface ToolCallMessageProps {
   duration?: number;
 }
 
-const statusIcon = {
-  success: <CheckCircle2 className="h-3 w-3" style={{ color: "#4ec994" }} />,
-  error: <XCircle className="h-3 w-3" style={{ color: "#f48771" }} />,
-  running: <Clock className="h-3 w-3 animate-pulse" style={{ color: "#3b9edd" }} />,
-};
+function StatusIcon({ status }: { status: ToolCall["status"] }) {
+  if (status === "success") return <CheckCircle2 className="h-3 w-3 shrink-0" style={{ color: "#4ec994" }} />;
+  if (status === "error") return <XCircle className="h-3 w-3 shrink-0" style={{ color: "#f48771" }} />;
+  return <Loader2 className="h-3 w-3 shrink-0 animate-spin" style={{ color: "#3b9edd" }} />;
+}
 
 export function ToolCallMessage({ toolCalls, duration }: ToolCallMessageProps) {
   const [expanded, setExpanded] = useState(false);
@@ -35,45 +35,73 @@ export function ToolCallMessage({ toolCalls, duration }: ToolCallMessageProps) {
     });
   }
 
+  const successCount = toolCalls.filter((c) => c.status === "success").length;
+  const errorCount = toolCalls.filter((c) => c.status === "error").length;
+
   return (
     <div
-      className="my-1.5 rounded"
-      style={{ backgroundColor: "var(--vscode-list-inactive-selection-background)" }}
+      className="mb-2 overflow-hidden rounded-md"
+      style={{
+        backgroundColor: "var(--vscode-list-inactive-selection-background)",
+        border: "1px solid var(--vscode-sidebar-section-header-border, transparent)",
+      }}
     >
       {/* Header */}
       <button
         type="button"
         onClick={() => setExpanded((e) => !e)}
-        className="flex w-full items-center gap-2 px-2.5 py-1.5 text-left"
+        className="flex w-full items-center gap-2 px-3 py-[6px] text-left transition-colors hover:bg-white/3"
       >
         <ChevronRight
           className={cn("h-3 w-3 shrink-0 transition-transform duration-150", expanded && "rotate-90")}
-          style={{ color: "var(--vscode-tab-inactive-foreground)" }}
+          style={{ color: "var(--vscode-tab-inactive-foreground)", opacity: 0.6 }}
         />
-        <span className="text-[12px]" style={{ color: "var(--vscode-tab-inactive-foreground)" }}>
+        <span className="text-[12px] font-medium" style={{ color: "var(--vscode-sidebar-foreground)" }}>
           {toolCalls.length} tool call{toolCalls.length !== 1 ? "s" : ""}
-          {duration != null && ` · ${(duration / 1000).toFixed(1)}s`}
         </span>
+        {successCount > 0 && (
+          <span className="flex items-center gap-0.5 text-[11px]" style={{ color: "#4ec994" }}>
+            <CheckCircle2 className="h-3 w-3" />
+            {successCount}
+          </span>
+        )}
+        {errorCount > 0 && (
+          <span className="flex items-center gap-0.5 text-[11px]" style={{ color: "#f48771" }}>
+            <XCircle className="h-3 w-3" />
+            {errorCount}
+          </span>
+        )}
+        {duration != null && (
+          <span className="ml-auto text-[11px]" style={{ color: "var(--vscode-tab-inactive-foreground)", opacity: 0.5 }}>
+            {(duration / 1000).toFixed(1)}s
+          </span>
+        )}
       </button>
 
       {/* Expanded tool calls */}
       {expanded && (
         <div
-          className="border-t px-2.5 pb-2 pt-1"
-          style={{ borderColor: "var(--vscode-sidebar-section-header-border)" }}
+          className="px-3 pb-2"
+          style={{ borderTop: "1px solid var(--vscode-sidebar-section-header-border, rgba(255,255,255,0.06))" }}
         >
           {toolCalls.map((call) => (
-            <div key={call.id} className="mt-1">
+            <div key={call.id} className="mt-1.5">
               <button
                 type="button"
                 onClick={() => toggleCall(call.id)}
-                className="flex w-full items-center gap-2 text-left"
+                className="flex w-full items-center gap-2 rounded px-1 py-0.5 text-left transition-colors hover:bg-white/5"
               >
-                {statusIcon[call.status]}
+                <StatusIcon status={call.status} />
                 <span className="flex-1 text-[12px] font-medium" style={{ color: "var(--vscode-sidebar-foreground)" }}>
                   {call.tool}
                 </span>
-                <span className="text-[11px]" style={{ color: "var(--vscode-tab-inactive-foreground)" }}>
+                <span
+                  className="rounded px-1.5 py-0.5 text-[10px] font-mono"
+                  style={{
+                    color: "var(--vscode-tab-inactive-foreground)",
+                    opacity: 0.6,
+                  }}
+                >
                   {call.duration}ms
                 </span>
               </button>
@@ -81,17 +109,19 @@ export function ToolCallMessage({ toolCalls, duration }: ToolCallMessageProps) {
               {expandedCalls.has(call.id) && (
                 <div className="ml-5 mt-1">
                   <pre
-                    className="overflow-x-auto rounded px-2 py-1.5 text-[11px] leading-relaxed"
+                    className="overflow-x-auto rounded-md px-2.5 py-2 text-[11px] leading-relaxed"
                     style={{
                       backgroundColor: "var(--vscode-editor-background)",
                       color: "var(--vscode-tab-inactive-foreground)",
-                      fontFamily: "monospace",
+                      fontFamily: "'SF Mono', Menlo, monospace",
+                      border: "1px solid var(--vscode-sidebar-section-header-border, rgba(255,255,255,0.06))",
                     }}
                   >
                     {call.input}
                     {call.output && (
                       <>
-                        {"\n\n→ "}
+                        {"\n"}
+                        <span style={{ color: "#4ec994" }}>{"→ "}</span>
                         {call.output}
                       </>
                     )}

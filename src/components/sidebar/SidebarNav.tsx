@@ -1,40 +1,90 @@
-import { History, MessageSquarePlus, Zap, Puzzle, Cable } from "lucide-react";
+import {
+  Cable,
+  HelpCircle,
+  Inbox,
+  MessageSquarePlus,
+  Settings,
+  SlidersHorizontal,
+  Puzzle,
+  Zap,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
-interface SidebarNavProps {
-  activeSection: "activity" | "workspaces";
-  onSectionChange: (section: "activity" | "workspaces") => void;
-}
-
-const navItems = [
-  { id: "activity", label: "Activity", icon: History },
+const primaryItems = [
+  { id: "activity", label: "Inbox", icon: Inbox },
   { id: "new-chat", label: "New Chat", icon: MessageSquarePlus },
   { id: "automations", label: "Automations", icon: Zap },
   { id: "skills", label: "Skills", icon: Puzzle },
   { id: "mcp", label: "MCP", icon: Cable },
 ] as const;
 
-export function SidebarNav({ activeSection, onSectionChange }: SidebarNavProps) {
+const footerItems = [
+  { id: "preferences", label: "Preferences", icon: SlidersHorizontal },
+  { id: "help", label: "Help", icon: HelpCircle },
+  { id: "settings", label: "Settings", icon: Settings },
+] as const;
+
+export type SidebarNavItemId =
+  | (typeof primaryItems)[number]["id"]
+  | (typeof footerItems)[number]["id"];
+
+interface SidebarNavProps {
+  activeItem: SidebarNavItemId;
+  onItemChange: (item: SidebarNavItemId) => void;
+}
+
+export function SidebarNav({ activeItem, onItemChange }: SidebarNavProps) {
   return (
-    <nav className="flex flex-col gap-0.5 px-2 py-2">
-      {navItems.map((item) => {
-        const isActive = activeSection === item.id;
-        const Icon = item.icon;
-        return (
-          <button
-            key={item.id}
-            type="button"
-            onClick={() => onSectionChange(item.id as "activity" | "workspaces")}
-            className={cn(
-              "vscode-list-item flex w-full items-center gap-2.5 rounded px-2 py-1.5 text-left text-[13px] transition-colors duration-75",
-              isActive && "selected",
-            )}
-          >
-            <Icon className="h-4 w-4 shrink-0" style={{ opacity: isActive ? 1 : 0.6 }} />
-            <span className={cn("font-medium", !isActive && "opacity-80")}>{item.label}</span>
-          </button>
-        );
-      })}
+    <nav className="vscode-activity-bar flex h-full w-[48px] shrink-0 flex-col items-center py-2">
+      <div className="flex flex-col items-center gap-0.5">
+        {primaryItems.map((item) => {
+          const isActive = activeItem === item.id;
+          const Icon = item.icon;
+          return (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => onItemChange(item.id)}
+              className={cn(
+                "relative flex h-[40px] w-[40px] items-center justify-center rounded-lg transition-all duration-100",
+                isActive
+                  ? "text-[var(--vscode-activity-bar-foreground)]"
+                  : "text-[var(--vscode-activity-bar-inactive,var(--vscode-activity-bar-foreground))] opacity-50 hover:opacity-80",
+              )}
+              aria-label={item.label}
+              title={item.label}
+            >
+              {isActive && <span className="activity-indicator" />}
+              <Icon className="h-[20px] w-[20px] shrink-0" strokeWidth={1.6} />
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="mt-auto flex flex-col items-center gap-0.5">
+        {footerItems.map((item) => {
+          const isActive = activeItem === item.id;
+          const Icon = item.icon;
+          return (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => onItemChange(item.id)}
+              className={cn(
+                "relative flex h-[40px] w-[40px] items-center justify-center rounded-lg transition-all duration-100",
+                isActive
+                  ? "text-[var(--vscode-activity-bar-foreground)]"
+                  : "text-[var(--vscode-activity-bar-inactive,var(--vscode-activity-bar-foreground))] opacity-50 hover:opacity-80",
+              )}
+              aria-label={item.label}
+              title={item.label}
+            >
+              {isActive && <span className="activity-indicator" />}
+              <Icon className="h-[20px] w-[20px] shrink-0" strokeWidth={1.6} />
+            </button>
+          );
+        })}
+      </div>
     </nav>
   );
 }

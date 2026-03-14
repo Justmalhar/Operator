@@ -62,11 +62,61 @@ a:hover {
   -webkit-app-region: no-drag;
 }
 
+.titlebar-action-btn:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* ── Status bar interactive items ─────────────────────────────────── */
+.statusbar-item-interactive {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 75ms ease;
+}
+
+.statusbar-item-interactive:hover {
+  background-color: var(--vscode-statusbar-hover-background, rgba(255, 255, 255, 0.12));
+}
+
 /* ── Smooth transitions for interactive elements ─────────────────── */
 .vscode-list-item,
 .vscode-tab,
 .vscode-button {
   transition: background-color 75ms ease, color 75ms ease, opacity 75ms ease;
+}
+
+/* ── Activity bar indicator (left edge accent) ────────────────────── */
+.activity-indicator {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2px;
+  height: 50%;
+  border-radius: 0 1px 1px 0;
+  background-color: var(--vscode-activity-bar-foreground);
+  transition: height 150ms ease, opacity 150ms ease;
+}
+
+/* ── Panel tab underline ──────────────────────────────────────────── */
+.panel-tab-underline {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background-color: var(--vscode-panel-title-active-border, var(--vscode-focus-border));
+  transition: opacity 100ms ease;
+}
+
+/* ── File tree indent guides ──────────────────────────────────────── */
+.tree-indent-guide {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background-color: var(--vscode-list-tree-indent-guide-stroke, rgba(255, 255, 255, 0.1));
 }
 
 /* ── Markdown Preview ─────────────────────────────────────────────── */

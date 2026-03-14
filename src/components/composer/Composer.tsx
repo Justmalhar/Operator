@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { ArrowUp, Plus, Slash } from "lucide-react";
+import { ArrowUp, Paperclip, Slash } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ComposerTextarea } from "./ComposerTextarea";
 import { AttachmentRow, type Attachment } from "./AttachmentRow";
@@ -48,7 +48,6 @@ export function Composer({ onSend, disabled, className }: ComposerProps) {
 
   const canSend = message.trim().length > 0 || attachments.length > 0;
 
-  // Simulate ~40% context usage for demo
   const contextUsed = 80000;
   const contextMax = 200000;
 
@@ -64,7 +63,6 @@ export function Composer({ onSend, disabled, className }: ComposerProps) {
   function handleTextChange(val: string) {
     setMessage(val);
 
-    // Slash command detection
     if (val.startsWith("/") && !val.includes(" ")) {
       setSlashQuery(val.slice(1));
       setShowSlashMenu(true);
@@ -72,7 +70,6 @@ export function Composer({ onSend, disabled, className }: ComposerProps) {
       return;
     }
 
-    // @ mention detection (file mention via @)
     const atMatch = val.match(/@(\S*)$/);
     if (atMatch) {
       setFileMentionQuery(atMatch[1]);
@@ -119,13 +116,13 @@ export function Composer({ onSend, disabled, className }: ComposerProps) {
       className={cn("relative flex flex-col", className)}
       style={{
         backgroundColor: "var(--vscode-editor-background)",
-        borderTop: "1px solid rgba(255,255,255,0.07)",
+        borderTop: "1px solid var(--vscode-panel-border)",
       }}
     >
       {/* Slash command overlay */}
       {showSlashMenu && filteredSlashCmds.length > 0 && (
         <div
-          className="absolute bottom-full left-3 mb-1 w-72 overflow-hidden rounded-md shadow-xl"
+          className="absolute bottom-full left-4 mb-1 w-72 overflow-hidden rounded-md shadow-xl"
           style={{
             backgroundColor: "var(--vscode-dropdown-background, #252526)",
             border: "1px solid var(--vscode-dropdown-border, rgba(255,255,255,0.1))",
@@ -169,28 +166,34 @@ export function Composer({ onSend, disabled, className }: ComposerProps) {
       <AttachmentRow attachments={attachments} onRemove={(id) => setAttachments((a) => a.filter((x) => x.id !== id))} />
 
       {/* Main input area */}
-      <div className="px-3 py-2.5">
-        <ComposerTextarea
-          value={message}
-          onChange={handleTextChange}
-          onSubmit={handleSend}
-          disabled={disabled}
-        />
+      <div className="mx-auto w-full max-w-[720px] px-5 py-3">
+        <div
+          className="rounded-lg px-3 py-2"
+          style={{
+            backgroundColor: "var(--vscode-input-background)",
+            border: "1px solid var(--vscode-input-border, rgba(255,255,255,0.08))",
+          }}
+        >
+          <ComposerTextarea
+            value={message}
+            onChange={handleTextChange}
+            onSubmit={handleSend}
+            disabled={disabled}
+          />
+        </div>
       </div>
 
       {/* Toolbar row */}
-      <div className="flex items-center gap-1 px-2 pb-2">
-        {/* Left tools */}
+      <div className="mx-auto flex w-full max-w-[720px] items-center gap-1 px-5 pb-2">
         <div className="flex flex-1 items-center gap-0.5">
-          {/* Add attachment */}
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="flex h-7 w-7 items-center justify-center rounded transition-colors hover:bg-white/5"
+            className="flex h-7 w-7 items-center justify-center rounded-md transition-colors hover:bg-white/5"
             title="Add attachment"
-            style={{ color: "var(--vscode-editor-foreground)", opacity: 0.6 }}
+            style={{ color: "var(--vscode-editor-foreground)", opacity: 0.5 }}
           >
-            <Plus className="h-4 w-4" />
+            <Paperclip className="h-3.5 w-3.5" />
           </button>
           <input
             ref={fileInputRef}
@@ -200,18 +203,14 @@ export function Composer({ onSend, disabled, className }: ComposerProps) {
             onChange={handleAttachFiles}
           />
 
-          {/* Model picker */}
           <ModelPicker value={model} onChange={setModel} />
-
-          {/* Reasoning picker */}
           <ReasoningPicker value={thinking} onChange={setThinking} />
 
-          {/* Slash command shortcut hint */}
           <button
             type="button"
             onClick={() => { setMessage("/"); setShowSlashMenu(true); }}
-            className="flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium transition-colors hover:bg-white/5"
-            style={{ color: "var(--vscode-editor-foreground)", opacity: 0.45 }}
+            className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors hover:bg-white/5"
+            style={{ color: "var(--vscode-editor-foreground)", opacity: 0.4 }}
             title="Slash commands"
           >
             <Slash className="h-3 w-3" />
@@ -225,15 +224,15 @@ export function Composer({ onSend, disabled, className }: ComposerProps) {
           onClick={handleSend}
           disabled={!canSend || disabled}
           className={cn(
-            "flex h-7 w-7 items-center justify-center rounded-full transition-all duration-150",
+            "flex h-[28px] w-[28px] items-center justify-center rounded-lg transition-all duration-150",
             canSend && !disabled
-              ? "opacity-100 hover:scale-105 active:scale-95"
-              : "cursor-not-allowed opacity-25",
+              ? "opacity-100 hover:brightness-110 active:scale-95"
+              : "cursor-not-allowed opacity-20",
           )}
           style={{
             backgroundColor: canSend && !disabled
               ? "var(--vscode-focus-border, #007fd4)"
-              : "rgba(255,255,255,0.12)",
+              : "rgba(255,255,255,0.08)",
             color: "#fff",
           }}
           title="Send (⌘↵)"
