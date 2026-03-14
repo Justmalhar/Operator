@@ -21,6 +21,7 @@
 | 09 | [Conductor Parity](09-conductor-parity.md) | Feature-by-feature parity matrix vs Conductor, env var compatibility, migration plan |
 | 10 | [Settings](10-settings.md) | All settings panels, app settings schema, per-repo settings, env vars panel |
 | 11 | [Rendering Performance](11-rendering-performance.md) | WebGL terminal, diff virtualization, message list virtualization, IPC optimization |
+| 12 | [Directory Structure](12-dir-structure.md) | Full repo layout, runtime filesystem paths, DB and log file locations |
 
 ---
 
