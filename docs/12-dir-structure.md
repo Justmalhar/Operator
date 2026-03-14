@@ -1,6 +1,6 @@
 # Operator — Directory Structure
 
-*Version 1.0 · March 2026 · Mobiiworld FZ LLC*
+*Version 1.0 · March 2026
 
 ---
 
