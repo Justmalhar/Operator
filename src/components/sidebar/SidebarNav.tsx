@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Cable,
   HelpCircle,
-  Inbox,
+  Lightbulb,
   MessageSquarePlus,
   Settings,
   SlidersHorizontal,
@@ -12,9 +12,13 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { springs, tooltipVariants } from "@/lib/animations";
+import {
+  applyTheme,
+  getCurrentTheme,
+  getTheme,
+} from "@/styles/themes/themes";
 
 const primaryItems = [
-  { id: "activity", label: "Inbox", icon: Inbox },
   { id: "new-chat", label: "New Chat", icon: MessageSquarePlus },
   { id: "automations", label: "Automations", icon: Zap },
   { id: "skills", label: "Skills", icon: Puzzle },
@@ -30,6 +34,68 @@ const footerItems = [
 export type SidebarNavItemId =
   | (typeof primaryItems)[number]["id"]
   | (typeof footerItems)[number]["id"];
+
+function ThemeToggleButton() {
+  const [isDark, setIsDark] = useState(() => {
+    const theme = getTheme(getCurrentTheme());
+    return theme?.variant !== "light";
+  });
+  const [hovered, setHovered] = useState(false);
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      const theme = getTheme(getCurrentTheme());
+      setIsDark(theme?.variant !== "light");
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-vscode-theme"] });
+    return () => observer.disconnect();
+  }, []);
+
+  const toggle = () => {
+    applyTheme(isDark ? "light-default" : "dark-default");
+  };
+
+  return (
+    <div className="relative">
+      <motion.button
+        type="button"
+        onClick={toggle}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.9 }}
+        transition={springs.snappy}
+        className="relative flex h-[40px] w-[40px] items-center justify-center rounded-lg text-[var(--vscode-activity-bar-inactive,var(--vscode-activity-bar-foreground))] opacity-50 hover:opacity-80"
+        aria-label={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+      >
+        <Lightbulb className="relative z-10 h-[20px] w-[20px] shrink-0" strokeWidth={1.6} />
+      </motion.button>
+
+      <AnimatePresence>
+        {hovered && (
+          <motion.div
+            variants={tooltipVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="absolute left-[52px] top-1/2 z-50 -translate-y-1/2 whitespace-nowrap rounded-md px-2.5 py-1.5 text-[11px] font-medium shadow-lg"
+            style={{
+              backgroundColor: "var(--vscode-dropdown-background)",
+              color: "var(--vscode-dropdown-foreground)",
+              border: "1px solid var(--vscode-panel-border, rgba(255,255,255,0.1))",
+            }}
+          >
+            {isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            <span
+              className="absolute left-[-4px] top-1/2 h-2 w-2 -translate-y-1/2 rotate-45"
+              style={{ backgroundColor: "var(--vscode-dropdown-background)" }}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
 
 interface SidebarNavProps {
   activeItem: SidebarNavItemId;
@@ -137,6 +203,7 @@ export function SidebarNav({ activeItem, onItemChange }: SidebarNavProps) {
         animate={{ opacity: 1, x: 0 }}
         transition={{ ...springs.smooth, delay: 0.15 }}
       >
+        <ThemeToggleButton />
         {footerItems.map((item) => (
           <NavButton
             key={item.id}

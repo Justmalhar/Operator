@@ -33,7 +33,7 @@ const FULL_PAGE_ITEMS: SidebarNavItemId[] = ["preferences", "help", "settings"];
 function App() {
   const { activeWorkspaceId, setActiveWorkspace, getActiveWorkspace } = useWorkspaceStore();
   const [showRightPanel, setShowRightPanel] = useState(true);
-  const [activeItem, setActiveItem] = useState<SidebarNavItemId>("activity");
+  const [activeItem, setActiveItem] = useState<SidebarNavItemId>("new-chat");
   const [rightPanelWidth, setRightPanelWidth] = useState(DEFAULT_RIGHT_WIDTH);
   const [bottomPanelHeight, setBottomPanelHeight] = useState(DEFAULT_BOTTOM_HEIGHT);
   const centerRef = useRef<CenterPanelHandle>(null);
