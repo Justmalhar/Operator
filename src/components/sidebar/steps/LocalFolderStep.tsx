@@ -9,12 +9,9 @@ interface LocalFolderStepProps {
   onBack: () => void;
 }
 
-function slugify(s: string): string {
-  return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-}
 
 export function LocalFolderStep({ onSuccess, onBack }: LocalFolderStepProps) {
-  const { addRepo, createWorkspace } = useWorkspaceStore();
+  const { addRepo } = useWorkspaceStore();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -31,8 +28,6 @@ export function LocalFolderStep({ onSuccess, onBack }: LocalFolderStepProps) {
 
       try {
         const name = selectedPath.split("/").pop() ?? "workspace";
-        const cityName = `${name}-ws`;
-        const branchName = slugify(cityName);
 
         // Check if already registered
         const existing = await invoke<{ id: string } | null>(
@@ -55,15 +50,7 @@ export function LocalFolderStep({ onSuccess, onBack }: LocalFolderStepProps) {
           repoId = repo.id;
         }
 
-        const ws = await createWorkspace({
-          repositoryId: repoId,
-          repoPath: selectedPath,
-          cityName,
-          branchName,
-          baseBranch: "main",
-        });
-
-        onSuccess(ws.id);
+        onSuccess(repoId);
       } catch (err) {
         setError(String(err));
         setIsLoading(false);
@@ -79,7 +66,7 @@ export function LocalFolderStep({ onSuccess, onBack }: LocalFolderStepProps) {
         style={{ color: "var(--vscode-foreground)" }}
       >
         <Loader2 className="h-4 w-4 animate-spin" />
-        <span className="text-[13px]">Setting up workspace…</span>
+        <span className="text-[13px]">Indexing folder…</span>
       </div>
     );
   }

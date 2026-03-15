@@ -9,9 +9,6 @@ interface CloneUrlStepProps {
   onBack: () => void;
 }
 
-function slugify(s: string): string {
-  return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-}
 
 function deriveNameFromUrl(url: string): string {
   try {
@@ -23,7 +20,7 @@ function deriveNameFromUrl(url: string): string {
 }
 
 export function CloneUrlStep({ onSuccess }: CloneUrlStepProps) {
-  const { addRepo, createWorkspace } = useWorkspaceStore();
+  const { addRepo } = useWorkspaceStore();
   const [url, setUrl] = useState("");
   const [destination, setDestination] = useState("");
   const [workspaceName, setWorkspaceName] = useState("");
@@ -64,15 +61,7 @@ export function CloneUrlStep({ onSuccess }: CloneUrlStepProps) {
         default_branch: "main",
       });
 
-      const ws = await createWorkspace({
-        repositoryId: repo.id,
-        repoPath: destinationPath,
-        cityName: workspaceName,
-        branchName: slugify(workspaceName),
-        baseBranch: "main",
-      });
-
-      onSuccess(ws.id);
+      onSuccess(repo.id);
     } catch (err) {
       setError(String(err));
       setIsLoading(false);
@@ -189,7 +178,7 @@ export function CloneUrlStep({ onSuccess }: CloneUrlStepProps) {
         }}
       >
         {isLoading && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-        {isLoading ? "Cloning…" : "Clone & Open"}
+        {isLoading ? "Cloning…" : "Clone & Index"}
       </button>
     </form>
   );

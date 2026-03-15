@@ -44,13 +44,14 @@ const SOURCE_CARDS: SourceCard[] = [
 interface NewWorkspaceModalProps {
   open: boolean;
   onClose: () => void;
-  onWorkspaceSelect: (workspaceId: string) => void;
+  /** Called with the newly-registered repo ID (no worktree created yet). */
+  onRepoRegistered: (repoId: string) => void;
 }
 
 export function NewWorkspaceModal({
   open,
   onClose,
-  onWorkspaceSelect,
+  onRepoRegistered,
 }: NewWorkspaceModalProps) {
   const [step, setStep] = useState<Step>("pick");
 
@@ -59,9 +60,9 @@ export function NewWorkspaceModal({
     onClose();
   }
 
-  function handleSuccess(workspaceId: string) {
+  function handleSuccess(repoId: string) {
     handleClose();
-    onWorkspaceSelect(workspaceId);
+    onRepoRegistered(repoId);
   }
 
   return (
