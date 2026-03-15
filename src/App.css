@@ -1,3 +1,123 @@
+/* ── VSCode Dark+ Theme Variables ─────────────────────────────────── */
+:root {
+  /* Editor */
+  --vscode-editor-background: #1e1e1e;
+  --vscode-editor-foreground: #d4d4d4;
+
+  /* Sidebar */
+  --vscode-sideBar-background: #252526;
+  --vscode-sideBar-foreground: #cccccc;
+  --vscode-sideBar-border: rgba(255, 255, 255, 0.08);
+  --vscode-sideBarTitle-foreground: #bbbbbb;
+  --vscode-sideBarSectionHeader-background: rgba(255, 255, 255, 0.04);
+  --vscode-sideBarSectionHeader-foreground: #bbbbbb;
+
+  /* Aliases used by components (legacy names) */
+  --vscode-sidebar-background: #252526;
+  --vscode-sidebar-foreground: #cccccc;
+  --vscode-sidebar-title-foreground: #bbbbbb;
+
+  /* Activity bar */
+  --vscode-activityBar-background: #333333;
+  --vscode-activityBar-foreground: #ffffff;
+  --vscode-activityBar-inactiveForeground: rgba(255, 255, 255, 0.4);
+  --vscode-activityBar-border: rgba(255, 255, 255, 0.05);
+
+  /* Aliases used by components */
+  --vscode-activity-bar-foreground: #ffffff;
+  --vscode-activity-bar-inactive: rgba(255, 255, 255, 0.4);
+
+  /* Lists */
+  --vscode-list-activeSelectionBackground: #094771;
+  --vscode-list-activeSelectionForeground: #ffffff;
+  --vscode-list-hoverBackground: rgba(255, 255, 255, 0.07);
+  --vscode-list-treeIndentGuidesStroke: rgba(255, 255, 255, 0.1);
+
+  /* Aliases used by components (camelCase → kebab mapping) */
+  --vscode-list-active-selection-background: #094771;
+  --vscode-list-active-selection-foreground: #ffffff;
+  --vscode-list-hover-background: rgba(255, 255, 255, 0.07);
+  --vscode-list-tree-indent-guide-stroke: rgba(255, 255, 255, 0.1);
+
+  /* Focus / accent */
+  --vscode-focusBorder: #007fd4;
+  --vscode-focus-border: #007fd4;
+
+  /* Inputs */
+  --vscode-input-background: #3c3c3c;
+  --vscode-input-foreground: #cccccc;
+  --vscode-input-border: rgba(255, 255, 255, 0.15);
+  --vscode-input-placeholderForeground: rgba(204, 204, 204, 0.5);
+
+  /* Dropdowns / selects */
+  --vscode-dropdown-background: #3c3c3c;
+  --vscode-dropdown-foreground: #cccccc;
+  --vscode-dropdown-border: rgba(255, 255, 255, 0.15);
+
+  /* Buttons */
+  --vscode-button-background: #0e639c;
+  --vscode-button-foreground: #ffffff;
+  --vscode-button-hoverBackground: #1177bb;
+  --vscode-button-secondaryBackground: rgba(255, 255, 255, 0.08);
+  --vscode-button-secondaryForeground: #cccccc;
+  --vscode-button-secondaryHoverBackground: rgba(255, 255, 255, 0.12);
+
+  /* Panels */
+  --vscode-panel-background: #1e1e1e;
+  --vscode-panel-border: rgba(255, 255, 255, 0.1);
+  --vscode-panelTitle-activeBorder: #007fd4;
+  --vscode-panelTitle-activeForeground: #d4d4d4;
+  --vscode-panelTitle-inactiveForeground: rgba(212, 212, 212, 0.6);
+  --vscode-panel-title-active-border: #007fd4;
+
+  /* Tabs */
+  --vscode-tab-activeBackground: #1e1e1e;
+  --vscode-tab-activeForeground: #ffffff;
+  --vscode-tab-inactiveBackground: #2d2d2d;
+  --vscode-tab-inactiveForeground: rgba(255, 255, 255, 0.5);
+  --vscode-tab-border: rgba(255, 255, 255, 0.06);
+  --vscode-tab-active-foreground: #ffffff;
+  --vscode-tab-inactive-foreground: rgba(255, 255, 255, 0.5);
+
+  /* Status bar */
+  --vscode-statusBar-background: #007acc;
+  --vscode-statusBar-foreground: #ffffff;
+  --vscode-statusBar-hoverBackground: rgba(255, 255, 255, 0.12);
+  --vscode-statusbar-hover-background: rgba(255, 255, 255, 0.12);
+
+  /* Keybinding labels */
+  --vscode-keybindingLabel-background: rgba(128, 128, 128, 0.17);
+  --vscode-keybindingLabel-foreground: #cccccc;
+  --vscode-keybindingLabel-border: rgba(51, 51, 51, 0.6);
+  --vscode-keybindingLabel-bottomBorder: rgba(68, 68, 68, 0.6);
+
+  /* Widget / decoration */
+  --vscode-widget-border: rgba(255, 255, 255, 0.1);
+  --vscode-widget-shadow: rgba(0, 0, 0, 0.36);
+
+  /* Misc */
+  --vscode-disabledForeground: rgba(204, 204, 204, 0.5);
+  --vscode-errorForeground: #f48771;
+  --vscode-warningForeground: #cca700;
+  --vscode-textLink-foreground: #3794ff;
+  --vscode-textLink-activeForeground: #3794ff;
+  --vscode-descriptionForeground: rgba(204, 204, 204, 0.7);
+  --vscode-icon-foreground: #c5c5c5;
+  --vscode-toolbar-hoverBackground: rgba(90, 93, 94, 0.31);
+  --vscode-toolbar-activeBackground: rgba(99, 102, 103, 0.31);
+  --vscode-breadcrumb-foreground: rgba(204, 204, 204, 0.8);
+  --vscode-breadcrumb-focusForeground: #e0e0e0;
+  --vscode-breadcrumb-activeSelectionForeground: #e0e0e0;
+  --vscode-menu-background: #3c3c3c;
+  --vscode-menu-foreground: #cccccc;
+  --vscode-menu-selectionBackground: #094771;
+  --vscode-menu-selectionForeground: #ffffff;
+  --vscode-menu-separatorBackground: rgba(255, 255, 255, 0.1);
+  --vscode-notifications-background: #252526;
+  --vscode-notifications-border: rgba(255, 255, 255, 0.12);
+  --vscode-notificationToast-border: rgba(255, 255, 255, 0.12);
+}
+
 /* ── Base Typography & Reset ──────────────────────────────────────── */
 :root {
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue",
@@ -11,6 +131,53 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
+}
+
+/* ── VSCode Layout Primitives ─────────────────────────────────────── */
+
+/* Root app shell */
+.vscode-editor {
+  background-color: var(--vscode-editor-background);
+  color: var(--vscode-editor-foreground);
+}
+
+/* Activity bar — the narrow icon strip on the far left */
+.vscode-activity-bar {
+  background-color: var(--vscode-activityBar-background);
+  color: var(--vscode-activityBar-foreground);
+  border-right: 1px solid var(--vscode-activityBar-border);
+}
+
+/* Sidebar panel — the wider panel to the right of the activity bar */
+.vscode-sidebar {
+  background-color: var(--vscode-sideBar-background);
+  color: var(--vscode-sideBar-foreground);
+  border-right: 1px solid var(--vscode-sideBar-border);
+}
+
+/* Scrollable sidebar regions */
+.vscode-scrollable {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Status bar — the thin strip at the very bottom */
+.vscode-statusbar {
+  background-color: var(--vscode-statusBar-background);
+  color: var(--vscode-statusBar-foreground);
+}
+
+/* Section header labels inside sidebar panels */
+.vscode-sidebar-section-header {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 8px 12px 4px;
+  color: var(--vscode-sideBarSectionHeader-foreground);
+  background-color: var(--vscode-sideBarSectionHeader-background);
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 /* Prevent text selection on UI chrome */
