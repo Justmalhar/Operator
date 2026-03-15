@@ -89,7 +89,7 @@ export function BottomPanel({ worktreePath: _worktreePath }: BottomPanelProps) {
         <div className="flex min-w-0 flex-1 items-stretch gap-4 pl-3">
           <button
             type="button"
-            className="flex h-full items-center px-2 transition-colors duration-75 hover:bg-white/5"
+            className="flex h-full items-center px-2 transition-colors duration-75 theme-hover-bg"
             aria-label="Collapse panel"
           >
             <svg
@@ -161,7 +161,7 @@ export function BottomPanel({ worktreePath: _worktreePath }: BottomPanelProps) {
                     transition={springs.snappy}
                     type="button"
                     onClick={openInBrowser}
-                    className="flex items-center gap-1.5 overflow-hidden rounded px-2.5 py-1 text-[11px] font-medium transition-colors duration-75 hover:bg-white/10 whitespace-nowrap"
+                    className="flex items-center gap-1.5 overflow-hidden rounded px-2.5 py-1 text-[11px] font-medium transition-colors duration-75 theme-hover-bg whitespace-nowrap"
                     style={{
                       color: "var(--vscode-sidebar-foreground)",
                       border: "1px solid var(--vscode-panel-border)",
@@ -187,7 +187,7 @@ export function BottomPanel({ worktreePath: _worktreePath }: BottomPanelProps) {
                       setActiveTab("run");
                     }
                   }}
-                  className="flex items-center gap-1.5 rounded-l px-2.5 py-1 text-[11px] font-medium transition-colors duration-75 hover:bg-white/10 whitespace-nowrap"
+                  className="flex items-center gap-1.5 rounded-l px-2.5 py-1 text-[11px] font-medium transition-colors duration-75 theme-hover-bg whitespace-nowrap"
                   style={{
                     color: "var(--vscode-sidebar-foreground)",
                     border: "1px solid var(--vscode-panel-border)",
@@ -218,7 +218,7 @@ export function BottomPanel({ worktreePath: _worktreePath }: BottomPanelProps) {
                   type="button"
                   whileTap={{ scale: 0.9 }}
                   onClick={() => setShowDropdown((v) => !v)}
-                  className="flex items-center rounded-r px-1.5 transition-colors duration-75 hover:bg-white/10"
+                  className="flex items-center rounded-r px-1.5 transition-colors duration-75 theme-hover-bg"
                   style={{
                     color: "var(--vscode-sidebar-foreground)",
                     border: "1px solid var(--vscode-panel-border)",

@@ -127,7 +127,7 @@ export function ChangesTab({ worktreePath }: ChangesTabProps) {
           whileHover={{ scale: 1.2, rotate: 180 }}
           whileTap={{ scale: 0.9 }}
           transition={springs.snappy}
-          className="flex h-5 w-5 items-center justify-center rounded hover:bg-white/8"
+          className="flex h-5 w-5 items-center justify-center rounded theme-hover-bg"
           aria-label="Refresh"
           title="Refresh changes"
         >

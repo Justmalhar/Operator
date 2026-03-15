@@ -105,6 +105,8 @@
   --vscode-icon-foreground: #c5c5c5;
   --vscode-toolbar-hoverBackground: rgba(90, 93, 94, 0.31);
   --vscode-toolbar-activeBackground: rgba(99, 102, 103, 0.31);
+  --vscode-toolbar-hover-background: rgba(255, 255, 255, 0.05);
+  --vscode-separator-color: rgba(255, 255, 255, 0.08);
   --vscode-breadcrumb-foreground: rgba(204, 204, 204, 0.8);
   --vscode-breadcrumb-focusForeground: #e0e0e0;
   --vscode-breadcrumb-activeSelectionForeground: #e0e0e0;
@@ -335,7 +337,7 @@ a:hover {
 }
 
 .titlebar-action-btn:hover {
-  background-color: rgba(255, 255, 255, 0.08);
+  background-color: var(--vscode-toolbar-hover-background);
 }
 
 .titlebar-action-btn:active {
@@ -402,7 +404,7 @@ a:hover {
   top: 0;
   bottom: 0;
   width: 1px;
-  background-color: var(--vscode-list-tree-indent-guide-stroke, rgba(255, 255, 255, 0.1));
+  background-color: var(--vscode-list-tree-indent-guide-stroke, var(--vscode-separator-color, rgba(255, 255, 255, 0.1)));
   transition: opacity 150ms ease;
 }
 
@@ -550,7 +552,7 @@ a:hover {
 
 .markdown-preview code {
   border-radius: 4px;
-  background: rgba(255, 255, 255, 0.07);
+  background: var(--vscode-toolbar-hover-background, rgba(255, 255, 255, 0.07));
   padding: 0.15rem 0.35rem;
   font-family: "SF Mono", "Menlo", "Monaco", "Cascadia Code", "Courier New", monospace;
   font-size: 0.92em;
@@ -558,7 +560,7 @@ a:hover {
 
 .markdown-preview pre {
   overflow-x: auto;
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  border: 1px solid var(--vscode-separator-color, rgba(255, 255, 255, 0.07));
   border-radius: 6px;
   background: var(--vscode-editor-background, #1e1e1e);
   padding: 1rem;
@@ -572,20 +574,20 @@ a:hover {
 .markdown-preview table {
   width: 100%;
   border-collapse: collapse;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--vscode-separator-color, rgba(255, 255, 255, 0.08));
   border-radius: 6px;
   overflow: hidden;
 }
 
 .markdown-preview th,
 .markdown-preview td {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  border-bottom: 1px solid var(--vscode-separator-color, rgba(255, 255, 255, 0.07));
   padding: 0.6rem 0.8rem;
   text-align: left;
 }
 
 .markdown-preview th {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--vscode-toolbar-hover-background, rgba(255, 255, 255, 0.04));
   color: var(--vscode-tab-active-foreground, #ffffff);
   font-weight: 600;
 }
@@ -609,10 +611,15 @@ a:hover {
   box-shadow: 0 24px 64px rgba(0, 0, 0, 0.32);
 }
 
+/* ── Theme-aware hover utility ────────────────────────────────────── */
+.theme-hover-bg:hover {
+  background-color: var(--vscode-toolbar-hover-background);
+}
+
 /* ── Enhanced scrollbar for non-vscode areas ──────────────────────── */
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+  scrollbar-color: var(--vscode-scrollbar-slider-background, rgba(255, 255, 255, 0.12)) transparent;
 }
 
 *::-webkit-scrollbar {
@@ -625,10 +632,10 @@ a:hover {
 }
 
 *::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--vscode-scrollbar-slider-background, rgba(255, 255, 255, 0.12));
   border-radius: 3px;
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--vscode-scrollbar-slider-hover, rgba(255, 255, 255, 0.2));
 }

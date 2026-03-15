@@ -31,7 +31,7 @@ function ContextBar({ used, max }: { used: number; max: number }) {
   return (
     <div className="flex items-center gap-1.5">
       <Gauge className="h-3 w-3 opacity-40" />
-      <div className="relative h-[3px] w-16 overflow-hidden rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.08)" }}>
+      <div className="relative h-[3px] w-16 overflow-hidden rounded-full" style={{ backgroundColor: "var(--vscode-separator-color)" }}>
         <div
           className="absolute inset-y-0 left-0 rounded-full transition-all"
           style={{ width: `${pct}%`, backgroundColor: color }}
@@ -61,7 +61,7 @@ export function StatusBar({
   return (
     <div
       className="flex items-center justify-between gap-2 px-5 py-1.5"
-      style={{ borderTop: "1px solid var(--vscode-panel-border, rgba(255,255,255,0.06))" }}
+      style={{ borderTop: "1px solid var(--vscode-panel-border, var(--vscode-separator-color))" }}
     >
       {/* Left cluster */}
       <div className="flex items-center gap-0.5">
@@ -70,7 +70,7 @@ export function StatusBar({
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors hover:bg-white/5"
+              className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors theme-hover-bg"
               style={{ color: "var(--vscode-editor-foreground)", opacity: 0.55 }}
             >
               <Cpu className="h-3 w-3" />
@@ -82,11 +82,11 @@ export function StatusBar({
             <DropdownMenuLabel className="text-[10px] font-semibold uppercase tracking-wider opacity-50">
               Context
             </DropdownMenuLabel>
-            <DropdownMenuSeparator style={{ backgroundColor: "rgba(255,255,255,0.06)" }} />
+            <DropdownMenuSeparator style={{ backgroundColor: "var(--vscode-separator-color)" }} />
             <DropdownMenuItem
               onClick={() => onContextModeChange("local")}
               className="text-[12px]"
-              style={{ backgroundColor: contextMode === "local" ? "rgba(255,255,255,0.06)" : undefined }}
+              style={{ backgroundColor: contextMode === "local" ? "var(--vscode-toolbar-hover-background)" : undefined }}
             >
               <div>
                 <p className="font-medium">Local</p>
@@ -96,7 +96,7 @@ export function StatusBar({
             <DropdownMenuItem
               onClick={() => onContextModeChange("full")}
               className="text-[12px]"
-              style={{ backgroundColor: contextMode === "full" ? "rgba(255,255,255,0.06)" : undefined }}
+              style={{ backgroundColor: contextMode === "full" ? "var(--vscode-toolbar-hover-background)" : undefined }}
             >
               <div>
                 <p className="font-medium">Full Access</p>
@@ -107,14 +107,14 @@ export function StatusBar({
         </DropdownMenu>
 
         {/* Separator */}
-        <span className="mx-0.5 h-3 w-px" style={{ backgroundColor: "rgba(255,255,255,0.08)" }} />
+        <span className="mx-0.5 h-3 w-px" style={{ backgroundColor: "var(--vscode-separator-color)" }} />
 
         {/* Edit mode */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors hover:bg-white/5"
+              className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors theme-hover-bg"
               style={{
                 color: "var(--vscode-editor-foreground)",
                 opacity: editMode === "auto" ? 0.55 : 0.8,
@@ -129,11 +129,11 @@ export function StatusBar({
             <DropdownMenuLabel className="text-[10px] font-semibold uppercase tracking-wider opacity-50">
               Edit Mode
             </DropdownMenuLabel>
-            <DropdownMenuSeparator style={{ backgroundColor: "rgba(255,255,255,0.06)" }} />
+            <DropdownMenuSeparator style={{ backgroundColor: "var(--vscode-separator-color)" }} />
             <DropdownMenuItem
               onClick={() => onEditModeChange("auto")}
               className="text-[12px]"
-              style={{ backgroundColor: editMode === "auto" ? "rgba(255,255,255,0.06)" : undefined }}
+              style={{ backgroundColor: editMode === "auto" ? "var(--vscode-toolbar-hover-background)" : undefined }}
             >
               <div>
                 <p className="font-medium">Automatically</p>
@@ -143,7 +143,7 @@ export function StatusBar({
             <DropdownMenuItem
               onClick={() => onEditModeChange("ask")}
               className="text-[12px]"
-              style={{ backgroundColor: editMode === "ask" ? "rgba(255,255,255,0.06)" : undefined }}
+              style={{ backgroundColor: editMode === "ask" ? "var(--vscode-toolbar-hover-background)" : undefined }}
             >
               <div>
                 <p className="font-medium">Ask</p>
@@ -154,14 +154,14 @@ export function StatusBar({
         </DropdownMenu>
 
         {/* Separator */}
-        <span className="mx-0.5 h-3 w-px" style={{ backgroundColor: "rgba(255,255,255,0.08)" }} />
+        <span className="mx-0.5 h-3 w-px" style={{ backgroundColor: "var(--vscode-separator-color)" }} />
 
         {/* Plan mode toggle */}
         <button
           type="button"
           onClick={() => onPlanModeChange(!planMode)}
           className={cn(
-            "flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors hover:bg-white/5",
+            "flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors theme-hover-bg",
           )}
           style={{
             color: planMode ? "var(--vscode-focus-border, #007fd4)" : "var(--vscode-editor-foreground)",

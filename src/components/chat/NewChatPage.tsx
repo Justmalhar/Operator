@@ -126,7 +126,7 @@ function ModelPicker({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium transition-colors hover:bg-white/8"
+        className="flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium transition-colors theme-hover-bg"
         style={{ color: "var(--vscode-tab-inactive-foreground)" }}
       >
         {selected.label}
@@ -168,12 +168,9 @@ function ModelPicker({
                       key={model.id}
                       type="button"
                       onClick={() => { onSelect(model.id); setOpen(false); }}
-                      whileHover={{ backgroundColor: "rgba(255,255,255,0.08)" }}
+                      whileHover={{ backgroundColor: "var(--vscode-toolbar-hover-background)" }}
                       whileTap={{ scale: 0.98 }}
-                      className={cn(
-                        "mx-1 flex items-center gap-2.5 rounded px-2.5 py-1.5 text-left text-[12px]",
-                        isSelected && "bg-white/5",
-                      )}
+                      className="mx-1 flex items-center gap-2.5 rounded px-2.5 py-1.5 text-left text-[12px]"
                       style={{
                         color: "var(--vscode-dropdown-foreground)",
                         width: "calc(100% - 8px)",
@@ -286,7 +283,7 @@ function WorkspaceDropdown({
                   key={repo.id}
                   type="button"
                   onClick={() => { onSelect(repo.id); setOpen(false); }}
-                  whileHover={{ backgroundColor: "rgba(255,255,255,0.08)" }}
+                  whileHover={{ backgroundColor: "var(--vscode-toolbar-hover-background)" }}
                   whileTap={{ scale: 0.98 }}
                   className="flex w-full items-center gap-2.5 px-3 py-1.5 text-left text-[12px]"
                   style={{ color: "var(--vscode-dropdown-foreground)" }}
@@ -313,14 +310,14 @@ function WorkspaceDropdown({
             />
             <motion.button
               type="button"
-              whileHover={{ backgroundColor: "rgba(255,255,255,0.08)" }}
+              whileHover={{ backgroundColor: "var(--vscode-toolbar-hover-background)" }}
               className="flex w-full items-center gap-2.5 px-3 py-1.5 text-left text-[12px]"
               style={{ color: "var(--vscode-tab-inactive-foreground)" }}
               onClick={() => setOpen(false)}
             >
               <span
                 className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded"
-                style={{ backgroundColor: "rgba(255,255,255,0.07)" }}
+                style={{ backgroundColor: "var(--vscode-toolbar-hover-background)" }}
               >
                 <Plus className="h-3 w-3" />
               </span>
@@ -470,7 +467,7 @@ export function NewChatPage({ onStartChat }: NewChatPageProps) {
             variants={staggerItemScale}
             type="button"
             whileHover={{ scale: 1.05 }}
-            className="flex items-center gap-1 self-center rounded px-2 py-1 text-[11px] transition-colors hover:bg-white/8"
+            className="flex items-center gap-1 self-center rounded px-2 py-1 text-[11px] transition-colors theme-hover-bg"
             style={{ color: "var(--vscode-tab-inactive-foreground)", opacity: 0.6 }}
           >
             More
@@ -496,7 +493,7 @@ export function NewChatPage({ onStartChat }: NewChatPageProps) {
               border: "1px solid var(--vscode-input-border, rgba(255,255,255,0.10))",
               boxShadow: composerFocused
                 ? "0 0 0 1px var(--vscode-focus-border), 0 0 12px rgba(0,127,212,0.15)"
-                : "inset 0 1px 0 rgba(255,255,255,0.03)",
+                : "none",
             }}
           >
             <textarea
@@ -547,7 +544,7 @@ export function NewChatPage({ onStartChat }: NewChatPageProps) {
               type="button"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
-              className="flex h-7 w-7 items-center justify-center rounded-md transition-colors hover:bg-white/5"
+              className="flex h-7 w-7 items-center justify-center rounded-md transition-colors theme-hover-bg"
               style={{ color: "var(--vscode-editor-foreground)", opacity: 0.5 }}
               title="Add attachment"
             >
@@ -559,7 +556,7 @@ export function NewChatPage({ onStartChat }: NewChatPageProps) {
               type="button"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
-              className="flex h-7 w-7 items-center justify-center rounded-md transition-colors hover:bg-white/5"
+              className="flex h-7 w-7 items-center justify-center rounded-md transition-colors theme-hover-bg"
               style={{ color: "var(--vscode-editor-foreground)", opacity: 0.5 }}
               title="Mention a file"
             >
@@ -571,7 +568,7 @@ export function NewChatPage({ onStartChat }: NewChatPageProps) {
             {/* Slash commands */}
             <button
               type="button"
-              className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors hover:bg-white/5"
+              className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors theme-hover-bg"
               style={{ color: "var(--vscode-editor-foreground)", opacity: 0.4 }}
               title="Slash commands"
             >
@@ -595,7 +592,7 @@ export function NewChatPage({ onStartChat }: NewChatPageProps) {
             style={{
               backgroundColor: canSend
                 ? "var(--vscode-focus-border, #007fd4)"
-                : "rgba(255,255,255,0.08)",
+                : "var(--vscode-toolbar-hover-background)",
               color: "#fff",
             }}
             title="Send (↵)"
@@ -612,7 +609,7 @@ export function NewChatPage({ onStartChat }: NewChatPageProps) {
           <div className="flex items-center gap-0.5">
             <button
               type="button"
-              className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors hover:bg-white/5"
+              className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors theme-hover-bg"
               style={{ color: "var(--vscode-editor-foreground)", opacity: 0.55 }}
             >
               <Cpu className="h-3 w-3" />
