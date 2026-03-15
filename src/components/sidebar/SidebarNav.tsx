@@ -116,13 +116,6 @@ function NavButton({
 
   return (
     <div className="relative flex w-[48px] items-center justify-center">
-      {isActive && (
-        <motion.span
-          layoutId="nav-indicator"
-          className="activity-indicator"
-          transition={springs.snappy}
-        />
-      )}
       <motion.button
         type="button"
         onClick={onClick}
@@ -143,7 +136,7 @@ function NavButton({
           <motion.span
             layoutId="nav-glow"
             className="absolute inset-0 rounded-lg"
-            style={{ backgroundColor: "var(--vscode-toolbar-hover-background)" }}
+            style={{ backgroundColor: "var(--vscode-toolbar-activeBackground, var(--vscode-toolbar-hover-background, rgba(255,255,255,0.12)))" }}
             transition={springs.smooth}
           />
         )}
