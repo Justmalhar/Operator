@@ -1,5 +1,20 @@
 import { useState } from "react";
-import { ChevronRight, CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import {
+  ChevronRight,
+  XCircle,
+  Loader2,
+  Eye,
+  FilePlus2,
+  FilePen,
+  FolderSearch,
+  Search,
+  Terminal,
+  Sparkles,
+  Bot,
+  Globe,
+  FileCode2,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface ToolCall {
@@ -16,120 +31,147 @@ interface ToolCallMessageProps {
   duration?: number;
 }
 
-function StatusIcon({ status }: { status: ToolCall["status"] }) {
-  if (status === "success") return <CheckCircle2 className="h-3 w-3 shrink-0" style={{ color: "#4ec994" }} />;
-  if (status === "error") return <XCircle className="h-3 w-3 shrink-0" style={{ color: "#f48771" }} />;
-  return <Loader2 className="h-3 w-3 shrink-0 animate-spin" style={{ color: "#3b9edd" }} />;
+// ── Tool icon map ─────────────────────────────────────────────────────────────
+
+const TOOL_ICONS: Record<string, LucideIcon> = {
+  Read: Eye,
+  Write: FilePlus2,
+  Edit: FilePen,
+  Glob: FolderSearch,
+  Grep: Search,
+  Bash: Terminal,
+  Think: Sparkles,
+  Thinking: Sparkles,
+  Agent: Bot,
+  WebFetch: Globe,
+  WebSearch: Globe,
+};
+
+function getToolIcon(tool: string): LucideIcon {
+  return TOOL_ICONS[tool] ?? FileCode2;
 }
 
+// ── Status dot ────────────────────────────────────────────────────────────────
+
+function StatusDot({ status }: { status: ToolCall["status"] }) {
+  if (status === "running")
+    return (
+      <Loader2
+        className="h-3 w-3 shrink-0 animate-spin"
+        style={{ color: "var(--vscode-focus-border, #007fd4)" }}
+      />
+    );
+  return (
+    <span
+      className="h-1.5 w-1.5 shrink-0 rounded-full"
+      style={{ backgroundColor: status === "error" ? "#f48771" : "#4ec994" }}
+    />
+  );
+}
+
+// ── ToolCallMessage ───────────────────────────────────────────────────────────
+
 export function ToolCallMessage({ toolCalls, duration }: ToolCallMessageProps) {
-  const [expanded, setExpanded] = useState(false);
-  const [expandedCalls, setExpandedCalls] = useState<Set<string>>(new Set());
-
-  function toggleCall(id: string) {
-    setExpandedCalls((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }
-
-  const successCount = toolCalls.filter((c) => c.status === "success").length;
+  const [expanded, setExpanded] = useState(true);
   const errorCount = toolCalls.filter((c) => c.status === "error").length;
 
   return (
     <div
-      className="mb-2 overflow-hidden rounded-md"
+      className="mb-3 overflow-hidden rounded-md text-[12px]"
       style={{
-        backgroundColor: "var(--vscode-list-inactive-selection-background)",
-        border: "1px solid var(--vscode-sidebar-section-header-border, transparent)",
+        border: "1px solid var(--vscode-panel-border, rgba(255,255,255,0.07))",
+        backgroundColor: "var(--vscode-sidebar-section-header-background, rgba(0,0,0,0.12))",
       }}
     >
-      {/* Header */}
+      {/* Summary row / toggle */}
       <button
         type="button"
         onClick={() => setExpanded((e) => !e)}
-        className="flex w-full items-center gap-2 px-3 py-[6px] text-left transition-colors hover:bg-white/3"
+        className="flex w-full items-center gap-2 px-3 py-[5px] text-left transition-colors hover:bg-white/3"
       >
         <ChevronRight
-          className={cn("h-3 w-3 shrink-0 transition-transform duration-150", expanded && "rotate-90")}
-          style={{ color: "var(--vscode-tab-inactive-foreground)", opacity: 0.6 }}
+          className={cn(
+            "h-3 w-3 shrink-0 transition-transform duration-150",
+            expanded && "rotate-90",
+          )}
+          style={{ color: "var(--vscode-tab-inactive-foreground)", opacity: 0.45 }}
         />
-        <span className="text-[12px] font-medium" style={{ color: "var(--vscode-sidebar-foreground)" }}>
+        <span
+          className="font-medium"
+          style={{ color: "var(--vscode-tab-inactive-foreground)", opacity: 0.7 }}
+        >
           {toolCalls.length} tool call{toolCalls.length !== 1 ? "s" : ""}
         </span>
-        {successCount > 0 && (
-          <span className="flex items-center gap-0.5 text-[11px]" style={{ color: "#4ec994" }}>
-            <CheckCircle2 className="h-3 w-3" />
-            {successCount}
-          </span>
-        )}
         {errorCount > 0 && (
-          <span className="flex items-center gap-0.5 text-[11px]" style={{ color: "#f48771" }}>
+          <span className="flex items-center gap-0.5" style={{ color: "#f48771" }}>
             <XCircle className="h-3 w-3" />
-            {errorCount}
+            {errorCount} error{errorCount > 1 ? "s" : ""}
           </span>
         )}
         {duration != null && (
-          <span className="ml-auto text-[11px]" style={{ color: "var(--vscode-tab-inactive-foreground)", opacity: 0.5 }}>
+          <span
+            className="ml-auto tabular-nums"
+            style={{ color: "var(--vscode-tab-inactive-foreground)", opacity: 0.4 }}
+          >
             {(duration / 1000).toFixed(1)}s
           </span>
         )}
       </button>
 
-      {/* Expanded tool calls */}
+      {/* Flat call rows */}
       {expanded && (
         <div
-          className="px-3 pb-2"
-          style={{ borderTop: "1px solid var(--vscode-sidebar-section-header-border, rgba(255,255,255,0.06))" }}
+          style={{
+            borderTop: "1px solid var(--vscode-panel-border, rgba(255,255,255,0.06))",
+          }}
         >
-          {toolCalls.map((call) => (
-            <div key={call.id} className="mt-1.5">
-              <button
-                type="button"
-                onClick={() => toggleCall(call.id)}
-                className="flex w-full items-center gap-2 rounded px-1 py-0.5 text-left transition-colors hover:bg-white/5"
+          {toolCalls.map((call, i) => {
+            const Icon = getToolIcon(call.tool);
+            return (
+              <div
+                key={call.id}
+                className={cn("flex items-center gap-2 px-3 py-[5px]")}
+                style={{
+                  borderBottom:
+                    i < toolCalls.length - 1
+                      ? "1px solid var(--vscode-panel-border, rgba(255,255,255,0.04))"
+                      : undefined,
+                }}
               >
-                <StatusIcon status={call.status} />
-                <span className="flex-1 text-[12px] font-medium" style={{ color: "var(--vscode-sidebar-foreground)" }}>
+                <StatusDot status={call.status} />
+                <Icon
+                  className="h-3.5 w-3.5 shrink-0"
+                  style={{ color: "var(--vscode-tab-inactive-foreground)", opacity: 0.55 }}
+                />
+                <span
+                  className="shrink-0 font-medium"
+                  style={{ color: "var(--vscode-sidebar-foreground)" }}
+                >
                   {call.tool}
                 </span>
                 <span
-                  className="rounded px-1.5 py-0.5 text-[10px] font-mono"
+                  className="min-w-0 flex-1 truncate font-mono"
                   style={{
                     color: "var(--vscode-tab-inactive-foreground)",
                     opacity: 0.6,
+                    fontSize: "11px",
+                  }}
+                >
+                  {call.input}
+                </span>
+                <span
+                  className="shrink-0 font-mono tabular-nums"
+                  style={{
+                    color: "var(--vscode-tab-inactive-foreground)",
+                    opacity: 0.3,
+                    fontSize: "10px",
                   }}
                 >
                   {call.duration}ms
                 </span>
-              </button>
-
-              {expandedCalls.has(call.id) && (
-                <div className="ml-5 mt-1">
-                  <pre
-                    className="overflow-x-auto rounded-md px-2.5 py-2 text-[11px] leading-relaxed"
-                    style={{
-                      backgroundColor: "var(--vscode-editor-background)",
-                      color: "var(--vscode-tab-inactive-foreground)",
-                      fontFamily: "'SF Mono', Menlo, monospace",
-                      border: "1px solid var(--vscode-sidebar-section-header-border, rgba(255,255,255,0.06))",
-                    }}
-                  >
-                    {call.input}
-                    {call.output && (
-                      <>
-                        {"\n"}
-                        <span style={{ color: "#4ec994" }}>{"→ "}</span>
-                        {call.output}
-                      </>
-                    )}
-                  </pre>
-                </div>
-              )}
-            </div>
-          ))}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

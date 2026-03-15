@@ -148,11 +148,11 @@ function AgentMessage({ message }: { message: AgentMsg }) {
     <div className="px-5 py-3">
       {/* Agent identity row */}
       <div
-        className="mb-2 flex items-center gap-2 text-[11px]"
+        className="mb-2.5 flex items-center gap-2 text-[11px]"
         style={{ color: "var(--vscode-tab-inactive-foreground)" }}
       >
         <span
-          className="flex h-[20px] w-[20px] items-center justify-center rounded-md text-[10px] font-bold"
+          className="flex h-[18px] w-[18px] items-center justify-center rounded text-[9px] font-bold"
           style={{
             background: "linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)",
             color: "#fff",
@@ -160,12 +160,17 @@ function AgentMessage({ message }: { message: AgentMsg }) {
         >
           O
         </span>
-        <span className="font-medium" style={{ color: "var(--vscode-sidebar-foreground)" }}>Operator</span>
+        <span
+          className="text-[12px] font-semibold"
+          style={{ color: "var(--vscode-sidebar-foreground)" }}
+        >
+          Operator
+        </span>
         {message.timestamp && (
-          <span className="opacity-60">{message.timestamp}</span>
+          <span style={{ opacity: 0.45 }}>{message.timestamp}</span>
         )}
         {message.duration && (
-          <span className="opacity-60">{(message.duration / 1000).toFixed(0)}s</span>
+          <span style={{ opacity: 0.4 }}>· {(message.duration / 1000).toFixed(0)}s</span>
         )}
       </div>
 
@@ -179,7 +184,7 @@ function AgentMessage({ message }: { message: AgentMsg }) {
 
       {/* Message body */}
       <div
-        className="text-[13px] leading-[1.6]"
+        className="text-[13px] leading-[1.65]"
         style={{ color: "var(--vscode-editor-foreground)", whiteSpace: "pre-wrap" }}
       >
         {message.content}
@@ -208,7 +213,7 @@ export function MessageList({ workspaceId: _workspaceId }: MessageListProps) {
 
   return (
     <div className="vscode-scrollable h-full overflow-y-auto">
-      <div className="mx-auto max-w-[720px] pb-4 pt-3">
+      <div className="mx-auto max-w-[720px] pb-6 pt-4">
         {MOCK_MESSAGES.map((msg, i) => (
           <div key={msg.id}>
             {msg.role === "user" ? (
@@ -222,11 +227,14 @@ export function MessageList({ workspaceId: _workspaceId }: MessageListProps) {
                 <MessageActions content={msg.content} />
               </div>
             )}
-            {/* Separator between message pairs */}
+            {/* Subtle hairline between conversation turns */}
             {i < MOCK_MESSAGES.length - 1 && MOCK_MESSAGES[i + 1].role === "user" && (
               <div
-                className="mx-5 my-1"
-                style={{ borderTop: "1px solid var(--vscode-panel-border)", opacity: 0.4 }}
+                className="mx-5 my-2"
+                style={{
+                  borderTop: "1px solid var(--vscode-panel-border)",
+                  opacity: 0.25,
+                }}
               />
             )}
           </div>

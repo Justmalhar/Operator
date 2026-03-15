@@ -65,7 +65,7 @@ const TreeNode = memo(function TreeNode({
         <button
           type="button"
           onClick={() => setExpanded((e) => !e)}
-          className="vscode-list-item flex h-[22px] w-full items-center gap-1.5 text-left text-[13px] transition-colors duration-75"
+          className="vscode-list-item flex h-[32px] w-full items-center gap-2 text-left text-[13px] transition-colors duration-75"
           style={{ paddingLeft: `${indent}px` }}
         >
           <ChevronRight
@@ -76,7 +76,14 @@ const TreeNode = memo(function TreeNode({
             style={{ color: "var(--vscode-list-tree-indent-guide-stroke)", opacity: 0.6 }}
           />
           <FileIcon filename={node.name} isDir isOpen={expanded} size={16} />
-          <span className="truncate font-medium" style={{ color: "var(--vscode-sidebar-foreground)" }}>
+          <span
+            className="truncate font-medium"
+            style={{
+              color: "var(--vscode-sidebar-foreground)",
+              fontFamily: "'SF Mono', Menlo, Monaco, 'Cascadia Code', monospace",
+              fontSize: "13px",
+            }}
+          >
             {node.name}
           </span>
         </button>
@@ -112,12 +119,12 @@ const TreeNode = memo(function TreeNode({
         onOpenFile?.(node.name, `src/${node.name}`);
       }}
       className={cn(
-        "vscode-list-item flex h-[22px] w-full items-center gap-1.5 text-left text-[13px] transition-colors duration-75",
+        "vscode-list-item flex h-[32px] w-full items-center gap-2 text-left text-[13px] transition-colors duration-75",
         isSelected && "selected",
       )}
       style={{ paddingLeft: `${indent + 16}px` }}
     >
-      <FileIcon filename={node.name} size={14} />
+      <FileIcon filename={node.name} size={15} />
       <span
         className="min-w-0 flex-1 truncate"
         style={{
@@ -126,17 +133,19 @@ const TreeNode = memo(function TreeNode({
             : node.added != null
               ? "#4ec994"
               : "var(--vscode-sidebar-foreground)",
+          fontFamily: "'SF Mono', Menlo, Monaco, 'Cascadia Code', monospace",
+          fontSize: "13px",
         }}
       >
         {node.name}
       </span>
       {node.added != null && (
-        <span className="mr-1 shrink-0 text-[10px] font-mono font-medium" style={{ color: "#4ec994" }}>
+        <span className="mr-2 shrink-0 text-[11px] font-mono font-medium" style={{ color: "#4ec994" }}>
           +{node.added}
         </span>
       )}
       {node.modified && (
-        <span className="mr-1 shrink-0 text-[10px] font-mono font-medium" style={{ color: "#e2c08d" }}>
+        <span className="mr-2 shrink-0 text-[11px] font-mono font-medium" style={{ color: "#e2c08d" }}>
           M
         </span>
       )}

@@ -72,7 +72,7 @@ function App() {
         </div>
 
         {showRightPanel && (
-          <div className="flex w-[260px] shrink-0 flex-col">
+          <div className="flex w-[420px] shrink-0 flex-col">
             <div className="min-h-0 flex-1">
               <RightPanel
                 onOpenFile={(filename, filePath) =>
@@ -80,7 +80,7 @@ function App() {
                 }
               />
             </div>
-            <div className="h-[220px] shrink-0">
+            <div className="h-[260px] shrink-0">
               <BottomPanel />
             </div>
           </div>

@@ -10,11 +10,11 @@ export function UserMessage({ text, timestamp }: UserMessageProps) {
     <div className="px-5 py-3">
       {/* User identity row */}
       <div
-        className="mb-2 flex items-center gap-2 text-[11px]"
+        className="mb-2.5 flex items-center gap-2 text-[11px]"
         style={{ color: "var(--vscode-tab-inactive-foreground)" }}
       >
         <span
-          className="flex h-[20px] w-[20px] items-center justify-center rounded-md text-[10px] font-bold"
+          className="flex h-[18px] w-[18px] items-center justify-center rounded"
           style={{
             backgroundColor: "var(--vscode-button-background)",
             color: "var(--vscode-button-foreground, #fff)",
@@ -22,15 +22,20 @@ export function UserMessage({ text, timestamp }: UserMessageProps) {
         >
           <User className="h-3 w-3" />
         </span>
-        <span className="font-medium" style={{ color: "var(--vscode-sidebar-foreground)" }}>You</span>
+        <span
+          className="text-[12px] font-semibold"
+          style={{ color: "var(--vscode-sidebar-foreground)" }}
+        >
+          You
+        </span>
         {timestamp && (
-          <span className="opacity-60">{timestamp}</span>
+          <span style={{ opacity: 0.45 }}>{timestamp}</span>
         )}
       </div>
 
       {/* Message body */}
       <div
-        className="text-[13px] leading-[1.6]"
+        className="text-[13px] leading-[1.65]"
         style={{ color: "var(--vscode-editor-foreground)", whiteSpace: "pre-wrap" }}
       >
         {text}

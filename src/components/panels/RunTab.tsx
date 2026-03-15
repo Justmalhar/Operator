@@ -27,13 +27,13 @@ export function RunTab() {
           return (
             <div
               key={script.id}
-              className="flex items-center gap-2 px-3 py-[5px]"
+              className="flex items-center gap-2.5 px-4 py-2"
             >
               {/* Run/Stop button */}
               <button
                 type="button"
                 onClick={() => setRunning(isRunning ? null : script.id)}
-                className="vscode-list-item flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded transition-colors duration-75"
+                className="vscode-list-item flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded transition-colors duration-75"
                 aria-label={isRunning ? "Stop" : "Run"}
               >
                 {isRunning ? (
@@ -71,7 +71,7 @@ export function RunTab() {
               {isRunning && (
                 <button
                   type="button"
-                  className="vscode-list-item flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded transition-colors duration-75"
+                  className="vscode-list-item flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded transition-colors duration-75"
                   aria-label="Restart"
                 >
                   <RotateCcw className="h-3 w-3" style={{ color: "var(--vscode-tab-inactive-foreground)" }} />
