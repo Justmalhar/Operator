@@ -1,5 +1,4 @@
 import { FileCode2, Folder } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 export interface FileSuggestion {
   id: string;
@@ -56,11 +55,11 @@ export function FileMentionOverlay({ query, onSelect, visible, activeIndex }: Fi
           key={f.id}
           type="button"
           onClick={() => onSelect(f)}
-          className={cn(
-            "flex w-full items-center gap-2 px-2.5 py-1.5 text-left text-[12px] transition-colors",
-            i === activeIndex ? "bg-white/10" : "hover:bg-white/5",
-          )}
-          style={{ color: "var(--vscode-editor-foreground)" }}
+          className="flex w-full items-center gap-2 px-2.5 py-1.5 text-left text-[12px] transition-colors theme-hover-bg"
+          style={{
+            color: "var(--vscode-editor-foreground)",
+            backgroundColor: i === activeIndex ? "var(--vscode-toolbar-hover-background)" : undefined,
+          }}
         >
           {f.type === "folder" ? (
             <Folder className="h-3.5 w-3.5 shrink-0 opacity-50" />

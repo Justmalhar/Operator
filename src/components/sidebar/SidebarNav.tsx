@@ -143,7 +143,7 @@ function NavButton({
           <motion.span
             layoutId="nav-glow"
             className="absolute inset-0 rounded-lg"
-            style={{ backgroundColor: "rgba(255,255,255,0.04)" }}
+            style={{ backgroundColor: "var(--vscode-toolbar-hover-background)" }}
             transition={springs.smooth}
           />
         )}

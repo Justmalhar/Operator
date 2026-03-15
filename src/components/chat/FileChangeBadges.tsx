@@ -21,7 +21,7 @@ export function FileChangeBadges({ changes }: FileChangeBadgesProps) {
           <button
             key={change.filename}
             type="button"
-            className="flex items-center gap-1.5 rounded-md px-2 py-[3px] text-[11px] font-medium transition-colors duration-75 hover:bg-white/5"
+            className="flex items-center gap-1.5 rounded-md px-2 py-[3px] text-[11px] font-medium transition-colors duration-75 theme-hover-bg"
             style={{
               backgroundColor: "rgba(255, 255, 255, 0.04)",
               border: "1px solid var(--vscode-sidebar-section-header-border, rgba(255,255,255,0.06))",
@@ -43,7 +43,7 @@ export function FileChangeBadges({ changes }: FileChangeBadgesProps) {
 
       <button
         type="button"
-        className="flex items-center gap-1 rounded-md px-2 py-[3px] text-[11px] font-medium transition-colors duration-75 hover:bg-white/5"
+        className="flex items-center gap-1 rounded-md px-2 py-[3px] text-[11px] font-medium transition-colors duration-75 theme-hover-bg"
         style={{
           color: "var(--vscode-focus-border, #007fd4)",
           opacity: 0.8,

@@ -23,20 +23,20 @@ export function AttachmentRow({ attachments, onRemove }: AttachmentRowProps) {
           key={att.id}
           className="group relative flex items-center gap-2.5 rounded-lg"
           style={{
-            backgroundColor: "rgba(255,255,255,0.05)",
-            border: "1px solid rgba(255,255,255,0.08)",
+            backgroundColor: "var(--vscode-toolbar-hover-background)",
+            border: "1px solid var(--vscode-panel-border)",
             padding: "8px 10px",
           }}
         >
           {/* Thumbnail */}
           <div
             className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-md"
-            style={{ backgroundColor: "rgba(255,255,255,0.04)" }}
+            style={{ backgroundColor: "var(--vscode-toolbar-hover-background)" }}
           >
             {att.type === "image" && att.url ? (
               <img src={att.url} alt={att.name} className="h-full w-full object-cover" />
             ) : (
-              <File className="h-5 w-5" style={{ color: "rgba(255,255,255,0.25)" }} />
+              <File className="h-5 w-5" style={{ color: "var(--vscode-icon-foreground)", opacity: 0.5 }} />
             )}
           </div>
 
@@ -44,13 +44,13 @@ export function AttachmentRow({ attachments, onRemove }: AttachmentRowProps) {
           <div className="min-w-0">
             <div
               className="max-w-[140px] truncate text-[12px] font-medium"
-              style={{ color: "rgba(255,255,255,0.88)" }}
+              style={{ color: "var(--vscode-editor-foreground)" }}
             >
               {att.name}
             </div>
             <div
               className="mt-0.5 text-[10px] font-medium uppercase tracking-wider"
-              style={{ color: "rgba(255,255,255,0.3)" }}
+              style={{ color: "var(--vscode-input-placeholder-foreground)" }}
             >
               {att.type}
             </div>

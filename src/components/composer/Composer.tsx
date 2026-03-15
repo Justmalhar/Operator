@@ -60,9 +60,9 @@ function ThinkingPicker({
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[12px] font-medium transition-colors hover:bg-white/5"
+          className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[12px] font-medium transition-colors theme-hover-bg"
           style={{
-            color: isActive ? "var(--vscode-focus-border, #007fd4)" : "rgba(255,255,255,0.55)",
+            color: isActive ? "var(--vscode-focus-border, #007fd4)" : "var(--vscode-icon-foreground)",
           }}
         >
           <Brain className="h-3.5 w-3.5" />
@@ -74,21 +74,21 @@ function ThinkingPicker({
         align="start"
         className="min-w-[160px]"
         style={{
-          backgroundColor: "var(--vscode-dropdown-background, #252526)",
-          border: "1px solid var(--vscode-dropdown-border, rgba(255,255,255,0.1))",
-          color: "var(--vscode-dropdown-foreground, #cccccc)",
+          backgroundColor: "var(--vscode-dropdown-background)",
+          border: "1px solid var(--vscode-dropdown-border, var(--vscode-panel-border))",
+          color: "var(--vscode-dropdown-foreground)",
         }}
       >
         <DropdownMenuLabel className="text-[10px] font-semibold uppercase tracking-wider opacity-50">
           Extended Thinking
         </DropdownMenuLabel>
-        <DropdownMenuSeparator style={{ backgroundColor: "rgba(255,255,255,0.06)" }} />
+        <DropdownMenuSeparator style={{ backgroundColor: "var(--vscode-separator-color)" }} />
         {OPTIONS.map((opt) => (
           <DropdownMenuItem
             key={opt.id}
             onClick={() => onChange(opt.id)}
             className="text-[12px]"
-            style={{ backgroundColor: value === opt.id ? "rgba(255,255,255,0.06)" : undefined }}
+            style={{ backgroundColor: value === opt.id ? "var(--vscode-toolbar-hover-background)" : undefined }}
           >
             {opt.label}
           </DropdownMenuItem>
@@ -180,14 +180,14 @@ export function Composer({ onSend, disabled, className, isTerminalOpen, onToggle
         <div
           className="absolute bottom-full left-4 mb-1 w-72 overflow-hidden rounded-xl shadow-xl"
           style={{
-            backgroundColor: "#1e1e1e",
-            border: "1px solid rgba(255,255,255,0.1)",
+            backgroundColor: "var(--vscode-editor-background)",
+            border: "1px solid var(--vscode-panel-border)",
             zIndex: 50,
           }}
         >
           <div
             className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wider"
-            style={{ color: "rgba(255,255,255,0.35)" }}
+            style={{ color: "var(--vscode-input-placeholder-foreground)" }}
           >
             Commands
           </div>
@@ -197,10 +197,12 @@ export function Composer({ onSend, disabled, className, isTerminalOpen, onToggle
               type="button"
               onClick={() => handleSlashSelect(cmd)}
               className={cn(
-                "flex w-full items-center gap-2.5 px-3 py-1.5 text-left text-[12px] transition-colors",
-                i === activeSlashIndex ? "bg-white/10" : "hover:bg-white/5",
+                "flex w-full items-center gap-2.5 px-3 py-1.5 text-left text-[12px] transition-colors theme-hover-bg",
               )}
-              style={{ color: "rgba(255,255,255,0.85)" }}
+              style={{
+                color: "var(--vscode-editor-foreground)",
+                backgroundColor: i === activeSlashIndex ? "var(--vscode-toolbar-hover-background)" : undefined,
+              }}
             >
               <Slash className="h-3 w-3 shrink-0 opacity-35" />
               <span className="font-medium">{cmd.name}</span>
@@ -224,8 +226,8 @@ export function Composer({ onSend, disabled, className, isTerminalOpen, onToggle
       <div
         className="overflow-hidden rounded-xl"
         style={{
-          backgroundColor: "#1c1c1c",
-          border: "1px solid rgba(255,255,255,0.08)",
+          backgroundColor: "var(--vscode-input-background)",
+          border: "1px solid var(--vscode-input-border, var(--vscode-panel-border))",
         }}
       >
         {/* Attachment previews inside card */}
@@ -252,8 +254,8 @@ export function Composer({ onSend, disabled, className, isTerminalOpen, onToggle
           <ThinkingPicker value={thinking} onChange={setThinking} />
           <button
             type="button"
-            className="flex h-7 w-7 items-center justify-center rounded-md transition-colors hover:bg-white/5"
-            style={{ color: "rgba(255,255,255,0.35)" }}
+            className="flex h-7 w-7 items-center justify-center rounded-md transition-colors theme-hover-bg"
+            style={{ color: "var(--vscode-icon-foreground)" }}
             title="Context map"
           >
             <Map className="h-3.5 w-3.5" />
@@ -263,9 +265,9 @@ export function Composer({ onSend, disabled, className, isTerminalOpen, onToggle
           <button
             type="button"
             onClick={onToggleTerminal}
-            className="flex h-7 w-7 items-center justify-center rounded-md transition-colors hover:bg-white/5"
+            className="flex h-7 w-7 items-center justify-center rounded-md transition-colors theme-hover-bg"
             style={{
-              color: isTerminalOpen ? "var(--vscode-focus-border, #007fd4)" : "rgba(255,255,255,0.35)",
+              color: isTerminalOpen ? "var(--vscode-focus-border, #007fd4)" : "var(--vscode-icon-foreground)",
               backgroundColor: isTerminalOpen ? "rgba(0,127,212,0.12)" : undefined,
             }}
             title={isTerminalOpen ? "Hide terminal (⌘`)" : "Show terminal (⌘`)"}
@@ -279,8 +281,8 @@ export function Composer({ onSend, disabled, className, isTerminalOpen, onToggle
           {/* Right group: stop, add, send */}
           <button
             type="button"
-            className="flex h-7 w-7 items-center justify-center rounded-md transition-colors hover:bg-white/5"
-            style={{ color: "rgba(255,255,255,0.25)" }}
+            className="flex h-7 w-7 items-center justify-center rounded-md transition-colors theme-hover-bg"
+            style={{ color: "var(--vscode-icon-foreground)", opacity: 0.5 }}
             title="Stop"
           >
             <Circle className="h-4 w-4" />
@@ -289,8 +291,8 @@ export function Composer({ onSend, disabled, className, isTerminalOpen, onToggle
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="flex h-7 w-7 items-center justify-center rounded-md transition-colors hover:bg-white/5"
-            style={{ color: "rgba(255,255,255,0.4)" }}
+            className="flex h-7 w-7 items-center justify-center rounded-md transition-colors theme-hover-bg"
+            style={{ color: "var(--vscode-icon-foreground)" }}
             title="Add attachment"
           >
             <Plus className="h-3.5 w-3.5" />
@@ -312,12 +314,12 @@ export function Composer({ onSend, disabled, className, isTerminalOpen, onToggle
               "ml-0.5 flex h-7 w-7 items-center justify-center rounded-full transition-all duration-150",
               canSend && !disabled
                 ? "cursor-pointer opacity-100 hover:brightness-110 active:scale-95"
-                : "cursor-not-allowed opacity-25",
+                : "cursor-not-allowed opacity-40",
             )}
             style={{
               backgroundColor:
-                canSend && !disabled ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.12)",
-              color: canSend && !disabled ? "#000" : "rgba(255,255,255,0.5)",
+                canSend && !disabled ? "var(--vscode-button-background)" : "var(--vscode-toolbar-hover-background)",
+              color: canSend && !disabled ? "var(--vscode-button-foreground)" : "var(--vscode-icon-foreground)",
             }}
             title="Send (⌘↵)"
           >

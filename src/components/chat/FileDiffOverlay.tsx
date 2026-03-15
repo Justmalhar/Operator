@@ -66,7 +66,7 @@ export function FileDiffOverlay({ file, onClose }: FileDiffOverlayProps) {
         <button
           type="button"
           onClick={onClose}
-          className="ml-auto flex h-6 w-6 items-center justify-center rounded transition-colors hover:bg-white/8"
+          className="ml-auto flex h-6 w-6 items-center justify-center rounded transition-colors theme-hover-bg"
           style={{ color: "var(--vscode-tab-inactive-foreground)" }}
           title="Close diff (Esc)"
         >

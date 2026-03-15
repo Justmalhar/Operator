@@ -87,7 +87,7 @@ export function ToolCallMessage({ toolCalls, duration }: ToolCallMessageProps) {
       <button
         type="button"
         onClick={() => setExpanded((e) => !e)}
-        className="flex w-full items-center gap-2 px-3 py-[5px] text-left transition-colors hover:bg-white/3"
+        className="flex w-full items-center gap-2 px-3 py-[5px] text-left transition-colors theme-hover-bg"
       >
         <ChevronRight
           className={cn(

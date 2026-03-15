@@ -44,7 +44,7 @@ export function ChangedFilesBar({ files, durationMs, onFileClick }: ChangedFiles
         )}
         <button
           type="button"
-          className="flex h-5 w-5 items-center justify-center rounded transition-colors hover:bg-white/6"
+          className="flex h-5 w-5 items-center justify-center rounded transition-colors theme-hover-bg"
           title="Undo last change"
           style={{ color: "inherit" }}
         >
@@ -52,7 +52,7 @@ export function ChangedFilesBar({ files, durationMs, onFileClick }: ChangedFiles
         </button>
         <button
           type="button"
-          className="flex h-5 w-5 items-center justify-center rounded transition-colors hover:bg-white/6"
+          className="flex h-5 w-5 items-center justify-center rounded transition-colors theme-hover-bg"
           title="Scroll to top"
           style={{ color: "inherit" }}
         >
@@ -76,7 +76,7 @@ export function ChangedFilesBar({ files, durationMs, onFileClick }: ChangedFiles
                 key={file.filename}
                 type="button"
                 onClick={() => onFileClick(file)}
-                className="flex shrink-0 items-center gap-1.5 rounded px-2 py-[3px] text-[11px] transition-colors hover:bg-white/6"
+                className="flex shrink-0 items-center gap-1.5 rounded px-2 py-[3px] text-[11px] transition-colors theme-hover-bg"
                 style={{
                   backgroundColor: "var(--vscode-sidebar-section-header-background, rgba(255,255,255,0.03))",
                   border: "1px solid var(--vscode-panel-border, rgba(255,255,255,0.07))",

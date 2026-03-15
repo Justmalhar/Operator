@@ -131,7 +131,7 @@ export function ChatTerminalPanel({ worktreePath }: ChatTerminalPanelProps) {
                     <span
                       className={cn(
                         "flex h-[16px] w-[16px] items-center justify-center rounded transition-all duration-75",
-                        "hover:bg-white/10",
+                        "theme-hover-bg",
                         !isActive && "opacity-0 group-hover:opacity-100",
                       )}
                       onClick={(e) => closeTerminal(t.id, e)}

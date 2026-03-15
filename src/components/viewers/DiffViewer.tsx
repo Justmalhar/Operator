@@ -83,11 +83,12 @@ export function DiffViewer({ filePath, originalContent, modifiedContent, classNa
   }, [filePath, modifiedContent, originalContent, sideBySide]);
 
   return (
-    <div className={cn("flex h-full min-h-0 flex-col bg-[#1e1e1e]", className)}>
-      <div className="flex items-center justify-between border-b border-white/8 bg-[#181818] px-4 py-2">
-        <div className="truncate font-mono text-xs text-[#8b8b8b]">{filePath}</div>
+    <div className={cn("flex h-full min-h-0 flex-col", className)} style={{ backgroundColor: "var(--vscode-editor-background)" }}>
+      <div className="flex items-center justify-between px-4 py-2" style={{ borderBottom: "1px solid var(--vscode-panel-border)", backgroundColor: "var(--vscode-sidebar-background)" }}>
+        <div className="truncate font-mono text-xs" style={{ color: "var(--vscode-icon-foreground)" }}>{filePath}</div>
         <Button
-          className="h-8 border-white/10 bg-white/5 text-xs text-[#d4d4d4] hover:bg-white/10"
+          className="h-8 text-xs theme-hover-bg"
+          style={{ border: "1px solid var(--vscode-panel-border)", backgroundColor: "var(--vscode-input-background)", color: "var(--vscode-editor-foreground)" }}
           size="sm"
           type="button"
           variant="outline"

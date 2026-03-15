@@ -210,7 +210,7 @@ export function SetupTab() {
                           onClick={() => runStep(step.id)}
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
-                          className="flex h-[22px] w-[22px] items-center justify-center rounded transition-colors duration-75 hover:bg-white/10"
+                          className="flex h-[22px] w-[22px] items-center justify-center rounded transition-colors duration-75 theme-hover-bg"
                           aria-label="Run step"
                           disabled={step.running}
                         >
@@ -230,7 +230,7 @@ export function SetupTab() {
                         <button
                           type="button"
                           onClick={() => deleteStep(step.id)}
-                          className="flex h-[22px] w-[22px] items-center justify-center rounded transition-colors duration-75 hover:bg-white/10"
+                          className="flex h-[22px] w-[22px] items-center justify-center rounded transition-colors duration-75 theme-hover-bg"
                           aria-label="Delete step"
                         >
                           <Trash2 className="h-2.5 w-2.5" style={{ color: "#f48771" }} />

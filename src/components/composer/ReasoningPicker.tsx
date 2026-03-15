@@ -38,7 +38,7 @@ export function ReasoningPicker({ value = "off", onChange }: ReasoningPickerProp
         <button
           type="button"
           className={cn(
-            "flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium transition-colors hover:bg-white/5",
+            "flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium transition-colors theme-hover-bg",
           )}
           style={{
             color: isActive ? "var(--vscode-focus-border, #007fd4)" : "var(--vscode-editor-foreground)",
@@ -62,14 +62,14 @@ export function ReasoningPicker({ value = "off", onChange }: ReasoningPickerProp
         <DropdownMenuLabel className="text-[10px] font-semibold uppercase tracking-wider opacity-50">
           Extended Thinking
         </DropdownMenuLabel>
-        <DropdownMenuSeparator style={{ backgroundColor: "rgba(255,255,255,0.06)" }} />
+        <DropdownMenuSeparator style={{ backgroundColor: "var(--vscode-separator-color)" }} />
         {OPTIONS.map((opt) => (
           <DropdownMenuItem
             key={opt.id}
             onClick={() => onChange?.(opt.id)}
             className="flex flex-col items-start gap-0.5 text-[12px]"
             style={{
-              backgroundColor: value === opt.id ? "rgba(255,255,255,0.06)" : undefined,
+              backgroundColor: value === opt.id ? "var(--vscode-toolbar-hover-background)" : undefined,
             }}
           >
             <span className="font-medium">{opt.label}</span>

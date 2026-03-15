@@ -143,7 +143,7 @@ export function WorkspaceHeader({ workspaceId, showRightPanel, onToggleRightPane
         >
           <button
             type="button"
-            className="flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium transition-colors duration-75 hover:bg-white/5"
+            className="flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium transition-colors duration-75 theme-hover-bg"
             style={{ color: "var(--vscode-tab-inactive-foreground)" }}
           >
             <GitPullRequest className="h-3 w-3 shrink-0" />
@@ -152,7 +152,7 @@ export function WorkspaceHeader({ workspaceId, showRightPanel, onToggleRightPane
           <div style={{ width: "1px", backgroundColor: "var(--vscode-sidebar-section-header-border, rgba(255,255,255,0.08))" }} />
           <button
             type="button"
-            className="flex items-center px-1.5 py-1 transition-colors duration-75 hover:bg-white/5"
+            className="flex items-center px-1.5 py-1 transition-colors duration-75 theme-hover-bg"
             style={{ color: "var(--vscode-tab-inactive-foreground)" }}
             title="PR options"
           >
@@ -169,7 +169,7 @@ export function WorkspaceHeader({ workspaceId, showRightPanel, onToggleRightPane
         >
           <button
             type="button"
-            className="flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium transition-colors duration-75 hover:bg-white/5"
+            className="flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium transition-colors duration-75 theme-hover-bg"
             style={{ color: "var(--vscode-tab-inactive-foreground)" }}
           >
             <Code2 className="h-3 w-3 shrink-0" />
@@ -178,7 +178,7 @@ export function WorkspaceHeader({ workspaceId, showRightPanel, onToggleRightPane
           <div style={{ width: "1px", backgroundColor: "var(--vscode-sidebar-section-header-border, rgba(255,255,255,0.08))" }} />
           <button
             type="button"
-            className="flex items-center px-1.5 py-1 transition-colors duration-75 hover:bg-white/5"
+            className="flex items-center px-1.5 py-1 transition-colors duration-75 theme-hover-bg"
             style={{ color: "var(--vscode-tab-inactive-foreground)" }}
             title="IDE options"
           >

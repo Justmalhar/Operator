@@ -178,7 +178,7 @@ export function WorkspaceList({ activeWorkspaceId, onWorkspaceSelect }: Workspac
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            whileHover={{ scale: 1.02, backgroundColor: "rgba(255,255,255,0.05)" }}
+            whileHover={{ scale: 1.02, backgroundColor: "var(--vscode-toolbar-hover-background)" }}
             whileTap={{ scale: 0.98 }}
             transition={springs.smooth}
             className="mx-3 mt-3 flex flex-col items-center gap-2 rounded-lg border border-dashed px-4 py-6 text-center"

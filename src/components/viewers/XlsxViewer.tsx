@@ -63,12 +63,11 @@ export function XlsxViewer({ filePath, filename, className }: BaseViewerProps) {
           return (
             <button
               key={sheetName}
-              className={cn(
-                "rounded-md border px-3 py-1 text-xs transition-colors",
-                isActive
-                  ? "border-[#007acc] bg-[#0e639c] text-white"
-                  : "border-white/10 bg-white/5 text-[#b0b0b0] hover:bg-white/10",
-              )}
+              className="rounded-md border px-3 py-1 text-xs transition-colors theme-hover-bg"
+              style={isActive
+                ? { borderColor: "#007acc", backgroundColor: "#0e639c", color: "#ffffff" }
+                : { borderColor: "var(--vscode-panel-border)", color: "var(--vscode-input-foreground)" }
+              }
               type="button"
               onClick={() => setActiveSheet(sheetName)}
             >

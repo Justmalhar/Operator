@@ -49,10 +49,10 @@ export function ModelPicker({ value = "claude-sonnet-4-6", onChange }: ModelPick
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[12px] font-medium transition-colors hover:bg-white/5"
-          style={{ color: "rgba(255,255,255,0.65)" }}
+          className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[12px] font-medium transition-colors theme-hover-bg"
+          style={{ color: "var(--vscode-input-foreground)" }}
         >
-          <Asterisk className="h-3.5 w-3.5" style={{ color: "rgba(255,255,255,0.5)" }} />
+          <Asterisk className="h-3.5 w-3.5" style={{ color: "var(--vscode-icon-foreground)" }} />
           {SHORT_LABEL[value]}
           <ChevronDown className="h-2.5 w-2.5 opacity-40" />
         </button>
@@ -61,29 +61,29 @@ export function ModelPicker({ value = "claude-sonnet-4-6", onChange }: ModelPick
         align="start"
         className="min-w-[180px]"
         style={{
-          backgroundColor: "var(--vscode-dropdown-background, #252526)",
-          border: "1px solid var(--vscode-dropdown-border, rgba(255,255,255,0.1))",
-          color: "var(--vscode-dropdown-foreground, #cccccc)",
+          backgroundColor: "var(--vscode-dropdown-background)",
+          border: "1px solid var(--vscode-dropdown-border, var(--vscode-panel-border))",
+          color: "var(--vscode-dropdown-foreground)",
         }}
       >
         <DropdownMenuLabel className="text-[10px] font-semibold uppercase tracking-wider opacity-50">
           Model
         </DropdownMenuLabel>
-        <DropdownMenuSeparator style={{ backgroundColor: "rgba(255,255,255,0.06)" }} />
+        <DropdownMenuSeparator style={{ backgroundColor: "var(--vscode-separator-color)" }} />
         {MODELS.map((m) => (
           <DropdownMenuItem
             key={m.id}
             onClick={() => onChange?.(m.id)}
             className="flex items-center justify-between gap-3 text-[12px]"
             style={{
-              backgroundColor: value === m.id ? "rgba(255,255,255,0.06)" : undefined,
+              backgroundColor: value === m.id ? "var(--vscode-toolbar-hover-background)" : undefined,
             }}
           >
             <span>{m.label}</span>
             {m.badge && (
               <span
                 className="rounded px-1 py-0.5 text-[10px]"
-                style={{ backgroundColor: "rgba(255,255,255,0.08)", opacity: 0.7 }}
+                style={{ backgroundColor: "var(--vscode-toolbar-hover-background)", opacity: 0.85 }}
               >
                 {m.badge}
               </span>
