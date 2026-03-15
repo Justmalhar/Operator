@@ -3,7 +3,6 @@ import { open } from "@tauri-apps/plugin-dialog";
 import { invoke } from "@tauri-apps/api/core";
 import { Loader2 } from "lucide-react";
 import { useWorkspaceStore } from "@/store/workspaceStore";
-import type { Repo } from "@/types/workspace";
 
 interface LocalFolderStepProps {
   onSuccess: (workspaceId: string) => void;
@@ -15,7 +14,7 @@ function slugify(s: string): string {
 }
 
 export function LocalFolderStep({ onSuccess, onBack }: LocalFolderStepProps) {
-  const addRepo = useWorkspaceStore((s) => s.addRepo);
+  const { addRepo, createWorkspace } = useWorkspaceStore();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -36,7 +35,7 @@ export function LocalFolderStep({ onSuccess, onBack }: LocalFolderStepProps) {
         const branchName = slugify(cityName);
 
         // Check if already registered
-        const existing = await invoke<{ id: string; local_path: string } | null>(
+        const existing = await invoke<{ id: string } | null>(
           "find_repository_by_path",
           { path: selectedPath },
         );
@@ -45,43 +44,24 @@ export function LocalFolderStep({ onSuccess, onBack }: LocalFolderStepProps) {
         if (existing) {
           repoId = existing.id;
         } else {
-          const repo = await invoke<{ id: string; name: string; local_path: string }>(
-            "add_repository",
-            {
-              input: {
-                name,
-                full_name: name,
-                remote_url: "",
-                local_path: selectedPath,
-                platform: "local",
-                default_branch: "main",
-              },
-            },
-          );
+          const repo = await addRepo({
+            name,
+            full_name: name,
+            remote_url: "",
+            local_path: selectedPath,
+            platform: "github",
+            default_branch: "main",
+          });
           repoId = repo.id;
-
-          const newRepo: Repo = {
-            id: repo.id,
-            name: repo.name,
-            avatarLetter: repo.name.charAt(0).toUpperCase(),
-            workspaces: [],
-            isExpanded: true,
-          };
-          addRepo(newRepo);
         }
 
-        const ws = await invoke<{ id: string; city_name: string; branch_name: string }>(
-          "create_workspace",
-          {
-            repositoryId: repoId,
-            repoPath: selectedPath,
-            cityName,
-            branchName,
-            baseBranch: "main",
-            agentBackend: null,
-            model: null,
-          },
-        );
+        const ws = await createWorkspace({
+          repositoryId: repoId,
+          repoPath: selectedPath,
+          cityName,
+          branchName,
+          baseBranch: "main",
+        });
 
         onSuccess(ws.id);
       } catch (err) {

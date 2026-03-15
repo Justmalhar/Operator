@@ -6,7 +6,6 @@ import { cn } from "@/lib/utils";
 import { useWorkspaceStore } from "@/store/workspaceStore";
 import { useSettingsStore, type CustomTemplate } from "@/store/settingsStore";
 import { HARDCODED_TEMPLATES, type HardcodedTemplate } from "@/data/templates";
-import type { Repo } from "@/types/workspace";
 
 interface TemplateStepProps {
   onSuccess: (workspaceId: string) => void;
@@ -24,7 +23,7 @@ function slugify(s: string): string {
 }
 
 export function TemplateStep({ onSuccess }: TemplateStepProps) {
-  const addRepo = useWorkspaceStore((s) => s.addRepo);
+  const { addRepo, createWorkspace } = useWorkspaceStore();
   const { customTemplates, isLoaded, addCustomTemplate } = useSettingsStore();
 
   const [view, setView] = useState<InnerView>("grid");
@@ -85,37 +84,23 @@ export function TemplateStep({ onSuccess }: TemplateStepProps) {
           destinationPath,
         });
       }
-      // For all templates (hardcoded or custom), ensure git is initialized
       await invoke("init_git_repo", { path: destinationPath });
 
-      const repo = await invoke<{ id: string; name: string }>("add_repository", {
-        input: {
-          name: workspaceName,
-          full_name: workspaceName,
-          remote_url: "",
-          local_path: destinationPath,
-          platform: "local",
-          default_branch: "main",
-        },
+      const repo = await addRepo({
+        name: workspaceName,
+        full_name: workspaceName,
+        remote_url: "",
+        local_path: destinationPath,
+        platform: "github",
+        default_branch: "main",
       });
 
-      const newRepo: Repo = {
-        id: repo.id,
-        name: repo.name,
-        avatarLetter: repo.name.charAt(0).toUpperCase(),
-        workspaces: [],
-        isExpanded: true,
-      };
-      addRepo(newRepo);
-
-      const ws = await invoke<{ id: string }>("create_workspace", {
+      const ws = await createWorkspace({
         repositoryId: repo.id,
         repoPath: destinationPath,
         cityName: workspaceName,
         branchName: slugify(workspaceName),
         baseBranch: "main",
-        agentBackend: null,
-        model: null,
       });
 
       onSuccess(ws.id);

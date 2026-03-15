@@ -1,19 +1,12 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { MessageList } from "./MessageList";
 import { Composer } from "@/components/composer/Composer";
 import { ChangedFilesBar, type ChangedFile } from "./ChangedFilesBar";
 import { FileDiffOverlay } from "./FileDiffOverlay";
-
-// Mock session-level changed files.
-// In production these come from `git status --short` via a Tauri command.
-const MOCK_SESSION_CHANGES: ChangedFile[] = [
-  { filename: "src/components/chat/MessageList.tsx", added: 18, removed: 19 },
-  { filename: "src/components/chat/ToolCallMessage.tsx", added: 114, removed: 72 },
-  { filename: "src/components/chat/UserMessage.tsx", added: 10, removed: 5 },
-  { filename: "src/components/composer/Composer.tsx", added: 19, removed: 3 },
-];
-
-const SESSION_DURATION_MS = 3 * 60 * 1000 + 44 * 1000; // 3m 44s
+import { useWorkspaceStore } from "@/store/workspaceStore";
+import { fadeInDown, fadeInScale, springs } from "@/lib/animations";
+import * as api from "@/lib/tauri";
 
 interface ChatPanelProps {
   workspaceId?: string;
@@ -21,6 +14,37 @@ interface ChatPanelProps {
 
 export function ChatPanel({ workspaceId }: ChatPanelProps) {
   const [diffFile, setDiffFile] = useState<ChangedFile | null>(null);
+  const [sessionChanges, setSessionChanges] = useState<ChangedFile[]>([]);
+  const [sessionStart] = useState(() => Date.now());
+
+  const getActiveWorkspace = useWorkspaceStore((s) => s.getActiveWorkspace);
+  const activeWs = getActiveWorkspace();
+
+  // Fetch real git diff for the workspace
+  const fetchSessionChanges = useCallback(async () => {
+    if (!activeWs?.worktree_path) {
+      setSessionChanges([]);
+      return;
+    }
+    try {
+      const diff = await api.getGitDiff(activeWs.worktree_path, false);
+      setSessionChanges(
+        diff.files.map((f) => ({
+          filename: f.path,
+          added: f.insertions,
+          removed: f.deletions,
+        })),
+      );
+    } catch {
+      setSessionChanges([]);
+    }
+  }, [activeWs?.worktree_path]);
+
+  useEffect(() => {
+    fetchSessionChanges();
+    const interval = setInterval(fetchSessionChanges, 10_000);
+    return () => clearInterval(interval);
+  }, [fetchSessionChanges]);
 
   // Close diff overlay on Escape
   useEffect(() => {
@@ -32,19 +56,25 @@ export function ChatPanel({ workspaceId }: ChatPanelProps) {
     return () => window.removeEventListener("keydown", onKey);
   }, [diffFile]);
 
+  const durationMs = Date.now() - sessionStart;
+
   return (
     <div
       className="relative flex h-full flex-col"
-      style={{ backgroundColor: "#0e0e0e" }}
+      style={{ backgroundColor: "var(--vscode-sidebar-background)" }}
     >
       {/* Changed files bar at the very top (above messages) */}
-      {MOCK_SESSION_CHANGES.length > 0 && (
-        <ChangedFilesBar
-          files={MOCK_SESSION_CHANGES}
-          durationMs={SESSION_DURATION_MS}
-          onFileClick={setDiffFile}
-        />
-      )}
+      <AnimatePresence>
+        {sessionChanges.length > 0 && (
+          <motion.div {...fadeInDown} key="changed-files-bar">
+            <ChangedFilesBar
+              files={sessionChanges}
+              durationMs={durationMs}
+              onFileClick={setDiffFile}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Message list */}
       <div className="min-h-0 flex-1">
@@ -52,12 +82,22 @@ export function ChatPanel({ workspaceId }: ChatPanelProps) {
       </div>
 
       {/* Composer at bottom */}
-      <Composer />
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ ...springs.smooth, delay: 0.15 }}
+      >
+        <Composer />
+      </motion.div>
 
       {/* Diff overlay — floats above everything */}
-      {diffFile && (
-        <FileDiffOverlay file={diffFile} onClose={() => setDiffFile(null)} />
-      )}
+      <AnimatePresence>
+        {diffFile && (
+          <motion.div {...fadeInScale} key="diff-overlay">
+            <FileDiffOverlay file={diffFile} onClose={() => setDiffFile(null)} />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -172,7 +172,7 @@ export function Composer({ onSend, disabled, className }: ComposerProps) {
   );
 
   return (
-    <div className={cn("relative px-4 pb-4 pt-1", className)}>
+    <div className={cn("relative px-2 pb-3 pt-1 sm:px-4 sm:pb-4", className)}>
       {/* Slash command overlay */}
       {showSlashMenu && filteredSlashCmds.length > 0 && (
         <div

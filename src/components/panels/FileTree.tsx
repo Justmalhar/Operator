@@ -1,81 +1,89 @@
-import { memo, useState } from "react";
-import { ChevronRight } from "lucide-react";
+import { memo, useCallback, useEffect, useState } from "react";
+import { ChevronRight, Loader2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { FileIcon } from "@/components/shared/FileIcon";
+import { springs } from "@/lib/animations";
+import * as api from "@/lib/tauri";
+import type { FileEntry } from "@/types/file";
 
-interface FileNode {
-  name: string;
-  type: "file" | "dir";
-  children?: FileNode[];
-  added?: number;
-  modified?: boolean;
+interface TreeNodeData {
+  entry: FileEntry;
+  children?: TreeNodeData[];
+  loaded: boolean;
 }
 
-const MOCK_TREE: FileNode[] = [
-  {
-    name: "src",
-    type: "dir",
-    children: [
-      {
-        name: "components",
-        type: "dir",
-        children: [
-          { name: "ChatPanel.tsx", type: "file", added: 3 },
-          { name: "Composer.tsx", type: "file", modified: true },
-          { name: "RightPanel.tsx", type: "file", added: 1 },
-        ],
-      },
-      { name: "App.tsx", type: "file", modified: true },
-      { name: "main.tsx", type: "file" },
-    ],
-  },
-  {
-    name: "assets",
-    type: "dir",
-    children: [{ name: "react.svg", type: "file" }],
-  },
-  { name: "CLAUDE.md", type: "file", added: 12 },
-  { name: "operator.json", type: "file" },
-];
+function buildNodes(entries: FileEntry[]): TreeNodeData[] {
+  return entries.map((entry) => ({
+    entry,
+    children: entry.is_dir ? undefined : undefined,
+    loaded: !entry.is_dir,
+  }));
+}
 
 interface TreeNodeProps {
-  node: FileNode;
-  depth?: number;
+  node: TreeNodeData;
+  depth: number;
   selectedFile: string | null;
-  onSelectFile: (name: string) => void;
+  onSelectFile: (path: string) => void;
   onOpenFile?: (filename: string, filePath: string) => void;
+  onLoadChildren: (path: string) => Promise<TreeNodeData[]>;
 }
 
-// Memoized so that selecting a file only re-renders the two nodes whose
-// isSelected state actually changed (was selected → deselected, and vice versa),
-// rather than the entire tree.
 const TreeNode = memo(function TreeNode({
   node,
-  depth = 0,
+  depth,
   selectedFile,
   onSelectFile,
   onOpenFile,
+  onLoadChildren,
 }: TreeNodeProps) {
-  const [expanded, setExpanded] = useState(depth < 2);
+  const [expanded, setExpanded] = useState(depth < 1);
+  const [children, setChildren] = useState<TreeNodeData[] | undefined>(node.children);
+  const [loading, setLoading] = useState(false);
   const indent = 16 + depth * 16;
 
-  if (node.type === "dir") {
+  const handleToggle = useCallback(async () => {
+    if (!expanded && !children) {
+      setLoading(true);
+      try {
+        const loaded = await onLoadChildren(node.entry.path);
+        setChildren(loaded);
+      } catch {
+        setChildren([]);
+      }
+      setLoading(false);
+    }
+    setExpanded((e) => !e);
+  }, [expanded, children, node.entry.path, onLoadChildren]);
+
+  if (node.entry.is_dir) {
     return (
       <div>
         <button
           type="button"
-          onClick={() => setExpanded((e) => !e)}
+          onClick={handleToggle}
           className="vscode-list-item flex h-[32px] w-full items-center gap-2 text-left text-[13px] transition-colors duration-75"
           style={{ paddingLeft: `${indent}px` }}
         >
-          <ChevronRight
-            className={cn(
-              "h-3 w-3 shrink-0 transition-transform duration-100",
-              expanded && "rotate-90",
-            )}
-            style={{ color: "var(--vscode-list-tree-indent-guide-stroke)", opacity: 0.6 }}
-          />
-          <FileIcon filename={node.name} isDir isOpen={expanded} size={16} />
+          {loading ? (
+            <Loader2
+              className="h-3 w-3 shrink-0 animate-spin"
+              style={{ color: "var(--vscode-list-tree-indent-guide-stroke)", opacity: 0.6 }}
+            />
+          ) : (
+            <motion.span
+              animate={{ rotate: expanded ? 90 : 0 }}
+              transition={springs.snappy}
+              className="flex shrink-0"
+            >
+              <ChevronRight
+                className="h-3 w-3"
+                style={{ color: "var(--vscode-list-tree-indent-guide-stroke)", opacity: 0.6 }}
+              />
+            </motion.span>
+          )}
+          <FileIcon filename={node.entry.name} isDir isOpen={expanded} size={16} />
           <span
             className="truncate font-medium"
             style={{
@@ -84,93 +92,160 @@ const TreeNode = memo(function TreeNode({
               fontSize: "13px",
             }}
           >
-            {node.name}
+            {node.entry.name}
           </span>
         </button>
-        {expanded && (
-          <div className="relative">
-            <span
-              className="tree-indent-guide"
-              style={{ left: `${indent + 7}px` }}
-            />
-            {node.children?.map((child) => (
-              <TreeNode
-                key={child.name}
-                node={child}
-                depth={depth + 1}
-                selectedFile={selectedFile}
-                onSelectFile={onSelectFile}
-                onOpenFile={onOpenFile}
+        <AnimatePresence>
+          {expanded && children && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.15, ease: "easeInOut" }}
+              className="relative overflow-hidden"
+            >
+              <span
+                className="tree-indent-guide"
+                style={{ left: `${indent + 7}px` }}
               />
-            ))}
-          </div>
-        )}
+              {children.map((child, i) => (
+                <motion.div
+                  key={child.entry.path}
+                  initial={{ opacity: 0, x: -4 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.02, duration: 0.12 }}
+                >
+                  <TreeNode
+                    node={child}
+                    depth={depth + 1}
+                    selectedFile={selectedFile}
+                    onSelectFile={onSelectFile}
+                    onOpenFile={onOpenFile}
+                    onLoadChildren={onLoadChildren}
+                  />
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     );
   }
 
-  const isSelected = selectedFile === node.name;
+  const isSelected = selectedFile === node.entry.path;
 
   return (
-    <button
+    <motion.button
       type="button"
       onClick={() => {
-        onSelectFile(node.name);
-        onOpenFile?.(node.name, `src/${node.name}`);
+        onSelectFile(node.entry.path);
+        onOpenFile?.(node.entry.name, node.entry.path);
       }}
+      whileHover={{ x: 2 }}
+      whileTap={{ scale: 0.98 }}
+      transition={springs.snappy}
       className={cn(
-        "vscode-list-item flex h-[32px] w-full items-center gap-2 text-left text-[13px] transition-colors duration-75",
+        "vscode-list-item flex h-[32px] w-full items-center gap-2 text-left text-[13px]",
         isSelected && "selected",
       )}
       style={{ paddingLeft: `${indent + 16}px` }}
     >
-      <FileIcon filename={node.name} size={15} />
+      <FileIcon filename={node.entry.name} size={15} />
       <span
         className="min-w-0 flex-1 truncate"
         style={{
-          color: node.modified
-            ? "#e2c08d"
-            : node.added != null
-              ? "#4ec994"
-              : "var(--vscode-sidebar-foreground)",
+          color: "var(--vscode-sidebar-foreground)",
           fontFamily: "'SF Mono', Menlo, Monaco, 'Cascadia Code', monospace",
           fontSize: "13px",
         }}
       >
-        {node.name}
+        {node.entry.name}
       </span>
-      {node.added != null && (
-        <span className="mr-2 shrink-0 text-[11px] font-mono font-medium" style={{ color: "#4ec994" }}>
-          +{node.added}
-        </span>
-      )}
-      {node.modified && (
-        <span className="mr-2 shrink-0 text-[11px] font-mono font-medium" style={{ color: "#e2c08d" }}>
-          M
-        </span>
-      )}
-    </button>
+    </motion.button>
   );
 });
 
 interface FileTreeProps {
+  worktreePath?: string;
   onOpenFile?: (filename: string, filePath: string) => void;
 }
 
-export function FileTree({ onOpenFile }: FileTreeProps) {
+export function FileTree({ worktreePath, onOpenFile }: FileTreeProps) {
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  const [rootNodes, setRootNodes] = useState<TreeNodeData[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!worktreePath) {
+      setRootNodes([]);
+      return;
+    }
+
+    let cancelled = false;
+    setLoading(true);
+
+    api.listDirectory(worktreePath).then((entries) => {
+      if (!cancelled) {
+        setRootNodes(buildNodes(entries));
+        setLoading(false);
+      }
+    }).catch(() => {
+      if (!cancelled) setLoading(false);
+    });
+
+    return () => { cancelled = true; };
+  }, [worktreePath]);
+
+  const handleLoadChildren = useCallback(async (dirPath: string): Promise<TreeNodeData[]> => {
+    const entries = await api.listDirectory(dirPath);
+    return buildNodes(entries);
+  }, []);
+
+  if (!worktreePath) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="flex h-full items-center justify-center px-4 text-[12px]"
+        style={{ color: "var(--vscode-tab-inactive-foreground)" }}
+      >
+        Select a workspace to browse files
+      </motion.div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="flex h-full flex-col items-center justify-center gap-2 px-4 text-[12px]"
+        style={{ color: "var(--vscode-tab-inactive-foreground)" }}
+      >
+        <Loader2 className="h-4 w-4 animate-spin" />
+        Loading files...
+      </motion.div>
+    );
+  }
 
   return (
-    <div className="vscode-scrollable h-full overflow-y-auto py-0.5">
-      {MOCK_TREE.map((node) => (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.15 }}
+      className="vscode-scrollable h-full overflow-y-auto py-0.5"
+    >
+      {rootNodes.map((node) => (
         <TreeNode
-          key={node.name}
+          key={node.entry.path}
           node={node}
+          depth={0}
           selectedFile={selectedFile}
           onSelectFile={setSelectedFile}
           onOpenFile={onOpenFile}
+          onLoadChildren={handleLoadChildren}
         />
       ))}
-    </div>
+    </motion.div>
   );
 }

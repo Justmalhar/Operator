@@ -1,8 +1,10 @@
 import { useEffect, useRef } from "react";
 import { Copy, ExternalLink, Folder, GitBranch, GitFork, RotateCcw, Terminal } from "lucide-react";
+import { motion } from "framer-motion";
 import { UserMessage } from "./UserMessage";
 import { ToolCallMessage, type ToolCall } from "./ToolCallMessage";
 import { FileChangeBadges } from "./FileChangeBadges";
+import { staggerContainer, staggerItem, springs } from "@/lib/animations";
 
 interface FileChange {
   filename: string;
@@ -151,9 +153,15 @@ function SetupItem({
 
 function WorkspaceSetup() {
   return (
-    <div className="px-6 pb-6 pt-10">
+    <motion.div
+      className="px-6 pb-6 pt-10"
+      variants={staggerContainer}
+      initial="hidden"
+      animate="visible"
+    >
       {/* Setup card */}
-      <div
+      <motion.div
+        variants={staggerItem}
         className="mb-5 inline-block max-w-[520px] rounded-xl px-4 py-3"
         style={{ backgroundColor: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.07)" }}
       >
@@ -161,10 +169,10 @@ function WorkspaceSetup() {
           You're in a new copy of <InlineCode>Operator</InlineCode> called{" "}
           <InlineCode>delhi</InlineCode>
         </span>
-      </div>
+      </motion.div>
 
       {/* Status items */}
-      <div className="flex flex-col gap-3.5">
+      <motion.div variants={staggerItem} className="flex flex-col gap-3.5">
         <SetupItem icon={<GitBranch className="h-3.5 w-3.5" />}>
           Branched <InlineCode>Justmalhar/delhi</InlineCode> from{" "}
           <InlineCode>origin/main</InlineCode>
@@ -184,8 +192,8 @@ function WorkspaceSetup() {
             <ExternalLink className="h-3 w-3" />
           </button>
         </SetupItem>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 
@@ -193,39 +201,47 @@ function WorkspaceSetup() {
 
 function MessageActions({ content }: { content: string }) {
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95, y: -4 }}
+      whileInView={{ opacity: 0 }}
       className="absolute right-4 top-3 z-10 flex items-center overflow-hidden rounded-lg opacity-0 shadow-lg transition-opacity duration-100 group-hover:opacity-100"
       style={{
         backgroundColor: "#222",
         border: "1px solid rgba(255,255,255,0.08)",
       }}
     >
-      <button
+      <motion.button
         type="button"
         title="Copy message"
         onClick={() => navigator.clipboard.writeText(content)}
-        className="flex h-[26px] w-[28px] items-center justify-center transition-colors hover:bg-white/8"
+        whileHover={{ backgroundColor: "rgba(255,255,255,0.08)" }}
+        whileTap={{ scale: 0.9 }}
+        className="flex h-[26px] w-[28px] items-center justify-center"
         style={{ color: "rgba(255,255,255,0.5)" }}
       >
         <Copy className="h-3.5 w-3.5" />
-      </button>
-      <button
+      </motion.button>
+      <motion.button
         type="button"
         title="Fork from here"
-        className="flex h-[26px] w-[28px] items-center justify-center transition-colors hover:bg-white/8"
+        whileHover={{ backgroundColor: "rgba(255,255,255,0.08)" }}
+        whileTap={{ scale: 0.9 }}
+        className="flex h-[26px] w-[28px] items-center justify-center"
         style={{ color: "rgba(255,255,255,0.5)" }}
       >
         <GitFork className="h-3.5 w-3.5" />
-      </button>
-      <button
+      </motion.button>
+      <motion.button
         type="button"
         title="Revert to here"
-        className="flex h-[26px] w-[28px] items-center justify-center transition-colors hover:bg-white/8"
+        whileHover={{ backgroundColor: "rgba(255,255,255,0.08)" }}
+        whileTap={{ scale: 0.9 }}
+        className="flex h-[26px] w-[28px] items-center justify-center"
         style={{ color: "rgba(255,255,255,0.5)" }}
       >
         <RotateCcw className="h-3.5 w-3.5" />
-      </button>
-    </div>
+      </motion.button>
+    </motion.div>
   );
 }
 
@@ -234,29 +250,6 @@ function MessageActions({ content }: { content: string }) {
 function AgentMessage({ message }: { message: AgentMsg }) {
   return (
     <div className="px-6 py-3">
-      {/* Agent identity row */}
-      <div
-        className="mb-2.5 flex items-center gap-2 text-[11px]"
-        style={{ color: "rgba(255,255,255,0.4)" }}
-      >
-        <span
-          className="flex h-[18px] w-[18px] items-center justify-center rounded text-[9px] font-bold"
-          style={{
-            background: "linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)",
-            color: "#fff",
-          }}
-        >
-          O
-        </span>
-        <span className="text-[12px] font-semibold" style={{ color: "rgba(255,255,255,0.8)" }}>
-          Operator
-        </span>
-        {message.timestamp && <span style={{ opacity: 0.45 }}>{message.timestamp}</span>}
-        {message.duration && (
-          <span style={{ opacity: 0.4 }}>· {(message.duration / 1000).toFixed(0)}s</span>
-        )}
-      </div>
-
       {/* Tool calls */}
       {message.toolCalls && message.toolCalls.length > 0 && (
         <ToolCallMessage toolCalls={message.toolCalls} duration={message.duration} />
@@ -265,7 +258,7 @@ function AgentMessage({ message }: { message: AgentMsg }) {
       {/* Message body */}
       <div
         className="text-[13px] leading-[1.65]"
-        style={{ color: "rgba(255,255,255,0.82)", whiteSpace: "pre-wrap" }}
+        style={{ color: "var(--vscode-editor-foreground)", whiteSpace: "pre-wrap" }}
       >
         {message.content}
       </div>
@@ -294,7 +287,7 @@ export function MessageList({ workspaceId: _workspaceId }: MessageListProps) {
   return (
     <div
       className="vscode-scrollable h-full overflow-y-auto"
-      style={{ backgroundColor: "#0e0e0e" }}
+      style={{ backgroundColor: "var(--vscode-sidebar-background)" }}
     >
       <div className="mx-auto max-w-[720px] pb-4">
         {/* Workspace setup header */}
@@ -302,7 +295,12 @@ export function MessageList({ workspaceId: _workspaceId }: MessageListProps) {
 
         {/* Conversation messages */}
         {MOCK_MESSAGES.map((msg, i) => (
-          <div key={msg.id}>
+          <motion.div
+            key={msg.id}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ ...springs.smooth, delay: i * 0.05 }}
+          >
             {msg.role === "user" ? (
               <div className="group relative">
                 <UserMessage text={msg.content} timestamp={msg.timestamp} />
@@ -323,7 +321,7 @@ export function MessageList({ workspaceId: _workspaceId }: MessageListProps) {
                 }}
               />
             )}
-          </div>
+          </motion.div>
         ))}
       </div>
       <div ref={bottomRef} />

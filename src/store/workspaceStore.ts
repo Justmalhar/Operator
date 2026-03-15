@@ -1,90 +1,152 @@
 import { create } from "zustand";
-import { invoke } from "@tauri-apps/api/core";
-import type { Repo, Workspace, WorkspaceStatus } from "@/types/workspace";
+import { immer } from "zustand/middleware/immer";
+import type { Repository, Workspace, CreateRepository, RepoWithWorkspaces } from "@/types/workspace";
+import * as api from "@/lib/tauri";
 
-// ── Tauri DB types (snake_case from Rust) ────────────────────────────────────
+interface WorkspaceState {
+  repos: Repository[];
+  workspacesByRepo: Record<string, Workspace[]>;
+  activeWorkspaceId: string | null;
+  loading: boolean;
+  error: string | null;
 
-interface TauriRepository {
-  id: string;
-  name: string;
-  full_name: string;
-  remote_url: string;
-  local_path: string;
-  default_branch: string;
+  fetchAll: () => Promise<void>;
+  addRepo: (input: CreateRepository) => Promise<Repository>;
+  removeRepo: (id: string) => Promise<void>;
+  createWorkspace: (params: {
+    repositoryId: string;
+    repoPath: string;
+    cityName: string;
+    branchName: string;
+    baseBranch: string;
+    agentBackend?: string;
+    model?: string;
+  }) => Promise<Workspace>;
+  deleteWorkspace: (id: string, repoId: string) => Promise<void>;
+  setActiveWorkspace: (id: string | null) => void;
+  updateWorkspaceStatus: (workspaceId: string, status: string) => void;
+  getActiveWorkspace: () => Workspace | undefined;
+  getRepoList: () => RepoWithWorkspaces[];
 }
 
-interface TauriWorkspace {
-  id: string;
-  repository_id: string;
-  city_name: string;
-  branch_name: string;
-  worktree_path: string;
-  status: string;
-  total_cost_usd: number;
-  is_archived: number;
-}
+export const useWorkspaceStore = create<WorkspaceState>()(
+  immer((set, get) => ({
+    repos: [],
+    workspacesByRepo: {},
+    activeWorkspaceId: null,
+    loading: false,
+    error: null,
 
-// ── Store ─────────────────────────────────────────────────────────────────────
+    fetchAll: async () => {
+      set((s) => {
+        s.loading = true;
+        s.error = null;
+      });
+      try {
+        const repos = await api.listRepositories();
+        const byRepo: Record<string, Workspace[]> = {};
 
-interface WorkspaceStore {
-  repos: Repo[];
-  isLoading: boolean;
-  loadRepos: () => Promise<void>;
-  addRepo: (repo: Repo) => void;
-}
+        const results = await Promise.allSettled(
+          repos.map(async (r) => {
+            const ws = await api.listWorkspaces(r.id);
+            return { repoId: r.id, workspaces: ws };
+          }),
+        );
 
-function mapWorkspace(ws: TauriWorkspace): Workspace {
-  return {
-    id: ws.id,
-    name: ws.city_name,
-    branch: ws.branch_name,
-    status: (ws.status as WorkspaceStatus) ?? "idle",
-    agentCount: 0,
-    cost: ws.total_cost_usd > 0 ? ws.total_cost_usd : undefined,
-    localPath: ws.worktree_path,
-  };
-}
+        for (const result of results) {
+          if (result.status === "fulfilled") {
+            byRepo[result.value.repoId] = result.value.workspaces;
+          }
+        }
 
-function mapRepo(repo: TauriRepository, workspaces: TauriWorkspace[]): Repo {
-  const repoWorkspaces = workspaces
-    .filter((ws) => ws.repository_id === repo.id && ws.is_archived === 0)
-    .map(mapWorkspace);
-
-  return {
-    id: repo.id,
-    name: repo.name,
-    avatarLetter: repo.name.charAt(0).toUpperCase(),
-    workspaces: repoWorkspaces,
-    isExpanded: repoWorkspaces.length > 0,
-  };
-}
-
-export const useWorkspaceStore = create<WorkspaceStore>((set) => ({
-  repos: [],
-  isLoading: false,
-
-  loadRepos: async () => {
-    set({ isLoading: true });
-    try {
-      const tauriRepos = await invoke<TauriRepository[]>("list_repositories");
-      const allWorkspaces: TauriWorkspace[] = [];
-
-      for (const repo of tauriRepos) {
-        const ws = await invoke<TauriWorkspace[]>("list_workspaces", {
-          repositoryId: repo.id,
+        set((s) => {
+          s.repos = repos;
+          s.workspacesByRepo = byRepo;
+          s.loading = false;
         });
-        allWorkspaces.push(...ws);
+      } catch (err) {
+        set((s) => {
+          s.error = err instanceof Error ? err.message : String(err);
+          s.loading = false;
+        });
       }
+    },
 
-      const repos = tauriRepos.map((r) => mapRepo(r, allWorkspaces));
-      set({ repos, isLoading: false });
-    } catch (err) {
-      console.error("Failed to load repos:", err);
-      set({ isLoading: false });
-    }
-  },
+    addRepo: async (input) => {
+      const repo = await api.addRepository(input);
+      set((s) => {
+        s.repos.push(repo);
+        s.workspacesByRepo[repo.id] = [];
+      });
+      return repo;
+    },
 
-  addRepo: (repo) => {
-    set((state) => ({ repos: [...state.repos, repo] }));
-  },
-}));
+    removeRepo: async (id) => {
+      await api.removeRepository(id);
+      set((s) => {
+        s.repos = s.repos.filter((r) => r.id !== id);
+        delete s.workspacesByRepo[id];
+      });
+    },
+
+    createWorkspace: async (params) => {
+      const ws = await api.createWorkspace(params);
+      set((s) => {
+        const list = s.workspacesByRepo[params.repositoryId] ?? [];
+        list.push(ws);
+        s.workspacesByRepo[params.repositoryId] = list;
+      });
+      return ws;
+    },
+
+    deleteWorkspace: async (id, repoId) => {
+      await api.deleteWorkspace(id);
+      set((s) => {
+        const list = s.workspacesByRepo[repoId];
+        if (list) {
+          s.workspacesByRepo[repoId] = list.filter((w) => w.id !== id);
+        }
+        if (s.activeWorkspaceId === id) {
+          s.activeWorkspaceId = null;
+        }
+      });
+    },
+
+    setActiveWorkspace: (id) => {
+      set((s) => {
+        s.activeWorkspaceId = id;
+      });
+    },
+
+    updateWorkspaceStatus: (workspaceId, status) => {
+      set((s) => {
+        for (const list of Object.values(s.workspacesByRepo)) {
+          const ws = (list as Workspace[]).find((w) => w.id === workspaceId);
+          if (ws) {
+            ws.status = status as Workspace["status"];
+            break;
+          }
+        }
+      });
+    },
+
+    getActiveWorkspace: () => {
+      const { activeWorkspaceId, workspacesByRepo } = get();
+      if (!activeWorkspaceId) return undefined;
+      for (const list of Object.values(workspacesByRepo)) {
+        const ws = list.find((w) => w.id === activeWorkspaceId);
+        if (ws) return ws;
+      }
+      return undefined;
+    },
+
+    getRepoList: () => {
+      const { repos, workspacesByRepo } = get();
+      return repos.map((repo) => ({
+        repo,
+        workspaces: workspacesByRepo[repo.id] ?? [],
+        isExpanded: true,
+      }));
+    },
+  })),
+);

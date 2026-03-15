@@ -6,12 +6,17 @@ pub async fn init_db(app: &tauri::AppHandle) -> Result<SqlitePool, sqlx::Error> 
     let db_path = app
         .path()
         .app_data_dir()
-        .expect("failed to resolve app_data_dir")
+        .map_err(|e| sqlx::Error::Configuration(
+            format!("failed to resolve app_data_dir: {e}").into()
+        ))?
         .join("operator.db");
 
     if let Some(parent) = db_path.parent() {
-        std::fs::create_dir_all(parent)
-            .expect("failed to create app data directory");
+        std::fs::create_dir_all(parent).map_err(|e| {
+            sqlx::Error::Configuration(
+                format!("failed to create app data directory {}: {e}", parent.display()).into()
+            )
+        })?;
     }
 
     let db_url = format!(

@@ -1,133 +1,150 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import "./App.css";
-import { cn } from "@/lib/utils";
 import { SidebarLayout } from "@/components/layout/SidebarLayout";
 import { CenterPanel, type CenterPanelHandle } from "@/components/center/CenterPanel";
 import { RightPanel } from "@/components/panels/RightPanel";
 import { BottomPanel } from "@/components/panels/BottomPanel";
+import { ResizeHandle } from "@/components/shared/ResizeHandle";
 import { PreferencesPage } from "@/pages/PreferencesPage";
 import { HelpPage } from "@/pages/HelpPage";
 import { SettingsPage } from "@/pages/SettingsPage";
 import { type SidebarNavItemId } from "@/components/sidebar/SidebarNav";
 import { useWorkspaceStore } from "@/store/workspaceStore";
 import { useSettingsStore } from "@/store/settingsStore";
+import { springs } from "@/lib/animations";
 import {
   AlertCircle,
-  Bell,
   CheckCircle2,
   Cloud,
   GitBranch,
-  PanelRight,
   Radio,
   Wifi,
 } from "lucide-react";
 
+const DEFAULT_RIGHT_WIDTH = 360;
+const MIN_RIGHT_WIDTH = 260;
+const MAX_RIGHT_WIDTH = 700;
+const DEFAULT_BOTTOM_HEIGHT = 260;
+const MIN_BOTTOM_HEIGHT = 100;
+const MAX_BOTTOM_HEIGHT = 500;
+
 const FULL_PAGE_ITEMS: SidebarNavItemId[] = ["preferences", "help", "settings"];
 
 function App() {
-  const [activeWorkspaceId, setActiveWorkspaceId] = useState<string | null>("ws-los-angeles");
+  const { activeWorkspaceId, setActiveWorkspace, getActiveWorkspace } = useWorkspaceStore();
   const [showRightPanel, setShowRightPanel] = useState(true);
-  const [activeItem, setActiveItem] = useState<SidebarNavItemId>("activity");
+  const [activeItem, setActiveItem] = useState<SidebarNavItemId>("new-chat");
+  const [rightPanelWidth, setRightPanelWidth] = useState(DEFAULT_RIGHT_WIDTH);
+  const [bottomPanelHeight, setBottomPanelHeight] = useState(DEFAULT_BOTTOM_HEIGHT);
   const centerRef = useRef<CenterPanelHandle>(null);
 
-  // Hydrate stores on mount
+  // Load settings store on mount (repos are loaded by WorkspaceList via fetchAll)
   useEffect(() => {
-    void useWorkspaceStore.getState().loadRepos();
     void useSettingsStore.getState().loadSettings();
   }, []);
 
+  const activeWs = getActiveWorkspace();
   const isFullPage = FULL_PAGE_ITEMS.includes(activeItem);
+
+  const handleWorkspaceSelect = useCallback(
+    (id: string) => setActiveWorkspace(id),
+    [setActiveWorkspace],
+  );
 
   return (
     <div className="vscode-editor flex h-screen flex-col overflow-hidden">
-      {/* ── Title bar ────────────────────────────────────────────────────── */}
-      <div className="vscode-titlebar flex shrink-0 items-center" data-tauri-drag-region>
-        <div className="w-[78px] shrink-0" />
-        <div className="flex min-w-0 flex-1 items-center justify-center">
-          <span
-            className="text-[12px] font-medium tracking-wide"
-            style={{ color: "var(--vscode-titlebar-foreground)", opacity: 0.7 }}
-          >
-            Operator
-          </span>
-        </div>
-        <div className="flex items-center gap-0.5 pr-2">
-          <button
-            type="button"
-            className="titlebar-action-btn flex h-[28px] w-[28px] items-center justify-center rounded-md transition-colors duration-75"
-            style={{ color: "var(--vscode-titlebar-foreground)", opacity: 0.6 }}
-            aria-label="Notifications"
-            title="Notifications"
-          >
-            <Bell className="h-3.5 w-3.5" />
-          </button>
-          {/* Only show right panel toggle when not in full-page mode */}
-          {!isFullPage && (
-            <button
-              type="button"
-              onClick={() => setShowRightPanel((v) => !v)}
-              className={cn(
-                "titlebar-action-btn flex h-[28px] w-[28px] items-center justify-center rounded-md transition-colors duration-75",
-                showRightPanel ? "opacity-100" : "opacity-40",
-              )}
-              style={{ color: "var(--vscode-titlebar-foreground)" }}
-              aria-label="Toggle right panel"
-              title="Toggle right panel"
-            >
-              <PanelRight className="h-3.5 w-3.5" />
-            </button>
-          )}
-        </div>
-      </div>
-
       {/* ── Main content ─────────────────────────────────────────────────── */}
       <div className="flex min-h-0 flex-1">
         <SidebarLayout
           activeWorkspaceId={activeWorkspaceId}
-          onWorkspaceSelect={setActiveWorkspaceId}
+          onWorkspaceSelect={handleWorkspaceSelect}
           activeItem={activeItem}
           onItemChange={setActiveItem}
         />
 
         {isFullPage ? (
-          /* Full-page mode: Preferences, Help, or Settings */
           <div className="flex min-w-0 flex-1">
             {activeItem === "preferences" && <PreferencesPage />}
             {activeItem === "help" && <HelpPage />}
             {activeItem === "settings" && <SettingsPage />}
           </div>
         ) : (
-          /* Normal workspace mode */
           <>
             <div className="flex min-w-0 flex-1 flex-col">
-              <CenterPanel ref={centerRef} workspaceId={activeWorkspaceId} />
+              <CenterPanel
+                ref={centerRef}
+                workspaceId={activeWorkspaceId}
+                showRightPanel={showRightPanel}
+                onToggleRightPanel={() => setShowRightPanel((v) => !v)}
+              />
             </div>
 
             {showRightPanel && (
-              <div className="flex w-[420px] shrink-0 flex-col">
-                <div className="min-h-0 flex-1">
-                  <RightPanel
-                    onOpenFile={(filename, filePath) =>
-                      centerRef.current?.openFile(filename, filePath)
-                    }
-                  />
-                </div>
-                <div className="h-[260px] shrink-0">
-                  <BottomPanel />
-                </div>
-              </div>
+              <ResizeHandle
+                currentSize={rightPanelWidth}
+                onResize={setRightPanelWidth}
+                minSize={MIN_RIGHT_WIDTH}
+                maxSize={MAX_RIGHT_WIDTH}
+                direction="right"
+                defaultSize={DEFAULT_RIGHT_WIDTH}
+              />
             )}
+
+            <AnimatePresence mode="wait">
+              {showRightPanel && (
+                <motion.div
+                  key="right-panel"
+                  initial={{ width: 0, opacity: 0 }}
+                  animate={{ width: rightPanelWidth, opacity: 1 }}
+                  exit={{ width: 0, opacity: 0 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 35 }}
+                  className="flex shrink-0 flex-col overflow-hidden"
+                >
+                  <div className="min-h-0 flex-1">
+                    <RightPanel
+                      worktreePath={activeWs?.worktree_path}
+                      onOpenFile={(filename, filePath) =>
+                        centerRef.current?.openFile(filename, filePath)
+                      }
+                    />
+                  </div>
+
+                  <ResizeHandle
+                    currentSize={bottomPanelHeight}
+                    onResize={setBottomPanelHeight}
+                    minSize={MIN_BOTTOM_HEIGHT}
+                    maxSize={MAX_BOTTOM_HEIGHT}
+                    direction="right"
+                    orientation="horizontal"
+                    defaultSize={DEFAULT_BOTTOM_HEIGHT}
+                  />
+
+                  <div style={{ height: bottomPanelHeight }} className="shrink-0">
+                    <BottomPanel worktreePath={activeWs?.worktree_path} />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </>
         )}
       </div>
 
-      {/* ── Status bar — rich IDE-grade ───────────────────────────────────── */}
-      <div className="vscode-statusbar flex h-[22px] shrink-0 items-center justify-between text-[11px]">
-        <div className="flex items-center">
+      {/* ── Status bar ───────────────────────────────────────────────────── */}
+      <motion.div
+        initial={{ y: 22 }}
+        animate={{ y: 0 }}
+        transition={{ delay: 0.1, ...springs.smooth }}
+        className="vscode-statusbar flex h-[22px] shrink-0 items-center justify-between text-[11px]"
+      >
+        <div className="flex min-w-0 flex-1 items-center overflow-hidden">
           <button
             type="button"
-            className="statusbar-item-interactive flex items-center gap-1.5 px-2"
-            style={{ backgroundColor: "var(--vscode-statusbar-remote-background, #16825d)", color: "#fff" }}
+            className="statusbar-item-interactive flex shrink-0 items-center gap-1.5 px-2"
+            style={{
+              background: "linear-gradient(135deg, #16825d, #1a9f6e)",
+              color: "#fff",
+            }}
           >
             <Radio className="h-3 w-3" />
             <span className="font-medium">Operator</span>
@@ -135,22 +152,22 @@ function App() {
 
           <button
             type="button"
-            className="statusbar-item-interactive flex items-center gap-1 px-2"
+            className="statusbar-item-interactive flex items-center gap-1 truncate px-2"
           >
-            <GitBranch className="h-3 w-3" />
-            <span>main</span>
+            <GitBranch className="h-3 w-3 shrink-0" />
+            <span className="truncate">{activeWs?.branch_name ?? "main"}</span>
           </button>
 
           <button
             type="button"
-            className="statusbar-item-interactive flex items-center gap-1 px-2"
+            className="statusbar-item-interactive hidden items-center gap-1 px-2 sm:flex"
           >
             <Cloud className="h-3 w-3" />
           </button>
 
           <button
             type="button"
-            className="statusbar-item-interactive flex items-center gap-1.5 px-2"
+            className="statusbar-item-interactive flex shrink-0 items-center gap-1.5 px-2"
           >
             <AlertCircle className="h-3 w-3" />
             <span>0</span>
@@ -159,22 +176,31 @@ function App() {
           </button>
         </div>
 
-        <div className="flex items-center">
-          {activeWorkspaceId && !isFullPage && (
-            <span className="statusbar-item-interactive flex items-center gap-1 px-2">
-              <CheckCircle2 className="h-3 w-3" style={{ color: "#4ec994" }} />
-              <span>Los Angeles</span>
-            </span>
-          )}
+        <div className="flex shrink-0 items-center">
+          <AnimatePresence>
+            {activeWs && !isFullPage && (
+              <motion.span
+                key="workspace-status"
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 10 }}
+                transition={springs.snappy}
+                className="statusbar-item-interactive hidden items-center gap-1 px-2 sm:flex"
+              >
+                <CheckCircle2 className="h-3 w-3" style={{ color: "#4ec994" }} />
+                <span>{activeWs.city_name}</span>
+              </motion.span>
+            )}
+          </AnimatePresence>
           <span className="statusbar-item-interactive flex items-center gap-1 px-2">
             <Wifi className="h-3 w-3" />
-            <span>Connected</span>
+            <span className="hidden sm:inline">Connected</span>
           </span>
           <span className="statusbar-item-interactive px-2" style={{ opacity: 0.7 }}>
             v0.1.0
           </span>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

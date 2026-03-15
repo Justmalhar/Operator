@@ -3,7 +3,6 @@ import { open } from "@tauri-apps/plugin-dialog";
 import { invoke } from "@tauri-apps/api/core";
 import { Folder, Loader2 } from "lucide-react";
 import { useWorkspaceStore } from "@/store/workspaceStore";
-import type { Repo } from "@/types/workspace";
 
 interface CloneUrlStepProps {
   onSuccess: (workspaceId: string) => void;
@@ -24,7 +23,7 @@ function deriveNameFromUrl(url: string): string {
 }
 
 export function CloneUrlStep({ onSuccess }: CloneUrlStepProps) {
-  const addRepo = useWorkspaceStore((s) => s.addRepo);
+  const { addRepo, createWorkspace } = useWorkspaceStore();
   const [url, setUrl] = useState("");
   const [destination, setDestination] = useState("");
   const [workspaceName, setWorkspaceName] = useState("");
@@ -33,7 +32,6 @@ export function CloneUrlStep({ onSuccess }: CloneUrlStepProps) {
 
   function handleUrlChange(value: string) {
     setUrl(value);
-    // Auto-fill name only if user hasn't manually edited it
     const derived = deriveNameFromUrl(url);
     if (!workspaceName || workspaceName === derived) {
       setWorkspaceName(deriveNameFromUrl(value));
@@ -57,37 +55,21 @@ export function CloneUrlStep({ onSuccess }: CloneUrlStepProps) {
     try {
       await invoke("clone_repository", { url: url.trim(), destinationPath });
 
-      const repo = await invoke<{ id: string; name: string; local_path: string }>(
-        "add_repository",
-        {
-          input: {
-            name: workspaceName,
-            full_name: workspaceName,
-            remote_url: url.trim(),
-            local_path: destinationPath,
-            platform: "github",
-            default_branch: "main",
-          },
-        },
-      );
+      const repo = await addRepo({
+        name: workspaceName,
+        full_name: workspaceName,
+        remote_url: url.trim(),
+        local_path: destinationPath,
+        platform: "github",
+        default_branch: "main",
+      });
 
-      const newRepo: Repo = {
-        id: repo.id,
-        name: repo.name,
-        avatarLetter: repo.name.charAt(0).toUpperCase(),
-        workspaces: [],
-        isExpanded: true,
-      };
-      addRepo(newRepo);
-
-      const ws = await invoke<{ id: string }>("create_workspace", {
+      const ws = await createWorkspace({
         repositoryId: repo.id,
         repoPath: destinationPath,
         cityName: workspaceName,
         branchName: slugify(workspaceName),
         baseBranch: "main",
-        agentBackend: null,
-        model: null,
       });
 
       onSuccess(ws.id);
