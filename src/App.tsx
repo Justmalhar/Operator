@@ -1,12 +1,15 @@
 import { useCallback, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import "./App.css";
-import { cn } from "@/lib/utils";
 import { SidebarLayout } from "@/components/layout/SidebarLayout";
 import { CenterPanel, type CenterPanelHandle } from "@/components/center/CenterPanel";
 import { RightPanel } from "@/components/panels/RightPanel";
 import { BottomPanel } from "@/components/panels/BottomPanel";
 import { ResizeHandle } from "@/components/shared/ResizeHandle";
+import { PreferencesPage } from "@/pages/PreferencesPage";
+import { HelpPage } from "@/pages/HelpPage";
+import { SettingsPage } from "@/pages/SettingsPage";
+import { type SidebarNavItemId } from "@/components/sidebar/SidebarNav";
 import { useWorkspaceStore } from "@/store/workspaceStore";
 import { springs } from "@/lib/animations";
 import {
@@ -14,7 +17,6 @@ import {
   CheckCircle2,
   Cloud,
   GitBranch,
-  PanelRight,
   Radio,
   Wifi,
 } from "lucide-react";
@@ -26,14 +28,18 @@ const DEFAULT_BOTTOM_HEIGHT = 260;
 const MIN_BOTTOM_HEIGHT = 100;
 const MAX_BOTTOM_HEIGHT = 500;
 
+const FULL_PAGE_ITEMS: SidebarNavItemId[] = ["preferences", "help", "settings"];
+
 function App() {
   const { activeWorkspaceId, setActiveWorkspace, getActiveWorkspace } = useWorkspaceStore();
   const [showRightPanel, setShowRightPanel] = useState(true);
+  const [activeItem, setActiveItem] = useState<SidebarNavItemId>("activity");
   const [rightPanelWidth, setRightPanelWidth] = useState(DEFAULT_RIGHT_WIDTH);
   const [bottomPanelHeight, setBottomPanelHeight] = useState(DEFAULT_BOTTOM_HEIGHT);
   const centerRef = useRef<CenterPanelHandle>(null);
 
   const activeWs = getActiveWorkspace();
+  const isFullPage = FULL_PAGE_ITEMS.includes(activeItem);
 
   const handleWorkspaceSelect = useCallback(
     (id: string) => setActiveWorkspace(id),
@@ -47,62 +53,78 @@ function App() {
         <SidebarLayout
           activeWorkspaceId={activeWorkspaceId}
           onWorkspaceSelect={handleWorkspaceSelect}
+          activeItem={activeItem}
+          onItemChange={setActiveItem}
         />
 
-        <div className="flex min-w-0 flex-1 flex-col">
-          <CenterPanel ref={centerRef} workspaceId={activeWorkspaceId} showRightPanel={showRightPanel} onToggleRightPanel={() => setShowRightPanel((v) => !v)} />
-        </div>
-
-        {showRightPanel && (
-          <ResizeHandle
-            currentSize={rightPanelWidth}
-            onResize={setRightPanelWidth}
-            minSize={MIN_RIGHT_WIDTH}
-            maxSize={MAX_RIGHT_WIDTH}
-            direction="right"
-            defaultSize={DEFAULT_RIGHT_WIDTH}
-          />
-        )}
-
-        <AnimatePresence mode="wait">
-          {showRightPanel && (
-            <motion.div
-              key="right-panel"
-              initial={{ width: 0, opacity: 0 }}
-              animate={{ width: rightPanelWidth, opacity: 1 }}
-              exit={{ width: 0, opacity: 0 }}
-              transition={{ type: "spring", stiffness: 400, damping: 35 }}
-              className="flex shrink-0 flex-col overflow-hidden"
-            >
-              <div className="min-h-0 flex-1">
-                <RightPanel
-                  worktreePath={activeWs?.worktree_path}
-                  onOpenFile={(filename, filePath) =>
-                    centerRef.current?.openFile(filename, filePath)
-                  }
-                />
-              </div>
-
-              {/* Horizontal resize handle between right panel and bottom panel */}
-              <ResizeHandle
-                currentSize={bottomPanelHeight}
-                onResize={setBottomPanelHeight}
-                minSize={MIN_BOTTOM_HEIGHT}
-                maxSize={MAX_BOTTOM_HEIGHT}
-                direction="right"
-                orientation="horizontal"
-                defaultSize={DEFAULT_BOTTOM_HEIGHT}
+        {isFullPage ? (
+          <div className="flex min-w-0 flex-1">
+            {activeItem === "preferences" && <PreferencesPage />}
+            {activeItem === "help" && <HelpPage />}
+            {activeItem === "settings" && <SettingsPage />}
+          </div>
+        ) : (
+          <>
+            <div className="flex min-w-0 flex-1 flex-col">
+              <CenterPanel
+                ref={centerRef}
+                workspaceId={activeWorkspaceId}
+                showRightPanel={showRightPanel}
+                onToggleRightPanel={() => setShowRightPanel((v) => !v)}
               />
+            </div>
 
-              <div style={{ height: bottomPanelHeight }} className="shrink-0">
-                <BottomPanel worktreePath={activeWs?.worktree_path} />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            {showRightPanel && (
+              <ResizeHandle
+                currentSize={rightPanelWidth}
+                onResize={setRightPanelWidth}
+                minSize={MIN_RIGHT_WIDTH}
+                maxSize={MAX_RIGHT_WIDTH}
+                direction="right"
+                defaultSize={DEFAULT_RIGHT_WIDTH}
+              />
+            )}
+
+            <AnimatePresence mode="wait">
+              {showRightPanel && (
+                <motion.div
+                  key="right-panel"
+                  initial={{ width: 0, opacity: 0 }}
+                  animate={{ width: rightPanelWidth, opacity: 1 }}
+                  exit={{ width: 0, opacity: 0 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 35 }}
+                  className="flex shrink-0 flex-col overflow-hidden"
+                >
+                  <div className="min-h-0 flex-1">
+                    <RightPanel
+                      worktreePath={activeWs?.worktree_path}
+                      onOpenFile={(filename, filePath) =>
+                        centerRef.current?.openFile(filename, filePath)
+                      }
+                    />
+                  </div>
+
+                  <ResizeHandle
+                    currentSize={bottomPanelHeight}
+                    onResize={setBottomPanelHeight}
+                    minSize={MIN_BOTTOM_HEIGHT}
+                    maxSize={MAX_BOTTOM_HEIGHT}
+                    direction="right"
+                    orientation="horizontal"
+                    defaultSize={DEFAULT_BOTTOM_HEIGHT}
+                  />
+
+                  <div style={{ height: bottomPanelHeight }} className="shrink-0">
+                    <BottomPanel worktreePath={activeWs?.worktree_path} />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </>
+        )}
       </div>
 
-      {/* ── Status bar — rich IDE-grade ───────────────────────────────────── */}
+      {/* ── Status bar ───────────────────────────────────────────────────── */}
       <motion.div
         initial={{ y: 22 }}
         animate={{ y: 0 }}
@@ -150,7 +172,7 @@ function App() {
 
         <div className="flex shrink-0 items-center">
           <AnimatePresence>
-            {activeWs && (
+            {activeWs && !isFullPage && (
               <motion.span
                 key="workspace-status"
                 initial={{ opacity: 0, x: 10 }}
