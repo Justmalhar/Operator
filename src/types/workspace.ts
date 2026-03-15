@@ -15,6 +15,7 @@ export interface Workspace {
   agentCount: number;
   cost?: number;
   todoCount?: number;
+  localPath?: string;
 }
 
 export interface Repo {
