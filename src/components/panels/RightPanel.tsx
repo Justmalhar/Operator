@@ -1,23 +1,26 @@
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { FileTree } from "./FileTree";
 import { ChangesTab } from "./ChangesTab";
 import { ChecksTab } from "./ChecksTab";
 import { LayoutList, Search } from "lucide-react";
+import { tabContent, springs } from "@/lib/animations";
 
 type RightTab = "files" | "changes" | "checks";
 
-const TABS: { id: RightTab; label: string; badge?: number }[] = [
+const TABS: { id: RightTab; label: string }[] = [
   { id: "files", label: "All files" },
-  { id: "changes", label: "Changes", badge: 0 },
+  { id: "changes", label: "Changes" },
   { id: "checks", label: "Checks" },
 ];
 
 interface RightPanelProps {
+  worktreePath?: string;
   onOpenFile?: (filename: string, filePath: string) => void;
 }
 
-export function RightPanel({ onOpenFile }: RightPanelProps) {
+export function RightPanel({ worktreePath, onOpenFile }: RightPanelProps) {
   const [activeTab, setActiveTab] = useState<RightTab>("files");
 
   return (
@@ -34,8 +37,7 @@ export function RightPanel({ onOpenFile }: RightPanelProps) {
           borderBottom: "1px solid var(--vscode-panel-border)",
         }}
       >
-        {/* Tabs */}
-        <div className="flex min-w-0 flex-1 items-stretch gap-5 overflow-hidden pl-4">
+        <div className="flex min-w-0 flex-1 items-stretch gap-2 overflow-hidden pl-3 sm:gap-5 sm:pl-4">
           {TABS.map((tab) => {
             const isActive = tab.id === activeTab;
             return (
@@ -44,57 +46,65 @@ export function RightPanel({ onOpenFile }: RightPanelProps) {
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
-                  "relative flex h-full items-center gap-1 px-3 py-1 text-[12px] font-medium transition-colors duration-75 whitespace-nowrap",
+                  "relative flex h-full items-center gap-1 px-1.5 py-1 text-[11px] font-medium transition-colors duration-75 whitespace-nowrap sm:px-3 sm:text-[12px]",
                   isActive
                     ? "text-[var(--vscode-panel-title-active-foreground)]"
                     : "text-[var(--vscode-panel-title-inactive-foreground)] hover:text-[var(--vscode-panel-title-active-foreground)]",
                 )}
               >
                 {tab.label}
-                {tab.badge !== undefined && (
-                  <span
-                    className="text-[11px]"
-                    style={{ color: "var(--vscode-panel-title-inactive-foreground)" }}
-                  >
-                    {tab.badge}
-                  </span>
-                )}
                 {isActive && <span className="panel-tab-underline" />}
               </button>
             );
           })}
         </div>
 
-        {/* Right-side icon actions */}
         <div className="flex shrink-0 items-center gap-0.5 pr-2">
-          <button
+          <motion.button
             type="button"
-            className="flex h-7 w-7 items-center justify-center rounded transition-colors duration-75 hover:bg-white/8"
+            whileHover={{ scale: 1.1, backgroundColor: "rgba(255,255,255,0.08)" }}
+            whileTap={{ scale: 0.9 }}
+            transition={springs.snappy}
+            className="flex h-7 w-7 items-center justify-center rounded"
             aria-label="Toggle tree view"
           >
             <LayoutList
               className="h-[15px] w-[15px]"
               style={{ color: "var(--vscode-panel-title-inactive-foreground)" }}
             />
-          </button>
-          <button
+          </motion.button>
+          <motion.button
             type="button"
-            className="flex h-7 w-7 items-center justify-center rounded transition-colors duration-75 hover:bg-white/8"
+            whileHover={{ scale: 1.1, backgroundColor: "rgba(255,255,255,0.08)" }}
+            whileTap={{ scale: 0.9 }}
+            transition={springs.snappy}
+            className="flex h-7 w-7 items-center justify-center rounded"
             aria-label="Search files"
           >
             <Search
               className="h-[14px] w-[14px]"
               style={{ color: "var(--vscode-panel-title-inactive-foreground)" }}
             />
-          </button>
+          </motion.button>
         </div>
       </div>
 
-      {/* Panel content */}
+      {/* Panel content with animated transitions */}
       <div className="min-h-0 flex-1">
-        {activeTab === "files" && <FileTree onOpenFile={onOpenFile} />}
-        {activeTab === "changes" && <ChangesTab />}
-        {activeTab === "checks" && <ChecksTab />}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            variants={tabContent}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="h-full"
+          >
+            {activeTab === "files" && <FileTree worktreePath={worktreePath} onOpenFile={onOpenFile} />}
+            {activeTab === "changes" && <ChangesTab worktreePath={worktreePath} />}
+            {activeTab === "checks" && <ChecksTab />}
+          </motion.div>
+        </AnimatePresence>
       </div>
     </aside>
   );

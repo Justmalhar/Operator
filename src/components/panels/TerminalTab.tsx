@@ -1,31 +1,26 @@
 import { useEffect, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import * as api from "@/lib/tauri";
 
 interface TerminalLine {
   id: string;
-  type: "command" | "output" | "error" | "vite" | "url";
+  type: "command" | "output" | "error";
   text: string;
 }
 
-const INITIAL_LINES: TerminalLine[] = [
-  { id: "1", type: "command", text: "bun run dev; exit" },
-  { id: "2", type: "output", text: "(eval):2: command not found: compdef" },
-  { id: "3", type: "output", text: "(eval):213: command not found: compdef" },
-  { id: "4", type: "output", text: "" },
-  { id: "5", type: "command", text: "> bun run dev; exit" },
-  { id: "6", type: "output", text: "$ vite" },
-  { id: "7", type: "output", text: "" },
-  { id: "8", type: "vite", text: "  VITE v7.3.1  ready in 1632 ms" },
-  { id: "9", type: "output", text: "" },
-  { id: "10", type: "url", text: "  ➜  Local:   http://localhost:1420/" },
-  { id: "11", type: "output", text: "  ➜  press h + enter to show help" },
-  { id: "12", type: "output", text: "" },
-];
+interface TerminalTabProps {
+  worktreePath?: string;
+}
 
-export function TerminalTab() {
-  const [lines, setLines] = useState<TerminalLine[]>(INITIAL_LINES);
+export function TerminalTab({ worktreePath }: TerminalTabProps) {
+  const [lines, setLines] = useState<TerminalLine[]>([
+    { id: "welcome", type: "output", text: worktreePath ? `Operator Terminal — ${worktreePath}` : "Operator Terminal" },
+    { id: "blank", type: "output", text: "" },
+  ]);
   const [input, setInput] = useState("");
   const [history, setHistory] = useState<string[]>([]);
   const [historyIdx, setHistoryIdx] = useState(-1);
+  const [running, setRunning] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -33,7 +28,7 @@ export function TerminalTab() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [lines]);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const cmd = input.trim();
     if (!cmd) return;
@@ -42,25 +37,48 @@ export function TerminalTab() {
       { id: crypto.randomUUID(), type: "command", text: `$ ${cmd}` },
     ];
 
-    if (cmd === "ls") {
-      newLines.push({ id: crypto.randomUUID(), type: "output", text: "CLAUDE.md  src/  assets/  package.json" });
-    } else if (cmd === "clear") {
+    if (cmd === "clear") {
       setLines([]);
       setInput("");
       setHistory((h) => [cmd, ...h]);
       setHistoryIdx(-1);
       return;
-    } else if (cmd.startsWith("echo ")) {
-      newLines.push({ id: crypto.randomUUID(), type: "output", text: cmd.slice(5) });
-    } else {
-      newLines.push({ id: crypto.randomUUID(), type: "error", text: `command not found: ${cmd}` });
     }
 
-    newLines.push({ id: crypto.randomUUID(), type: "output", text: "" });
     setLines((prev) => [...prev, ...newLines]);
+    setInput("");
     setHistory((h) => [cmd, ...h]);
     setHistoryIdx(-1);
-    setInput("");
+    setRunning(true);
+
+    try {
+      const result = await api.runShellCommand(cmd, worktreePath);
+      const outputLines: TerminalLine[] = [];
+
+      if (result.stdout) {
+        for (const line of result.stdout.split("\n")) {
+          outputLines.push({ id: crypto.randomUUID(), type: "output", text: line });
+        }
+      }
+      if (result.stderr) {
+        for (const line of result.stderr.split("\n")) {
+          outputLines.push({ id: crypto.randomUUID(), type: "error", text: line });
+        }
+      }
+      if (outputLines.length === 0) {
+        outputLines.push({ id: crypto.randomUUID(), type: "output", text: "" });
+      }
+
+      setLines((prev) => [...prev, ...outputLines]);
+    } catch (err) {
+      setLines((prev) => [
+        ...prev,
+        { id: crypto.randomUUID(), type: "error", text: String(err) },
+        { id: crypto.randomUUID(), type: "output", text: "" },
+      ]);
+    }
+
+    setRunning(false);
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -81,8 +99,6 @@ export function TerminalTab() {
     switch (type) {
       case "command": return "var(--vscode-editor-foreground)";
       case "error": return "#f48771";
-      case "vite": return "#e8ab53";
-      case "url": return "#3b9edd";
       default: return "var(--vscode-tab-inactive-foreground)";
     }
   }
@@ -95,18 +111,30 @@ export function TerminalTab() {
     >
       {/* Output */}
       <div className="vscode-scrollable min-h-0 flex-1 overflow-y-auto px-4 py-3">
-        {lines.map((line) => (
-          <div
-            key={line.id}
-            className="leading-[1.8]"
-            style={{
-              color: getLineColor(line.type),
-              whiteSpace: "pre-wrap",
-            }}
-          >
-            {line.text || "\u00A0"}
-          </div>
-        ))}
+        <AnimatePresence>
+          {lines.map((line) => (
+            <motion.div
+              key={line.id}
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.1 }}
+              className="leading-[1.8]"
+              style={{
+                color: getLineColor(line.type),
+                whiteSpace: "pre-wrap",
+              }}
+            >
+              {line.type === "command" ? (
+                <span>
+                  <span style={{ color: "#4ec994" }}>$</span>
+                  <span>{line.text.slice(1)}</span>
+                </span>
+              ) : (
+                line.text || "\u00A0"
+              )}
+            </motion.div>
+          ))}
+        </AnimatePresence>
         <div ref={bottomRef} />
       </div>
 
@@ -116,7 +144,22 @@ export function TerminalTab() {
         className="flex shrink-0 items-center gap-1.5 px-4 py-2"
         style={{ borderTop: "1px solid var(--vscode-sidebar-section-header-border, rgba(255,255,255,0.06))" }}
       >
-        <span className="font-bold" style={{ color: "#4ec994" }}>$</span>
+        <motion.span
+          animate={{ color: running ? "#cca700" : "#4ec994" }}
+          transition={{ duration: 0.15 }}
+          className="font-bold"
+        >
+          {running ? (
+            <motion.span
+              animate={{ opacity: [1, 0.3, 1] }}
+              transition={{ duration: 1.2, repeat: Infinity }}
+            >
+              ...
+            </motion.span>
+          ) : (
+            "$"
+          )}
+        </motion.span>
         <input
           ref={inputRef}
           className="min-w-0 flex-1 bg-transparent text-[12px] focus:outline-none"
@@ -127,6 +170,8 @@ export function TerminalTab() {
           spellCheck={false}
           autoComplete="off"
           autoFocus
+          disabled={running}
+          placeholder={running ? "Running..." : "Enter command..."}
         />
       </form>
     </div>

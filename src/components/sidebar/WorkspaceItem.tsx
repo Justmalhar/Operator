@@ -1,6 +1,8 @@
 import { GitBranch } from "lucide-react";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import type { Workspace } from "@/types/workspace";
+import { springs } from "@/lib/animations";
 
 const statusColors: Record<string, string> = {
   running: "#4ec994",
@@ -12,6 +14,8 @@ const statusColors: Record<string, string> = {
   archived: "var(--vscode-tab-inactive-foreground)",
 };
 
+const animatedStatuses = new Set(["running", "waiting"]);
+
 interface WorkspaceItemProps {
   workspace: Workspace;
   isActive: boolean;
@@ -20,13 +24,17 @@ interface WorkspaceItemProps {
 
 export function WorkspaceItem({ workspace, isActive, onClick }: WorkspaceItemProps) {
   const dotColor = statusColors[workspace.status] ?? statusColors.idle;
+  const shouldPulse = animatedStatuses.has(workspace.status);
 
   return (
-    <button
+    <motion.button
       type="button"
       onClick={onClick}
+      whileHover={{ x: 2, backgroundColor: "var(--vscode-list-hover-background)" }}
+      whileTap={{ scale: 0.98 }}
+      transition={springs.snappy}
       className={cn(
-        "vscode-list-item vscode-sidebar-item vscode-focusable group flex h-[22px] w-full items-center gap-1.5 text-left text-[13px] transition-colors duration-75",
+        "vscode-list-item vscode-sidebar-item vscode-focusable group flex h-[22px] w-full items-center gap-1.5 text-left text-[13px]",
         isActive && "selected",
       )}
       style={{ paddingLeft: 24 }}
@@ -35,11 +43,14 @@ export function WorkspaceItem({ workspace, isActive, onClick }: WorkspaceItemPro
         className="h-3.5 w-3.5 shrink-0"
         style={{ color: isActive ? "var(--vscode-list-active-selection-foreground)" : "var(--vscode-list-tree-indent-guide-stroke)" }}
       />
-      <span className="min-w-0 flex-1 truncate">{workspace.name}</span>
+      <span className="min-w-0 flex-1 truncate">{workspace.city_name}</span>
       <span
-        className="mr-2 inline-block h-[6px] w-[6px] shrink-0 rounded-full"
+        className={cn(
+          "status-dot mr-2 inline-block h-[6px] w-[6px] shrink-0 rounded-full",
+          shouldPulse && "status-dot-active",
+        )}
         style={{ backgroundColor: dotColor }}
       />
-    </button>
+    </motion.button>
   );
 }
