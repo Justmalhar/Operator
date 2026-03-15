@@ -11,6 +11,8 @@ import {
   AtSign,
   Star,
   ExternalLink,
+  Slash,
+  Cpu,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { mockRepos } from "@/data/mockWorkspaces";
@@ -62,35 +64,25 @@ const MODEL_GROUPS: ModelGroup[] = [
 
 const DEFAULT_MODEL_ID = "claude-sonnet-4-6";
 
-// Anthropic asterisk / snowflake SVG icon
+// ── Brand icons ───────────────────────────────────────────────────────────────
+
 function AnthropicIcon({ className }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      className={className}
-      aria-hidden="true"
-    >
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
       <path d="M12 2L13.5 8.5L20 7L15.5 12L20 17L13.5 15.5L12 22L10.5 15.5L4 17L8.5 12L4 7L10.5 8.5L12 2Z" />
     </svg>
   );
 }
 
-// OpenAI swirl SVG icon
 function OpenAIIcon({ className }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      className={className}
-      aria-hidden="true"
-    >
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
       <path d="M22.282 9.821a5.985 5.985 0 0 0-.516-4.91 6.046 6.046 0 0 0-6.51-2.9A6.065 6.065 0 0 0 4.981 4.18a5.985 5.985 0 0 0-3.998 2.9 6.046 6.046 0 0 0 .743 7.097 5.98 5.98 0 0 0 .51 4.911 6.051 6.051 0 0 0 6.515 2.9A5.985 5.985 0 0 0 13.26 24a6.056 6.056 0 0 0 5.772-4.206 5.99 5.99 0 0 0 3.997-2.9 6.056 6.056 0 0 0-.747-7.073zM13.26 22.43a4.476 4.476 0 0 1-2.876-1.04l.141-.081 4.779-2.758a.795.795 0 0 0 .392-.681v-6.737l2.02 1.168a.071.071 0 0 1 .038.052v5.583a4.504 4.504 0 0 1-4.494 4.494zM3.6 18.304a4.47 4.47 0 0 1-.535-3.014l.142.085 4.783 2.759a.771.771 0 0 0 .78 0l5.843-3.369v2.332a.08.08 0 0 1-.033.062L9.74 19.95a4.5 4.5 0 0 1-6.14-1.646zM2.34 7.896a4.485 4.485 0 0 1 2.366-1.973V11.6a.766.766 0 0 0 .388.676l5.815 3.355-2.02 1.168a.076.076 0 0 1-.071 0l-4.83-2.786A4.504 4.504 0 0 1 2.34 7.896zm16.597 3.855l-5.843-3.372 2.02-1.164a.08.08 0 0 1 .071 0l4.83 2.786a4.494 4.494 0 0 1-.676 8.105v-5.678a.79.79 0 0 0-.402-.677zm2.01-3.023l-.141-.085-4.774-2.782a.776.776 0 0 0-.785 0L9.409 9.23V6.897a.066.066 0 0 1 .028-.061l4.83-2.787a4.5 4.5 0 0 1 6.68 4.66zm-12.64 4.135l-2.02-1.164a.08.08 0 0 1-.038-.057V6.075a4.5 4.5 0 0 1 7.375-3.453l-.142.08L8.704 5.46a.795.795 0 0 0-.393.681zm1.097-2.365l2.602-1.5 2.607 1.5v2.999l-2.597 1.5-2.607-1.5z" />
     </svg>
   );
 }
 
-// ── ModelPicker dropdown ──────────────────────────────────────────────────────
+// ── Model picker dropdown ─────────────────────────────────────────────────────
 
 function ModelPicker({
   selectedModelId,
@@ -107,15 +99,12 @@ function ModelPicker({
 
   useEffect(() => {
     function handleOutside(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     }
     if (open) document.addEventListener("mousedown", handleOutside);
     return () => document.removeEventListener("mousedown", handleOutside);
   }, [open]);
 
-  // Keyboard shortcut selection
   useEffect(() => {
     if (!open) return;
     function handleKey(e: KeyboardEvent) {
@@ -135,38 +124,35 @@ function ModelPicker({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium transition-colors duration-75 hover:bg-white/10"
+        className="flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium transition-colors hover:bg-white/8"
         style={{ color: "var(--vscode-tab-inactive-foreground)" }}
       >
         {selected.label}
-        <ChevronDown className="h-3 w-3" />
+        <ChevronDown className="h-3 w-3 opacity-60" />
       </button>
 
       {open && (
         <div
-          className="absolute bottom-full left-0 z-50 mb-1.5 w-64 rounded-xl py-2 shadow-2xl"
+          className="absolute bottom-full left-0 z-50 mb-1.5 w-64 overflow-hidden rounded-lg py-1.5 shadow-2xl"
           style={{
-            backgroundColor: "#2a2a2a",
-            border: "1px solid rgba(255,255,255,0.1)",
+            backgroundColor: "var(--vscode-dropdown-background)",
+            border: "1px solid var(--vscode-panel-border, rgba(255,255,255,0.10))",
           }}
         >
           {MODEL_GROUPS.map((group, gi) => (
             <div key={group.label}>
               {gi > 0 && (
                 <div
-                  className="mx-3 my-1.5"
-                  style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}
+                  className="mx-2 my-1"
+                  style={{ borderTop: "1px solid var(--vscode-panel-border, rgba(255,255,255,0.07))" }}
                 />
               )}
-              {/* Group label */}
               <p
-                className="px-3 pb-1 pt-1 text-[11px] font-medium"
-                style={{ color: "var(--vscode-tab-inactive-foreground)" }}
+                className="px-3 pb-1 pt-1.5 text-[10px] font-semibold uppercase tracking-wider"
+                style={{ color: "var(--vscode-tab-inactive-foreground)", opacity: 0.5 }}
               >
                 {group.label}
               </p>
-
-              {/* Models */}
               {group.models.map((model) => {
                 const isSelected = model.id === selectedModelId;
                 const Icon = group.provider === "claude" ? AnthropicIcon : OpenAIIcon;
@@ -176,7 +162,7 @@ function ModelPicker({
                     type="button"
                     onClick={() => { onSelect(model.id); setOpen(false); }}
                     className={cn(
-                      "flex w-full items-center gap-2.5 rounded-lg mx-1 px-2 py-2 text-left text-[13px] transition-colors duration-75 hover:bg-white/10",
+                      "mx-1 flex items-center gap-2.5 rounded px-2.5 py-1.5 text-left text-[12px] transition-colors hover:bg-white/8",
                       isSelected && "bg-white/5",
                     )}
                     style={{
@@ -184,47 +170,24 @@ function ModelPicker({
                       width: "calc(100% - 8px)",
                     }}
                   >
-                    <Icon className="h-4 w-4 shrink-0 opacity-70" />
+                    <Icon className="h-3.5 w-3.5 shrink-0 opacity-60" />
                     <span className="flex-1 truncate">{model.label}</span>
-
-                    {/* External link arrow */}
-                    {model.isExternal && (
-                      <ExternalLink className="h-3 w-3 shrink-0 opacity-40" />
-                    )}
-
-                    {/* NEW badge */}
+                    {model.isExternal && <ExternalLink className="h-3 w-3 shrink-0 opacity-35" />}
                     {model.isNew && (
                       <span
-                        className="shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold"
-                        style={{
-                          backgroundColor: "rgba(220,100,80,0.25)",
-                          color: "#e07060",
-                        }}
+                        className="shrink-0 rounded px-1.5 py-0.5 text-[9px] font-semibold"
+                        style={{ backgroundColor: "rgba(220,100,80,0.2)", color: "#e07060" }}
                       >
                         NEW
                       </span>
                     )}
-
-                    {/* Checkmark for selected */}
                     {isSelected && (
-                      <Check className="h-3.5 w-3.5 shrink-0 opacity-70" />
+                      <Check className="h-3 w-3 shrink-0" style={{ color: "var(--vscode-list-highlight-foreground)" }} />
                     )}
-
-                    {/* Star */}
-                    {model.isStarred ? (
-                      <Star
-                        className="h-3.5 w-3.5 shrink-0"
-                        style={{ color: "#facc15", fill: "#facc15" }}
-                      />
-                    ) : !model.isNew && !model.isExternal ? (
-                      <Star className="h-3.5 w-3.5 shrink-0 opacity-20" />
-                    ) : null}
-
-                    {/* Keyboard shortcut number */}
-                    <span
-                      className="w-4 shrink-0 text-right text-[11px]"
-                      style={{ opacity: 0.35 }}
-                    >
+                    {model.isStarred && !isSelected && (
+                      <Star className="h-3 w-3 shrink-0" style={{ color: "#facc15", fill: "#facc15" }} />
+                    )}
+                    <span className="w-4 shrink-0 text-right text-[10px]" style={{ opacity: 0.3 }}>
                       {model.shortcut}
                     </span>
                   </button>
@@ -238,23 +201,7 @@ function ModelPicker({
   );
 }
 
-const SUGGESTED_PROMPTS = [
-  {
-    icon: Gamepad2,
-    label: "Build a classic Snake game in this repo.",
-    color: "#4ade80",
-  },
-  {
-    icon: FileText,
-    label: "Create a one-page PDF that summarizes this app.",
-    color: "#f87171",
-  },
-  {
-    icon: Lightbulb,
-    label: "Create a plan to…",
-    color: "#facc15",
-  },
-];
+// ── Workspace dropdown ────────────────────────────────────────────────────────
 
 function WorkspaceDropdown({
   repos,
@@ -267,14 +214,11 @@ function WorkspaceDropdown({
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-
   const selectedRepo = repos.find((r) => r.id === selectedRepoId) ?? repos[0];
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     }
     if (open) document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -285,55 +229,44 @@ function WorkspaceDropdown({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className={cn(
-          "flex items-center gap-1.5 rounded-md px-2 py-0.5 transition-colors duration-75",
-          "hover:bg-white/10",
-        )}
+        className="flex items-center gap-1.5 rounded-md px-2 py-0.5 transition-colors hover:bg-white/8"
       >
         <span
-          className="text-[22px] font-semibold"
+          className="text-[22px] font-semibold leading-tight"
           style={{ color: "var(--vscode-editor-foreground)" }}
         >
           {selectedRepo?.name ?? "Select project"}
         </span>
         <ChevronDown
-          className={cn(
-            "h-4 w-4 transition-transform duration-150 mt-0.5",
-            open && "rotate-180",
-          )}
-          style={{ color: "var(--vscode-tab-inactive-foreground)" }}
+          className={cn("mt-0.5 h-4 w-4 transition-transform duration-150", open && "rotate-180")}
+          style={{ color: "var(--vscode-tab-inactive-foreground)", opacity: 0.6 }}
         />
       </button>
 
       {open && (
         <div
-          className="absolute left-1/2 top-full z-50 mt-1.5 w-52 -translate-x-1/2 rounded-lg py-1 shadow-xl"
+          className="absolute left-1/2 top-full z-50 mt-1.5 w-56 -translate-x-1/2 overflow-hidden rounded-lg py-1 shadow-xl"
           style={{
             backgroundColor: "var(--vscode-dropdown-background)",
-            border: "1px solid rgba(255,255,255,0.1)",
+            border: "1px solid var(--vscode-panel-border, rgba(255,255,255,0.10))",
           }}
         >
           <p
-            className="px-3 pb-1.5 pt-2 text-[11px] font-medium uppercase tracking-wide"
-            style={{ color: "var(--vscode-tab-inactive-foreground)" }}
+            className="px-3 pb-1.5 pt-2 text-[10px] font-semibold uppercase tracking-wider"
+            style={{ color: "var(--vscode-tab-inactive-foreground)", opacity: 0.45 }}
           >
-            Select your project
+            Select project
           </p>
-
           {repos.map((repo) => {
             const isSelected = repo.id === selectedRepo?.id;
             return (
               <button
                 key={repo.id}
                 type="button"
-                onClick={() => {
-                  onSelect(repo.id);
-                  setOpen(false);
-                }}
-                className="flex w-full items-center gap-2.5 px-3 py-1.5 text-left text-[13px] transition-colors duration-75 hover:bg-white/10"
+                onClick={() => { onSelect(repo.id); setOpen(false); }}
+                className="flex w-full items-center gap-2.5 px-3 py-1.5 text-left text-[12px] transition-colors hover:bg-white/8"
                 style={{ color: "var(--vscode-dropdown-foreground)" }}
               >
-                {/* Repo avatar */}
                 <span
                   className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded text-[10px] font-bold"
                   style={{
@@ -345,31 +278,24 @@ function WorkspaceDropdown({
                 </span>
                 <span className="min-w-0 flex-1 truncate">{repo.name}</span>
                 {isSelected && (
-                  <Check
-                    className="h-3.5 w-3.5 shrink-0"
-                    style={{ color: "var(--vscode-list-highlight-foreground)" }}
-                  />
+                  <Check className="h-3 w-3 shrink-0" style={{ color: "var(--vscode-list-highlight-foreground)" }} />
                 )}
               </button>
             );
           })}
-
-          {/* Divider */}
           <div
             className="mx-2 my-1"
-            style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}
+            style={{ borderTop: "1px solid var(--vscode-panel-border, rgba(255,255,255,0.07))" }}
           />
-
-          {/* Add new project */}
           <button
             type="button"
-            className="flex w-full items-center gap-2.5 px-3 py-1.5 text-left text-[13px] transition-colors duration-75 hover:bg-white/10"
+            className="flex w-full items-center gap-2.5 px-3 py-1.5 text-left text-[12px] transition-colors hover:bg-white/8"
             style={{ color: "var(--vscode-tab-inactive-foreground)" }}
             onClick={() => setOpen(false)}
           >
             <span
               className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded"
-              style={{ backgroundColor: "rgba(255,255,255,0.08)" }}
+              style={{ backgroundColor: "rgba(255,255,255,0.07)" }}
             >
               <Plus className="h-3 w-3" />
             </span>
@@ -381,10 +307,18 @@ function WorkspaceDropdown({
   );
 }
 
+// ── Suggested prompts ─────────────────────────────────────────────────────────
+
+const SUGGESTED_PROMPTS = [
+  { icon: Gamepad2, label: "Build a classic Snake game in this repo.", accent: "#4ade80" },
+  { icon: FileText, label: "Create a one-page PDF summarizing this app.", accent: "#f87171" },
+  { icon: Lightbulb, label: "Create a plan to…", accent: "#facc15" },
+];
+
+// ── NewChatPage ───────────────────────────────────────────────────────────────
+
 export function NewChatPage({ onStartChat }: NewChatPageProps) {
-  const [selectedRepoId, setSelectedRepoId] = useState<string | null>(
-    mockRepos[0]?.id ?? null,
-  );
+  const [selectedRepoId, setSelectedRepoId] = useState<string | null>(mockRepos[0]?.id ?? null);
   const [message, setMessage] = useState("");
   const [selectedModelId, setSelectedModelId] = useState(DEFAULT_MODEL_ID);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -415,38 +349,32 @@ export function NewChatPage({ onStartChat }: NewChatPageProps) {
     el.style.height = `${Math.min(el.scrollHeight, 200)}px`;
   }, [message]);
 
+  const canSend = message.trim().length > 0;
+
   return (
     <div
       className="flex h-full flex-col items-center justify-between"
       style={{ backgroundColor: "var(--vscode-editor-background)" }}
     >
-      {/* ── Center hero ───────────────────────────────────────────────── */}
-      <div className="flex flex-1 flex-col items-center justify-center gap-3 pb-8">
-        {/* Icon */}
+      {/* ── Hero ──────────────────────────────────────────────────────── */}
+      <div className="flex flex-1 flex-col items-center justify-center gap-0 pb-6">
+        {/* Operator mark */}
         <div
-          className="flex h-14 w-14 items-center justify-center rounded-2xl mb-1"
-          style={{ backgroundColor: "var(--vscode-sidebar-background)" }}
+          className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl text-[18px] font-bold"
+          style={{
+            background: "linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)",
+            color: "#fff",
+            boxShadow: "0 4px 24px rgba(59,130,246,0.2)",
+          }}
         >
-          <svg
-            width="28"
-            height="28"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            style={{ color: "var(--vscode-tab-inactive-foreground)" }}
-          >
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-          </svg>
+          O
         </div>
 
         {/* Headline + workspace picker */}
         <div className="flex flex-col items-center gap-0.5">
           <span
-            className="text-[22px] font-semibold"
-            style={{ color: "var(--vscode-editor-foreground)" }}
+            className="text-[13px]"
+            style={{ color: "var(--vscode-tab-inactive-foreground)", opacity: 0.55 }}
           >
             Let&apos;s build
           </span>
@@ -457,8 +385,8 @@ export function NewChatPage({ onStartChat }: NewChatPageProps) {
           />
         </div>
 
-        {/* Suggested prompts */}
-        <div className="mt-6 flex flex-wrap justify-center gap-2.5 px-6 max-w-xl">
+        {/* Suggested prompt cards */}
+        <div className="mt-8 flex flex-wrap justify-center gap-2 px-6" style={{ maxWidth: "520px" }}>
           {SUGGESTED_PROMPTS.map((prompt) => {
             const Icon = prompt.icon;
             return (
@@ -466,147 +394,165 @@ export function NewChatPage({ onStartChat }: NewChatPageProps) {
                 key={prompt.label}
                 type="button"
                 onClick={() => handleSuggestedPrompt(prompt.label)}
-                className="flex items-start gap-2.5 rounded-xl px-3.5 py-3 text-left text-[12px] transition-colors duration-75 hover:opacity-90 w-[160px]"
+                className="flex w-[155px] items-start gap-2.5 rounded-lg px-3 py-2.5 text-left text-[12px] transition-colors hover:bg-white/5"
                 style={{
                   backgroundColor: "var(--vscode-sidebar-background)",
+                  border: "1px solid var(--vscode-panel-border, rgba(255,255,255,0.07))",
                   color: "var(--vscode-editor-foreground)",
-                  border: "1px solid rgba(255,255,255,0.06)",
                 }}
               >
                 <span
-                  className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg"
-                  style={{ backgroundColor: `${prompt.color}22` }}
+                  className="mt-px flex h-5 w-5 shrink-0 items-center justify-center rounded"
+                  style={{ backgroundColor: `${prompt.accent}1a` }}
                 >
-                  <Icon className="h-3.5 w-3.5" style={{ color: prompt.color }} />
+                  <Icon className="h-3 w-3" style={{ color: prompt.accent }} />
                 </span>
-                <span className="leading-snug" style={{ opacity: 0.85 }}>
+                <span className="leading-snug" style={{ opacity: 0.8 }}>
                   {prompt.label}
                 </span>
               </button>
             );
           })}
 
-          {/* Explore more */}
           <button
             type="button"
-            className="flex items-center gap-1 self-center px-2 py-1 text-[12px] rounded transition-colors duration-75 hover:bg-white/10"
-            style={{ color: "var(--vscode-tab-inactive-foreground)" }}
+            className="flex items-center gap-1 self-center rounded px-2 py-1 text-[11px] transition-colors hover:bg-white/8"
+            style={{ color: "var(--vscode-tab-inactive-foreground)", opacity: 0.6 }}
           >
-            Explore more
-            <ChevronDown className="h-3 w-3 rotate-[-90deg]" />
+            More
+            <ChevronDown className="h-3 w-3 -rotate-90" />
           </button>
         </div>
       </div>
 
-      {/* ── Composer bar ─────────────────────────────────────────────── */}
-      <div className="w-full max-w-2xl px-4 pb-4">
-        <div
-          className="flex flex-col rounded-xl overflow-hidden"
-          style={{
-            backgroundColor: "var(--vscode-input-background)",
-            border: "1px solid rgba(255,255,255,0.08)",
-          }}
-        >
-          {/* Textarea */}
-          <textarea
-            ref={textareaRef}
-            value={message}
-            onChange={(e) => setMessage(e.currentTarget.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="⌘ Codex anything, @ to add files, /for commands"
-            rows={1}
-            className="w-full resize-none bg-transparent px-4 pt-3 pb-2 text-[13px] leading-relaxed placeholder:opacity-40 focus:outline-none vscode-scrollable"
+      {/* ── Composer ──────────────────────────────────────────────────── */}
+      <div
+        className="w-full shrink-0"
+        style={{ borderTop: "1px solid var(--vscode-panel-border, rgba(255,255,255,0.07))" }}
+      >
+        <div className="mx-auto w-full max-w-[720px] px-5 pt-3 pb-2">
+          {/* Input box */}
+          <div
+            className="rounded-lg px-3 pt-2.5 pb-1.5"
             style={{
-              color: "var(--vscode-input-foreground)",
-              minHeight: "44px",
-              maxHeight: "200px",
+              backgroundColor: "var(--vscode-input-background)",
+              border: "1px solid var(--vscode-input-border, rgba(255,255,255,0.10))",
+              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03)",
             }}
-          />
-
-          {/* Bottom toolbar */}
-          <div className="flex items-center justify-between px-3 pb-2.5">
-            <div className="flex items-center gap-1">
-              {/* Attach */}
-              <button
-                type="button"
-                className="flex h-7 w-7 items-center justify-center rounded transition-colors duration-75 hover:bg-white/10"
-                style={{ color: "var(--vscode-tab-inactive-foreground)" }}
-                aria-label="Attach file"
-              >
-                <Paperclip className="h-3.5 w-3.5" />
-              </button>
-
-              {/* Mention */}
-              <button
-                type="button"
-                className="flex h-7 w-7 items-center justify-center rounded transition-colors duration-75 hover:bg-white/10"
-                style={{ color: "var(--vscode-tab-inactive-foreground)" }}
-                aria-label="Mention"
-              >
-                <AtSign className="h-3.5 w-3.5" />
-              </button>
-
-              {/* Divider */}
-              <div
-                className="mx-1 h-4"
-                style={{ borderLeft: "1px solid rgba(255,255,255,0.12)" }}
-              />
-
-              {/* Model picker */}
-              <ModelPicker
-                selectedModelId={selectedModelId}
-                onSelect={setSelectedModelId}
-              />
-
-              {/* Reasoning */}
-              <button
-                type="button"
-                className="flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium transition-colors duration-75 hover:bg-white/10"
-                style={{ color: "var(--vscode-tab-inactive-foreground)" }}
-              >
-                Medium
-                <ChevronDown className="h-3 w-3" />
-              </button>
-            </div>
-
-            {/* Send */}
-            <button
-              type="button"
-              onClick={handleSend}
-              disabled={!message.trim()}
-              className={cn(
-                "flex h-7 w-7 items-center justify-center rounded-lg transition-all duration-75",
-                message.trim()
-                  ? "opacity-100 hover:opacity-90"
-                  : "opacity-30 cursor-not-allowed",
-              )}
+          >
+            <textarea
+              ref={textareaRef}
+              value={message}
+              onChange={(e) => setMessage(e.currentTarget.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Ask Operator anything, @ to add files, / for commands…"
+              rows={1}
+              className="vscode-scrollable w-full resize-none bg-transparent text-[13px] leading-relaxed placeholder:opacity-40 focus:outline-none"
               style={{
-                backgroundColor: message.trim()
-                  ? "var(--vscode-button-background, #007acc)"
-                  : "var(--vscode-input-background)",
-                color: "#ffffff",
+                color: "var(--vscode-input-foreground)",
+                minHeight: "22px",
+                maxHeight: "200px",
+                overflowY: "auto",
               }}
-              aria-label="Send message"
-            >
-              <ArrowUp className="h-3.5 w-3.5" />
-            </button>
+            />
+            {/* Keyboard hint */}
+            {!canSend && (
+              <div
+                className="mt-1 flex items-center justify-end pb-0.5 text-[10px]"
+                style={{ color: "var(--vscode-input-placeholder-foreground)", opacity: 0.45 }}
+              >
+                <kbd
+                  className="rounded px-1 py-px font-mono"
+                  style={{ border: "1px solid var(--vscode-panel-border, rgba(255,255,255,0.1))" }}
+                >
+                  ↵
+                </kbd>
+                <span className="ml-1">to send</span>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Status bar row */}
-        <div className="flex items-center justify-between px-1 pt-2 text-[11px]" style={{ color: "var(--vscode-tab-inactive-foreground)", opacity: 0.7 }}>
-          <div className="flex items-center gap-1.5">
-            <span
-              className="inline-block h-1.5 w-1.5 rounded-full"
-              style={{ backgroundColor: "#6b6b6b" }}
-            />
-            Local
-            <ChevronDown className="h-3 w-3" />
+        {/* Toolbar row */}
+        <div className="mx-auto flex w-full max-w-[720px] items-center gap-1 px-5 pb-2">
+          <div className="flex flex-1 items-center gap-0.5">
+            {/* Attach */}
+            <button
+              type="button"
+              className="flex h-7 w-7 items-center justify-center rounded-md transition-colors hover:bg-white/5"
+              style={{ color: "var(--vscode-editor-foreground)", opacity: 0.5 }}
+              title="Add attachment"
+            >
+              <Paperclip className="h-3.5 w-3.5" />
+            </button>
+
+            {/* Mention */}
+            <button
+              type="button"
+              className="flex h-7 w-7 items-center justify-center rounded-md transition-colors hover:bg-white/5"
+              style={{ color: "var(--vscode-editor-foreground)", opacity: 0.5 }}
+              title="Mention a file"
+            >
+              <AtSign className="h-3.5 w-3.5" />
+            </button>
+
+            <ModelPicker selectedModelId={selectedModelId} onSelect={setSelectedModelId} />
+
+            {/* Slash commands */}
+            <button
+              type="button"
+              className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors hover:bg-white/5"
+              style={{ color: "var(--vscode-editor-foreground)", opacity: 0.4 }}
+              title="Slash commands"
+            >
+              <Slash className="h-3 w-3" />
+              Commands
+            </button>
           </div>
-          <div className="flex items-center gap-1">
-            Full access
-            <ChevronDown className="h-3 w-3" />
+
+          {/* Send */}
+          <button
+            type="button"
+            onClick={handleSend}
+            disabled={!canSend}
+            className={cn(
+              "flex h-[28px] w-[28px] items-center justify-center rounded-lg transition-all duration-150",
+              canSend ? "opacity-100 hover:brightness-110 active:scale-95" : "cursor-not-allowed opacity-20",
+            )}
+            style={{
+              backgroundColor: canSend
+                ? "var(--vscode-focus-border, #007fd4)"
+                : "rgba(255,255,255,0.08)",
+              color: "#fff",
+            }}
+            title="Send (↵)"
+          >
+            <ArrowUp className="h-3.5 w-3.5" strokeWidth={2.5} />
+          </button>
+        </div>
+
+        {/* Status row */}
+        <div
+          className="mx-auto flex w-full max-w-[720px] items-center justify-between px-5 py-1.5"
+          style={{ borderTop: "1px solid var(--vscode-panel-border, rgba(255,255,255,0.06))" }}
+        >
+          <div className="flex items-center gap-0.5">
+            <button
+              type="button"
+              className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors hover:bg-white/5"
+              style={{ color: "var(--vscode-editor-foreground)", opacity: 0.55 }}
+            >
+              <Cpu className="h-3 w-3" />
+              Local
+              <ChevronDown className="h-2.5 w-2.5 opacity-50" />
+            </button>
           </div>
+          <span
+            className="text-[10px] tabular-nums"
+            style={{ color: "var(--vscode-tab-inactive-foreground)", opacity: 0.35 }}
+          >
+            80k / 200k ctx
+          </span>
         </div>
       </div>
     </div>
