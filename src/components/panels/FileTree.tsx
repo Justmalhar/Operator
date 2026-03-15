@@ -1,6 +1,7 @@
-import { useState } from "react";
-import { ChevronRight, File, Folder, FolderOpen } from "lucide-react";
+import { memo, useState } from "react";
+import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { FileIcon } from "@/components/shared/FileIcon";
 
 interface FileNode {
   name: string;
@@ -37,15 +38,6 @@ const MOCK_TREE: FileNode[] = [
   { name: "operator.json", type: "file" },
 ];
 
-function getFileColor(name: string): string {
-  if (name.endsWith(".tsx") || name.endsWith(".ts")) return "#519aba";
-  if (name.endsWith(".css")) return "#563d7c";
-  if (name.endsWith(".json")) return "#cbcb41";
-  if (name.endsWith(".md")) return "#519aba";
-  if (name.endsWith(".svg")) return "#f1502f";
-  return "var(--vscode-list-tree-indent-guide-stroke)";
-}
-
 interface TreeNodeProps {
   node: FileNode;
   depth?: number;
@@ -54,7 +46,10 @@ interface TreeNodeProps {
   onOpenFile?: (filename: string, filePath: string) => void;
 }
 
-function TreeNode({
+// Memoized so that selecting a file only re-renders the two nodes whose
+// isSelected state actually changed (was selected → deselected, and vice versa),
+// rather than the entire tree.
+const TreeNode = memo(function TreeNode({
   node,
   depth = 0,
   selectedFile,
@@ -80,11 +75,7 @@ function TreeNode({
             )}
             style={{ color: "var(--vscode-list-tree-indent-guide-stroke)", opacity: 0.6 }}
           />
-          {expanded ? (
-            <FolderOpen className="h-[15px] w-[15px] shrink-0" style={{ color: "#e8ab53" }} />
-          ) : (
-            <Folder className="h-[15px] w-[15px] shrink-0" style={{ color: "#e8ab53" }} />
-          )}
+          <FileIcon filename={node.name} isDir isOpen={expanded} size={16} />
           <span
             className="truncate font-medium"
             style={{
@@ -98,7 +89,6 @@ function TreeNode({
         </button>
         {expanded && (
           <div className="relative">
-            {/* Indent guide */}
             <span
               className="tree-indent-guide"
               style={{ left: `${indent + 7}px` }}
@@ -134,10 +124,7 @@ function TreeNode({
       )}
       style={{ paddingLeft: `${indent + 16}px` }}
     >
-      <File
-        className="h-[15px] w-[15px] shrink-0"
-        style={{ color: getFileColor(node.name) }}
-      />
+      <FileIcon filename={node.name} size={15} />
       <span
         className="min-w-0 flex-1 truncate"
         style={{
@@ -164,7 +151,7 @@ function TreeNode({
       )}
     </button>
   );
-}
+});
 
 interface FileTreeProps {
   onOpenFile?: (filename: string, filePath: string) => void;
