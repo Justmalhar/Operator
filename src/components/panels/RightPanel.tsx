@@ -4,15 +4,17 @@ import { cn } from "@/lib/utils";
 import { FileTree } from "./FileTree";
 import { ChangesTab } from "./ChangesTab";
 import { ChecksTab } from "./ChecksTab";
-import { LayoutList, Search } from "lucide-react";
+import { CheckSquare, Search } from "lucide-react";
 import { tabContent, springs } from "@/lib/animations";
+import { TodosPanel } from "@/components/todos/TodosPanel";
 
-type RightTab = "files" | "changes" | "checks";
+type RightTab = "files" | "changes" | "checks" | "todos";
 
 const TABS: { id: RightTab; label: string }[] = [
   { id: "files", label: "All files" },
   { id: "changes", label: "Changes" },
   { id: "checks", label: "Checks" },
+  { id: "todos", label: "Todos" },
 ];
 
 interface RightPanelProps {
@@ -52,6 +54,9 @@ export function RightPanel({ worktreePath, onOpenFile }: RightPanelProps) {
                     : "text-[var(--vscode-panel-title-inactive-foreground)] hover:text-[var(--vscode-panel-title-active-foreground)]",
                 )}
               >
+                {tab.id === "todos" && (
+                  <CheckSquare className="h-[12px] w-[12px] shrink-0" />
+                )}
                 {tab.label}
                 {isActive && <span className="panel-tab-underline" />}
               </button>
@@ -65,12 +70,13 @@ export function RightPanel({ worktreePath, onOpenFile }: RightPanelProps) {
             whileHover={{ scale: 1.1, backgroundColor: "rgba(255,255,255,0.08)" }}
             whileTap={{ scale: 0.9 }}
             transition={springs.snappy}
+            onClick={() => setActiveTab("todos")}
             className="flex h-7 w-7 items-center justify-center rounded"
-            aria-label="Toggle tree view"
+            aria-label="Todos"
           >
-            <LayoutList
+            <CheckSquare
               className="h-[15px] w-[15px]"
-              style={{ color: "var(--vscode-panel-title-inactive-foreground)" }}
+              style={{ color: activeTab === "todos" ? "var(--vscode-panel-title-active-foreground)" : "var(--vscode-panel-title-inactive-foreground)" }}
             />
           </motion.button>
           <motion.button
@@ -103,6 +109,7 @@ export function RightPanel({ worktreePath, onOpenFile }: RightPanelProps) {
             {activeTab === "files" && <FileTree worktreePath={worktreePath} onOpenFile={onOpenFile} />}
             {activeTab === "changes" && <ChangesTab worktreePath={worktreePath} />}
             {activeTab === "checks" && <ChecksTab />}
+            {activeTab === "todos" && <TodosPanel />}
           </motion.div>
         </AnimatePresence>
       </div>
