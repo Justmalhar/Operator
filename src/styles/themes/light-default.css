@@ -108,6 +108,13 @@
   --vscode-toolbar-hover-background:      rgba(0, 0, 0, 0.06);
   --vscode-separator-color:               rgba(0, 0, 0, 0.08);
 
+  /* ── Text & Links ─────────────────────────────────────────────────────── */
+  --vscode-descriptionForeground:         #717171;
+  --vscode-textLink-foreground:           #007acc;
+  --vscode-textLink-activeForeground:     #0062a3;
+  --vscode-errorForeground:              #e51400;
+  --vscode-focusBorder:                   #0090f1;
+
   /* ── Misc overrides ──────────────────────────────────────────────────── */
   --vscode-widget-border:                 rgba(0, 0, 0, 0.1);
   --vscode-menu-background:               #ffffff;

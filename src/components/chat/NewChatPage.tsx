@@ -7,12 +7,10 @@ import {
   FileText,
   Lightbulb,
   ArrowUp,
-  Paperclip,
-  AtSign,
   Star,
   ExternalLink,
-  Slash,
-  Cpu,
+  Brain,
+  Map,
   GitBranch,
   FolderGit2,
 } from "lucide-react";
@@ -346,6 +344,140 @@ function slugify(s: string): string {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
+// ── Thinking helpers ──────────────────────────────────────────────────────────
+
+type ThinkingLevel = "off" | "low" | "medium" | "high";
+
+function ThinkingRects({ level }: { level: ThinkingLevel }) {
+  const counts: Record<ThinkingLevel, number> = { off: 0, low: 1, medium: 2, high: 3 };
+  const count = counts[level];
+  if (count === 0) return null;
+  return (
+    <span className="flex items-center gap-[2px]">
+      {Array.from({ length: 3 }).map((_, i) => (
+        <span
+          key={i}
+          className="inline-block rounded-[1px]"
+          style={{
+            width: "3px",
+            height: i < count ? "10px" : "6px",
+            backgroundColor: "currentColor",
+            opacity: i < count ? 1 : 0.2,
+          }}
+        />
+      ))}
+    </span>
+  );
+}
+
+function RadialContextIndicator({ percentage = 0 }: { percentage?: number }) {
+  const r = 7;
+  const circ = 2 * Math.PI * r;
+  const offset = circ - (Math.min(percentage, 100) / 100) * circ;
+  return (
+    <button
+      type="button"
+      className="flex h-7 w-7 items-center justify-center rounded-md transition-colors theme-hover-bg"
+      style={{ color: "var(--vscode-icon-foreground)" }}
+      title={`${percentage}% context used`}
+    >
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <circle cx="9" cy="9" r={r} stroke="currentColor" strokeWidth="1.5" opacity="0.2" />
+        {percentage > 0 && (
+          <circle
+            cx="9" cy="9" r={r}
+            stroke="currentColor" strokeWidth="1.5"
+            strokeDasharray={circ} strokeDashoffset={offset}
+            strokeLinecap="round" transform="rotate(-90 9 9)"
+          />
+        )}
+      </svg>
+    </button>
+  );
+}
+
+function ComposerThinkingPicker({
+  value,
+  onChange,
+}: {
+  value: ThinkingLevel;
+  onChange: (v: ThinkingLevel) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const isActive = value !== "off";
+  const OPTIONS: { id: ThinkingLevel; label: string }[] = [
+    { id: "off", label: "Off" },
+    { id: "low", label: "Low" },
+    { id: "medium", label: "Medium" },
+    { id: "high", label: "High" },
+  ];
+
+  useEffect(() => {
+    function handleOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    if (open) document.addEventListener("mousedown", handleOutside);
+    return () => document.removeEventListener("mousedown", handleOutside);
+  }, [open]);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[12px] font-medium transition-colors theme-hover-bg"
+        style={{
+          color: isActive ? "var(--vscode-focus-border, #007fd4)" : "var(--vscode-tab-inactive-foreground)",
+          backgroundColor: isActive ? "rgba(0,127,212,0.12)" : undefined,
+        }}
+      >
+        <Brain className="h-3.5 w-3.5" />
+        {value === "off" ? "Thinking" : OPTIONS.find((o) => o.id === value)?.label}
+        {isActive && <ThinkingRects level={value} />}
+        <ChevronDown className="h-2.5 w-2.5 opacity-40" />
+      </button>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            variants={dropdownVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="absolute bottom-full left-0 z-50 mb-1.5 w-44 overflow-hidden rounded-lg py-1.5 shadow-2xl"
+            style={{
+              backgroundColor: "var(--vscode-dropdown-background)",
+              border: "1px solid var(--vscode-panel-border, rgba(255,255,255,0.10))",
+            }}
+          >
+            <p
+              className="px-3 pb-1 pt-1.5 text-[10px] font-semibold uppercase tracking-wider"
+              style={{ color: "var(--vscode-tab-inactive-foreground)", opacity: 0.5 }}
+            >
+              Extended Thinking
+            </p>
+            {OPTIONS.map((opt) => (
+              <button
+                key={opt.id}
+                type="button"
+                onClick={() => { onChange(opt.id); setOpen(false); }}
+                className="flex w-full items-center justify-between gap-3 px-3 py-1.5 text-left text-[12px] transition-colors theme-hover-bg"
+                style={{
+                  color: "var(--vscode-dropdown-foreground)",
+                  backgroundColor: value === opt.id ? "var(--vscode-toolbar-hover-background)" : undefined,
+                }}
+              >
+                <span>{opt.label}</span>
+                <ThinkingRects level={opt.id} />
+              </button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 // ── NewChatPage ───────────────────────────────────────────────────────────────
 
 export function NewChatPage({ repoId, onStartChat }: NewChatPageProps) {
@@ -358,7 +490,10 @@ export function NewChatPage({ repoId, onStartChat }: NewChatPageProps) {
   const [composerFocused, setComposerFocused] = useState(false);
   const [branchName, setBranchName] = useState(() => `feature-${Date.now().toString(36)}`);
   const [isCreatingWorktree, setIsCreatingWorktree] = useState(false);
+  const [thinking, setThinking] = useState<ThinkingLevel>("off");
+  const [planMode, setPlanMode] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Resolve the active repo object
   const activeRepo = repos.find((r) => r.id === (repoId ?? selectedRepoId));
@@ -629,21 +764,20 @@ export function NewChatPage({ repoId, onStartChat }: NewChatPageProps) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ ...springs.smooth, delay: 0.2 }}
-        className="w-full min-w-0 shrink-0"
-        style={{ borderTop: "1px solid var(--vscode-panel-border, rgba(255,255,255,0.07))" }}
+        className="w-full min-w-0 shrink-0 px-3 pb-3 sm:px-5"
       >
-        <div className="mx-auto w-full max-w-[720px] px-3 pt-3 pb-2 sm:px-5">
-          {/* Input box */}
-          <div
-            className="rounded-lg px-3 pt-2.5 pb-1.5 transition-shadow duration-200"
-            style={{
-              backgroundColor: "var(--vscode-input-background)",
-              border: "1px solid var(--vscode-input-border, rgba(255,255,255,0.10))",
-              boxShadow: composerFocused
-                ? "0 0 0 1px var(--vscode-focus-border), 0 0 12px rgba(0,127,212,0.15)"
-                : "none",
-            }}
-          >
+        <div
+          className="mx-auto w-full max-w-[720px] overflow-hidden rounded-xl"
+          style={{
+            backgroundColor: "var(--vscode-input-background)",
+            border: "1px solid var(--vscode-input-border, rgba(255,255,255,0.10))",
+            boxShadow: composerFocused
+              ? "0 0 0 1px var(--vscode-focus-border), 0 0 12px rgba(0,127,212,0.15)"
+              : "none",
+          }}
+        >
+          {/* Textarea */}
+          <div className="px-3.5 pt-3 pb-1">
             <textarea
               ref={textareaRef}
               value={message}
@@ -651,7 +785,7 @@ export function NewChatPage({ repoId, onStartChat }: NewChatPageProps) {
               onKeyDown={handleKeyDown}
               onFocus={() => setComposerFocused(true)}
               onBlur={() => setComposerFocused(false)}
-              placeholder="Ask Operator anything, @ to add files, / for commands…"
+              placeholder="Ask for code changes, @mention files, run /slash commands or add /skills"
               rows={1}
               className="vscode-scrollable w-full resize-none bg-transparent text-[13px] leading-relaxed placeholder:opacity-40 focus:outline-none"
               style={{
@@ -661,123 +795,72 @@ export function NewChatPage({ repoId, onStartChat }: NewChatPageProps) {
                 overflowY: "auto",
               }}
             />
-            {/* Keyboard hint */}
-            <AnimatePresence>
-              {!canSend && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="mt-1 flex items-center justify-end pb-0.5 text-[10px]"
-                  style={{ color: "var(--vscode-input-placeholder-foreground)", opacity: 0.45 }}
-                >
-                  <kbd
-                    className="rounded px-1 py-px font-mono"
-                    style={{ border: "1px solid var(--vscode-panel-border, rgba(255,255,255,0.1))" }}
-                  >
-                    ↵
-                  </kbd>
-                  <span className="ml-1">to send</span>
-                </motion.div>
-              )}
-            </AnimatePresence>
           </div>
-        </div>
 
-        {/* Toolbar row */}
-        <div className="mx-auto flex w-full max-w-[720px] items-center gap-1 px-3 pb-2 sm:px-5">
-          <div className="flex flex-1 items-center gap-0.5">
-            {/* Attach */}
-            <motion.button
+          {/* Toolbar row */}
+          <div className="flex items-center gap-0.5 px-2 pb-2.5 pt-1">
+            {/* Left: model, thinking, plan */}
+            <ModelPicker selectedModelId={selectedModelId} onSelect={setSelectedModelId} />
+            <ComposerThinkingPicker value={thinking} onChange={setThinking} />
+            <button
               type="button"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
+              onClick={() => setPlanMode((v) => !v)}
+              className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[12px] font-medium transition-colors theme-hover-bg"
+              style={{
+                color: planMode ? "var(--vscode-focus-border, #007fd4)" : "var(--vscode-tab-inactive-foreground)",
+                backgroundColor: planMode ? "rgba(0,127,212,0.12)" : undefined,
+              }}
+              title="Toggle Plan mode"
+            >
+              <Map className="h-3.5 w-3.5" />
+              Plan
+            </button>
+
+            <div className="flex-1" />
+
+            {/* Right: context radial, attach, send */}
+            <RadialContextIndicator percentage={0} />
+
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
               className="flex h-7 w-7 items-center justify-center rounded-md transition-colors theme-hover-bg"
-              style={{ color: "var(--vscode-editor-foreground)", opacity: 0.5 }}
+              style={{ color: "var(--vscode-tab-inactive-foreground)" }}
               title="Add attachment"
             >
-              <Paperclip className="h-3.5 w-3.5" />
-            </motion.button>
+              <Plus className="h-3.5 w-3.5" />
+            </button>
+            <input ref={fileInputRef} type="file" multiple className="hidden" />
 
-            {/* Mention */}
             <motion.button
               type="button"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              className="flex h-7 w-7 items-center justify-center rounded-md transition-colors theme-hover-bg"
-              style={{ color: "var(--vscode-editor-foreground)", opacity: 0.5 }}
-              title="Mention a file"
+              onClick={() => void handleSend()}
+              disabled={!canSend}
+              whileHover={canSend ? { scale: 1.08 } : undefined}
+              whileTap={canSend ? { scale: 0.9 } : undefined}
+              transition={springs.snappy}
+              className={cn(
+                "ml-0.5 flex h-7 w-7 items-center justify-center rounded-full transition-all duration-150",
+                canSend ? "cursor-pointer opacity-100" : "cursor-not-allowed opacity-40",
+              )}
+              style={{
+                backgroundColor: canSend
+                  ? "var(--vscode-button-background, var(--vscode-focus-border, #007fd4))"
+                  : "var(--vscode-toolbar-hover-background)",
+                color: canSend ? "var(--vscode-button-foreground, #fff)" : "var(--vscode-icon-foreground)",
+              }}
+              title={isCreatingWorktree ? "Creating worktree…" : "Send (↵)"}
             >
-              <AtSign className="h-3.5 w-3.5" />
+              {isCreatingWorktree ? (
+                <svg className="h-3.5 w-3.5 animate-spin" viewBox="0 0 24 24" fill="none">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                </svg>
+              ) : (
+                <ArrowUp className="h-3.5 w-3.5" strokeWidth={2.5} />
+              )}
             </motion.button>
-
-            <ModelPicker selectedModelId={selectedModelId} onSelect={setSelectedModelId} />
-
-            {/* Slash commands */}
-            <button
-              type="button"
-              className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors theme-hover-bg"
-              style={{ color: "var(--vscode-editor-foreground)", opacity: 0.4 }}
-              title="Slash commands"
-            >
-              <Slash className="h-3 w-3" />
-              <span className="hidden sm:inline">Commands</span>
-            </button>
           </div>
-
-          {/* Send */}
-          <motion.button
-            type="button"
-            onClick={() => void handleSend()}
-            disabled={!canSend}
-            whileHover={canSend ? { scale: 1.08 } : undefined}
-            whileTap={canSend ? { scale: 0.9 } : undefined}
-            transition={springs.snappy}
-            className={cn(
-              "flex h-[28px] w-[28px] items-center justify-center rounded-lg",
-              canSend ? "opacity-100" : "cursor-not-allowed opacity-20",
-            )}
-            style={{
-              backgroundColor: canSend
-                ? "var(--vscode-focus-border, #007fd4)"
-                : "var(--vscode-toolbar-hover-background)",
-              color: "#fff",
-            }}
-            title={isCreatingWorktree ? "Creating worktree…" : "Send (↵)"}
-          >
-            {isCreatingWorktree ? (
-              <svg className="h-3.5 w-3.5 animate-spin" viewBox="0 0 24 24" fill="none">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-              </svg>
-            ) : (
-              <ArrowUp className="h-3.5 w-3.5" strokeWidth={2.5} />
-            )}
-          </motion.button>
-        </div>
-
-        {/* Status row */}
-        <div
-          className="mx-auto flex w-full max-w-[720px] items-center justify-between px-3 py-1.5 sm:px-5"
-          style={{ borderTop: "1px solid var(--vscode-panel-border, rgba(255,255,255,0.06))" }}
-        >
-          <div className="flex items-center gap-0.5">
-            <button
-              type="button"
-              className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors theme-hover-bg"
-              style={{ color: "var(--vscode-editor-foreground)", opacity: 0.55 }}
-            >
-              <Cpu className="h-3 w-3" />
-              Local
-              <ChevronDown className="h-2.5 w-2.5 opacity-50" />
-            </button>
-          </div>
-          <span
-            className="text-[10px] tabular-nums"
-            style={{ color: "var(--vscode-tab-inactive-foreground)", opacity: 0.35 }}
-          >
-            80k / 200k ctx
-          </span>
         </div>
       </motion.div>
     </div>

@@ -9,7 +9,7 @@ const DEFAULT_SIDEBAR_WIDTH = 220;
 const MIN_SIDEBAR_WIDTH = 150;
 const MAX_SIDEBAR_WIDTH = 480;
 
-const FULL_PAGE_ITEMS: SidebarNavItemId[] = ["preferences", "help", "settings", "automations"];
+const FULL_PAGE_ITEMS: SidebarNavItemId[] = ["preferences", "help", "settings", "automations", "skills"];
 
 interface SidebarLayoutProps {
   activeWorkspaceId: string | null;

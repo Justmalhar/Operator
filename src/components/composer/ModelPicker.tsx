@@ -9,39 +9,49 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export type ModelId =
-  | "claude-opus-4-6"
   | "claude-sonnet-4-6"
-  | "claude-haiku-4-5"
-  | "gpt-4o"
-  | "gemini-2-5-pro";
+  | "claude-opus-4-6"
+  | "claude-opus-4-6-1m"
+  | "gpt-5-4"
+  | "gpt-5-3-codex-spark"
+  | "gpt-5-3-codex"
+  | "gpt-5-2-codex";
 
 interface Model {
   id: ModelId;
   label: string;
   badge?: string;
-  provider: "anthropic" | "openai" | "google";
+  provider: "anthropic" | "openai";
+  group: "claude" | "gpt";
 }
 
 const MODELS: Model[] = [
-  { id: "claude-opus-4-6", label: "Claude Opus 4.6", badge: "Powerful", provider: "anthropic" },
-  { id: "claude-sonnet-4-6", label: "Claude Sonnet 4.6", badge: "Fast", provider: "anthropic" },
-  { id: "claude-haiku-4-5", label: "Claude Haiku 4.5", badge: "Lite", provider: "anthropic" },
-  { id: "gpt-4o", label: "GPT 4o", provider: "openai" },
-  { id: "gemini-2-5-pro", label: "Gemini 2.5 Pro", provider: "google" },
+  { id: "claude-sonnet-4-6", label: "Claude Sonnet 4.6", badge: "Fast", provider: "anthropic", group: "claude" },
+  { id: "claude-opus-4-6", label: "Claude Opus 4.6", badge: "Powerful", provider: "anthropic", group: "claude" },
+  { id: "claude-opus-4-6-1m", label: "Claude Opus 4.6 1M", badge: "1M ctx", provider: "anthropic", group: "claude" },
+  { id: "gpt-5-4", label: "GPT-5.4", provider: "openai", group: "gpt" },
+  { id: "gpt-5-3-codex-spark", label: "GPT-5.3 Codex Spark", provider: "openai", group: "gpt" },
+  { id: "gpt-5-3-codex", label: "GPT-5.3 Codex", provider: "openai", group: "gpt" },
+  { id: "gpt-5-2-codex", label: "GPT-5.2 Codex", provider: "openai", group: "gpt" },
 ];
 
 const SHORT_LABEL: Record<ModelId, string> = {
-  "claude-opus-4-6": "Opus 4.6",
   "claude-sonnet-4-6": "Sonnet 4.6",
-  "claude-haiku-4-5": "Haiku 4.5",
-  "gpt-4o": "GPT 4o",
-  "gemini-2-5-pro": "Gemini 2.5",
+  "claude-opus-4-6": "Opus 4.6",
+  "claude-opus-4-6-1m": "Opus 4.6 1M",
+  "gpt-5-4": "GPT-5.4",
+  "gpt-5-3-codex-spark": "GPT-5.3 Spark",
+  "gpt-5-3-codex": "GPT-5.3 Codex",
+  "gpt-5-2-codex": "GPT-5.2 Codex",
 };
 
 interface ModelPickerProps {
   value?: ModelId;
   onChange?: (id: ModelId) => void;
 }
+
+const claudeModels = MODELS.filter((m) => m.group === "claude");
+const gptModels = MODELS.filter((m) => m.group === "gpt");
 
 export function ModelPicker({ value = "claude-sonnet-4-6", onChange }: ModelPickerProps) {
   return (
@@ -59,7 +69,7 @@ export function ModelPicker({ value = "claude-sonnet-4-6", onChange }: ModelPick
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="start"
-        className="min-w-[180px]"
+        className="min-w-[200px]"
         style={{
           backgroundColor: "var(--vscode-dropdown-background)",
           border: "1px solid var(--vscode-dropdown-border, var(--vscode-panel-border))",
@@ -67,10 +77,10 @@ export function ModelPicker({ value = "claude-sonnet-4-6", onChange }: ModelPick
         }}
       >
         <DropdownMenuLabel className="text-[10px] font-semibold uppercase tracking-wider opacity-50">
-          Model
+          Claude
         </DropdownMenuLabel>
         <DropdownMenuSeparator style={{ backgroundColor: "var(--vscode-separator-color)" }} />
-        {MODELS.map((m) => (
+        {claudeModels.map((m) => (
           <DropdownMenuItem
             key={m.id}
             onClick={() => onChange?.(m.id)}
@@ -88,6 +98,22 @@ export function ModelPicker({ value = "claude-sonnet-4-6", onChange }: ModelPick
                 {m.badge}
               </span>
             )}
+          </DropdownMenuItem>
+        ))}
+        <DropdownMenuLabel className="mt-1 text-[10px] font-semibold uppercase tracking-wider opacity-50">
+          OpenAI
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator style={{ backgroundColor: "var(--vscode-separator-color)" }} />
+        {gptModels.map((m) => (
+          <DropdownMenuItem
+            key={m.id}
+            onClick={() => onChange?.(m.id)}
+            className="flex items-center justify-between gap-3 text-[12px]"
+            style={{
+              backgroundColor: value === m.id ? "var(--vscode-toolbar-hover-background)" : undefined,
+            }}
+          >
+            <span>{m.label}</span>
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
