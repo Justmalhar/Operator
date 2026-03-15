@@ -27,8 +27,8 @@ const primaryItems = [
 
 const footerItems = [
   { id: "preferences", label: "Preferences", icon: SlidersHorizontal },
-  { id: "help", label: "Help", icon: HelpCircle },
   { id: "settings", label: "Settings", icon: Settings },
+  { id: "help", label: "Help", icon: HelpCircle },
 ] as const;
 
 export type SidebarNavItemId =
@@ -115,7 +115,14 @@ function NavButton({
   const Icon = item.icon;
 
   return (
-    <div className="relative">
+    <div className="relative flex w-[48px] items-center justify-center">
+      {isActive && (
+        <motion.span
+          layoutId="nav-indicator"
+          className="activity-indicator"
+          transition={springs.snappy}
+        />
+      )}
       <motion.button
         type="button"
         onClick={onClick}
@@ -132,13 +139,6 @@ function NavButton({
         )}
         aria-label={item.label}
       >
-        {isActive && (
-          <motion.span
-            layoutId="nav-indicator"
-            className="activity-indicator"
-            transition={springs.snappy}
-          />
-        )}
         {isActive && (
           <motion.span
             layoutId="nav-glow"

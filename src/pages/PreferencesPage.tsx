@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Monitor, Type, Keyboard, LayoutTemplate, Code2, TerminalSquare } from "lucide-react";
+import { Monitor, Type, Keyboard, LayoutTemplate, Code2, TerminalSquare, AlignLeft, Map, Baseline } from "lucide-react";
 
 interface NavSection {
   title: string;
@@ -20,15 +20,15 @@ const navSections: NavSection[] = [
     title: "Editor",
     items: [
       { id: "editor-general", label: "General", icon: Code2 },
-      { id: "editor-formatting", label: "Formatting" },
-      { id: "editor-minimap", label: "Minimap" },
+      { id: "editor-formatting", label: "Formatting", icon: AlignLeft },
+      { id: "editor-minimap", label: "Minimap", icon: Map },
     ],
   },
   {
     title: "Terminal",
     items: [
       { id: "terminal-general", label: "General", icon: TerminalSquare },
-      { id: "terminal-font", label: "Font" },
+      { id: "terminal-font", label: "Font", icon: Baseline },
     ],
   },
   {
@@ -380,42 +380,52 @@ export function PreferencesPage() {
         className="vscode-sidebar flex h-full w-[220px] shrink-0 flex-col overflow-y-auto"
       >
         <div
-          className="px-4 pb-2 pt-4 text-[11px] font-semibold uppercase tracking-wider"
-          style={{ color: "var(--vscode-sidebar-title-foreground)", opacity: 0.6 }}
+          className="px-8 py-4 text-[11px] font-semibold uppercase tracking-wider"
+          style={{
+            color: "var(--vscode-sidebar-title-foreground)",
+            opacity: 0.6,
+            borderBottom: "1px solid var(--vscode-sideBar-border, rgba(255,255,255,0.08))",
+          }}
         >
           Preferences
         </div>
-        {navSections.map((section) => (
-          <div key={section.title} className="mb-2">
-            <div
-              className="px-4 py-1 text-[10px] font-semibold uppercase tracking-wider"
-              style={{ color: "var(--vscode-sidebar-foreground)", opacity: 0.45 }}
-            >
-              {section.title}
+        <div className="py-1 px-4">
+          {navSections.map((section) => (
+            <div key={section.title}>
+              {/* Section group label — matches WorkspaceList repo group header */}
+              <div
+                className="flex h-[22px] items-center mt-2 text-[11px] font-semibold uppercase tracking-wider"
+                style={{ color: "var(--vscode-sideBarSectionHeader-foreground)", opacity: 0.5 }}
+              >
+                {section.title}
+              </div>
+              {section.items.map((item) => {
+                const isActive = activeSection === item.id;
+                const Icon = item.icon;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setActiveSection(item.id)}
+                    className={cn(
+                      "vscode-list-item flex h-[32px] w-full items-center gap-2 px-8 text-left text-[13px] transition-colors duration-75",
+                      isActive
+                        ? "bg-[var(--vscode-list-active-selection-background)] text-[var(--vscode-list-active-selection-foreground)]"
+                        : "hover:bg-[var(--vscode-list-hover-background)]",
+                    )}
+                    style={isActive ? {} : { color: "var(--vscode-sideBar-foreground)" }}
+                  >
+                    {Icon
+                      ? <Icon className="h-4 w-4 shrink-0 opacity-70" />
+                      : <span className="inline-block h-4 w-4 shrink-0" />
+                    }
+                    {item.label}
+                  </button>
+                );
+              })}
             </div>
-            {section.items.map((item) => {
-              const isActive = activeSection === item.id;
-              const Icon = item.icon;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => setActiveSection(item.id)}
-                  className={cn(
-                    "flex w-full items-center gap-2.5 px-4 py-1.5 text-left text-[12px] transition-colors duration-75",
-                    isActive
-                      ? "bg-[var(--vscode-list-active-selection-background)] text-[var(--vscode-list-active-selection-foreground)]"
-                      : "hover:bg-[var(--vscode-list-hover-background)]",
-                  )}
-                  style={isActive ? {} : { color: "var(--vscode-sidebar-foreground)" }}
-                >
-                  {Icon && <Icon className="h-3.5 w-3.5 shrink-0 opacity-70" />}
-                  {item.label}
-                </button>
-              );
-            })}
-          </div>
-        ))}
+          ))}
+        </div>
       </aside>
 
       {/* Content area */}
@@ -423,7 +433,7 @@ export function PreferencesPage() {
         className="flex-1 overflow-y-auto"
         style={{ background: "var(--vscode-editor-background)" }}
       >
-        <div className="mx-auto max-w-2xl px-10 py-8">
+        <div className="mx-auto max-w-2xl px-12 py-10">
           <Content />
         </div>
       </div>
