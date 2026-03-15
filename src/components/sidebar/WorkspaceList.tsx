@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useWorkspaceStore } from "@/store/workspaceStore";
 import { WorkspaceItem } from "./WorkspaceItem";
+import { NewWorkspaceModal } from "./NewWorkspaceModal";
 import { staggerContainer, staggerItem, fadeInUp, springs, collapseVertical } from "@/lib/animations";
 import type { Repository, Workspace } from "@/types/workspace";
 
@@ -51,9 +52,7 @@ function RepoGroup({
           </motion.span>
         )}
         {!hasWorkspaces && <div className="w-3 shrink-0" />}
-        <span className="min-w-0 flex-1 truncate">
-          {repo.name}
-        </span>
+        <span className="min-w-0 flex-1 truncate">{repo.name}</span>
         {hasWorkspaces && (
           <span className="mr-2 text-[10px] font-normal opacity-50">
             {workspaces.length}
@@ -93,31 +92,14 @@ function RepoGroup({
 }
 
 export function WorkspaceList({ activeWorkspaceId, onWorkspaceSelect }: WorkspaceListProps) {
-  const { repos, workspacesByRepo, loading, error, fetchAll, addRepo } = useWorkspaceStore();
+  const { repos, workspacesByRepo, loading, error, fetchAll } = useWorkspaceStore();
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     fetchAll();
   }, [fetchAll]);
 
-  const handleAddRepo = useCallback(async () => {
-    try {
-      const { open } = await import("@tauri-apps/plugin-dialog");
-      const selected = await open({ directory: true, title: "Select repository folder" });
-      if (!selected) return;
-
-      const dirPath = typeof selected === "string" ? selected : selected;
-      const name = String(dirPath).split("/").pop() ?? "repo";
-
-      await addRepo({
-        name,
-        full_name: name,
-        remote_url: "",
-        local_path: String(dirPath),
-      });
-    } catch (err) {
-      console.error("Failed to add repository:", err);
-    }
-  }, [addRepo]);
+  const handleOpenModal = useCallback(() => setModalOpen(true), []);
 
   const repoList = repos.map((repo) => ({
     repo,
@@ -148,13 +130,13 @@ export function WorkspaceList({ activeWorkspaceId, onWorkspaceSelect }: Workspac
           </motion.button>
           <motion.button
             type="button"
-            onClick={handleAddRepo}
+            onClick={handleOpenModal}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             className="vscode-list-item flex h-[20px] w-[20px] items-center justify-center rounded transition-colors duration-75"
             style={{ color: "var(--vscode-sidebar-section-header-foreground)" }}
-            aria-label="Import repository"
-            title="Import repository"
+            aria-label="New workspace"
+            title="New workspace"
           >
             <Plus className="h-3 w-3" />
           </motion.button>
@@ -192,7 +174,7 @@ export function WorkspaceList({ activeWorkspaceId, onWorkspaceSelect }: Workspac
         {!loading && !error && repoList.length === 0 && (
           <motion.button
             type="button"
-            onClick={handleAddRepo}
+            onClick={handleOpenModal}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
@@ -206,7 +188,7 @@ export function WorkspaceList({ activeWorkspaceId, onWorkspaceSelect }: Workspac
             }}
           >
             <FolderOpen className="h-6 w-6 opacity-50" />
-            <span className="text-[12px]">Import a repository to get started</span>
+            <span className="text-[12px]">Create or import a workspace</span>
           </motion.button>
         )}
       </AnimatePresence>
@@ -231,6 +213,12 @@ export function WorkspaceList({ activeWorkspaceId, onWorkspaceSelect }: Workspac
           ))}
         </motion.div>
       )}
+
+      <NewWorkspaceModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onWorkspaceSelect={onWorkspaceSelect}
+      />
     </div>
   );
 }

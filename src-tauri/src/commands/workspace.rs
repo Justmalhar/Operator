@@ -43,6 +43,65 @@ pub async fn remove_repository(
         .map_err(Into::into)
 }
 
+/// Look up a repository by its filesystem path. Returns None if not registered.
+#[tauri::command]
+pub async fn find_repository_by_path(
+    state: State<'_, AppState>,
+    path: String,
+) -> Result<Option<db::repository::Repository>, AppError> {
+    db::repository::find_by_path(&state.db, &path)
+        .await
+        .map_err(Into::into)
+}
+
+/// Clone a remote git repository to destination_path using libgit2.
+#[tauri::command]
+pub async fn clone_repository(
+    url: String,
+    destination_path: String,
+) -> Result<(), AppError> {
+    let dest = PathBuf::from(&destination_path);
+    git2::Repository::clone(&url, &dest).map_err(AppError::Git)?;
+    Ok(())
+}
+
+/// Recursively copies a directory tree from source_path to destination_path.
+#[tauri::command]
+pub async fn copy_template(
+    source_path: String,
+    destination_path: String,
+) -> Result<(), AppError> {
+    fn copy_dir(src: &std::path::Path, dst: &std::path::Path) -> std::io::Result<()> {
+        std::fs::create_dir_all(dst)?;
+        for entry in std::fs::read_dir(src)? {
+            let entry = entry?;
+            let ty = entry.file_type()?;
+            let dst_path = dst.join(entry.file_name());
+            if ty.is_dir() {
+                copy_dir(&entry.path(), &dst_path)?;
+            } else if ty.is_file() {
+                std::fs::copy(entry.path(), &dst_path)?;
+            }
+        }
+        Ok(())
+    }
+    copy_dir(
+        std::path::Path::new(&source_path),
+        std::path::Path::new(&destination_path),
+    )
+    .map_err(AppError::Io)
+}
+
+/// Initializes a git repository at path if .git does not already exist.
+#[tauri::command]
+pub async fn init_git_repo(path: String) -> Result<(), AppError> {
+    let p = std::path::Path::new(&path);
+    if !p.join(".git").exists() {
+        git2::Repository::init(p).map_err(AppError::Git)?;
+    }
+    Ok(())
+}
+
 // ── Workspace commands ────────────────────────────────────────────────────────
 
 /// List active (non-archived) workspaces for a repository.

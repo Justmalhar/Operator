@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import "./App.css";
 import { SidebarLayout } from "@/components/layout/SidebarLayout";
@@ -11,6 +11,7 @@ import { HelpPage } from "@/pages/HelpPage";
 import { SettingsPage } from "@/pages/SettingsPage";
 import { type SidebarNavItemId } from "@/components/sidebar/SidebarNav";
 import { useWorkspaceStore } from "@/store/workspaceStore";
+import { useSettingsStore } from "@/store/settingsStore";
 import { springs } from "@/lib/animations";
 import {
   AlertCircle,
@@ -37,6 +38,11 @@ function App() {
   const [rightPanelWidth, setRightPanelWidth] = useState(DEFAULT_RIGHT_WIDTH);
   const [bottomPanelHeight, setBottomPanelHeight] = useState(DEFAULT_BOTTOM_HEIGHT);
   const centerRef = useRef<CenterPanelHandle>(null);
+
+  // Load settings store on mount (repos are loaded by WorkspaceList via fetchAll)
+  useEffect(() => {
+    void useSettingsStore.getState().loadSettings();
+  }, []);
 
   const activeWs = getActiveWorkspace();
   const isFullPage = FULL_PAGE_ITEMS.includes(activeItem);
