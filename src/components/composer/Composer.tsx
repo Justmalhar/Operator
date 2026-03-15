@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { ArrowUp, Brain, ChevronDown, Circle, Map, Plus, Slash } from "lucide-react";
+import { ArrowUp, Brain, ChevronDown, Circle, Map, Plus, Slash, TerminalSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ComposerTextarea } from "./ComposerTextarea";
 import { AttachmentRow, type Attachment } from "./AttachmentRow";
@@ -36,6 +36,8 @@ interface ComposerProps {
   onSend?: (message: string, attachments: Attachment[]) => void;
   disabled?: boolean;
   className?: string;
+  isTerminalOpen?: boolean;
+  onToggleTerminal?: () => void;
 }
 
 function ThinkingPicker({
@@ -96,7 +98,7 @@ function ThinkingPicker({
   );
 }
 
-export function Composer({ onSend, disabled, className }: ComposerProps) {
+export function Composer({ onSend, disabled, className, isTerminalOpen, onToggleTerminal }: ComposerProps) {
   const [message, setMessage] = useState("");
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [model, setModel] = useState<ModelId>("claude-sonnet-4-6");
@@ -255,6 +257,20 @@ export function Composer({ onSend, disabled, className }: ComposerProps) {
             title="Context map"
           >
             <Map className="h-3.5 w-3.5" />
+          </button>
+
+          {/* Terminal toggle */}
+          <button
+            type="button"
+            onClick={onToggleTerminal}
+            className="flex h-7 w-7 items-center justify-center rounded-md transition-colors hover:bg-white/5"
+            style={{
+              color: isTerminalOpen ? "var(--vscode-focus-border, #007fd4)" : "rgba(255,255,255,0.35)",
+              backgroundColor: isTerminalOpen ? "rgba(0,127,212,0.12)" : undefined,
+            }}
+            title={isTerminalOpen ? "Hide terminal (⌘`)" : "Show terminal (⌘`)"}
+          >
+            <TerminalSquare className="h-3.5 w-3.5" />
           </button>
 
           {/* Spacer */}

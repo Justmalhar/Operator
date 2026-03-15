@@ -1,9 +1,11 @@
 import { useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, X, Terminal, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, X, Terminal } from "lucide-react";
 import { TerminalTab } from "@/components/panels/TerminalTab";
 import { cn } from "@/lib/utils";
 import { springs } from "@/lib/animations";
+
+// Visibility is controlled by the parent (ChatPanel) via AnimatePresence.
 
 interface TerminalInstance {
   id: string;
@@ -23,7 +25,6 @@ export function ChatTerminalPanel({ worktreePath }: ChatTerminalPanelProps) {
     { id: "terminal-1", label: "Terminal 1" },
   ]);
   const [activeId, setActiveId] = useState("terminal-1");
-  const [collapsed, setCollapsed] = useState(false);
   const [height, setHeight] = useState(DEFAULT_HEIGHT);
 
   const dragStartY = useRef<number | null>(null);
@@ -35,7 +36,6 @@ export function ChatTerminalPanel({ worktreePath }: ChatTerminalPanelProps) {
     const newT: TerminalInstance = { id, label: `Terminal ${n}` };
     setTerminals((prev) => [...prev, newT]);
     setActiveId(id);
-    if (collapsed) setCollapsed(false);
   }
 
   function closeTerminal(id: string, e: React.MouseEvent) {
@@ -58,7 +58,6 @@ export function ChatTerminalPanel({ worktreePath }: ChatTerminalPanelProps) {
       const delta = dragStartY.current - ev.clientY;
       const next = Math.min(MAX_HEIGHT, Math.max(MIN_HEIGHT, dragStartHeight.current + delta));
       setHeight(next);
-      if (collapsed && next > MIN_HEIGHT) setCollapsed(false);
     }
 
     function onMouseUp() {
@@ -97,25 +96,11 @@ export function ChatTerminalPanel({ worktreePath }: ChatTerminalPanelProps) {
         style={{
           height: "36px",
           backgroundColor: "var(--vscode-panel-background)",
-          borderBottom: collapsed ? "none" : "1px solid var(--vscode-panel-border)",
+          borderBottom: "1px solid var(--vscode-panel-border)",
         }}
       >
-        {/* Collapse toggle */}
-        <button
-          type="button"
-          onClick={() => setCollapsed((v) => !v)}
-          className="flex h-full items-center px-2.5 transition-colors duration-75 hover:bg-white/5"
-          aria-label={collapsed ? "Expand terminal" : "Collapse terminal"}
-        >
-          {collapsed ? (
-            <ChevronUp className="h-3.5 w-3.5" style={{ color: "var(--vscode-panel-title-inactive-foreground)" }} />
-          ) : (
-            <ChevronDown className="h-3.5 w-3.5" style={{ color: "var(--vscode-panel-title-inactive-foreground)" }} />
-          )}
-        </button>
-
         {/* Terminal icon label */}
-        <div className="flex items-center gap-1.5 pr-2" style={{ color: "var(--vscode-panel-title-inactive-foreground)" }}>
+        <div className="flex items-center gap-1.5 pl-3 pr-2" style={{ color: "var(--vscode-panel-title-inactive-foreground)" }}>
           <Terminal className="h-3.5 w-3.5" />
         </div>
 
@@ -133,10 +118,7 @@ export function ChatTerminalPanel({ worktreePath }: ChatTerminalPanelProps) {
                   exit={{ opacity: 0, width: 0 }}
                   transition={springs.snappy}
                   type="button"
-                  onClick={() => {
-                    setActiveId(t.id);
-                    if (collapsed) setCollapsed(false);
-                  }}
+                  onClick={() => setActiveId(t.id)}
                   className={cn(
                     "group relative flex h-full items-center gap-1.5 whitespace-nowrap px-3 text-[11px] font-medium transition-colors duration-75",
                     isActive
@@ -189,30 +171,17 @@ export function ChatTerminalPanel({ worktreePath }: ChatTerminalPanelProps) {
       </div>
 
       {/* Terminal content */}
-      <AnimatePresence initial={false}>
-        {!collapsed && (
-          <motion.div
-            key="terminal-content"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height, opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={springs.smooth}
-            style={{ overflow: "hidden" }}
+      <div style={{ height }}>
+        {terminals.map((t) => (
+          <div
+            key={t.id}
+            className="h-full"
+            style={{ display: t.id === activeId ? "block" : "none" }}
           >
-            <div style={{ height }}>
-              {terminals.map((t) => (
-                <div
-                  key={t.id}
-                  className="h-full"
-                  style={{ display: t.id === activeId ? "block" : "none" }}
-                >
-                  <TerminalTab worktreePath={worktreePath} />
-                </div>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            <TerminalTab worktreePath={worktreePath} />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

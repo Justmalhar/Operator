@@ -17,6 +17,7 @@ export function ChatPanel({ workspaceId }: ChatPanelProps) {
   const [diffFile, setDiffFile] = useState<ChangedFile | null>(null);
   const [sessionChanges, setSessionChanges] = useState<ChangedFile[]>([]);
   const [sessionStart] = useState(() => Date.now());
+  const [terminalOpen, setTerminalOpen] = useState(false);
 
   const getActiveWorkspace = useWorkspaceStore((s) => s.getActiveWorkspace);
   const activeWs = getActiveWorkspace();
@@ -47,11 +48,14 @@ export function ChatPanel({ workspaceId }: ChatPanelProps) {
     return () => clearInterval(interval);
   }, [fetchSessionChanges]);
 
-  // Close diff overlay on Escape
+  // Close diff overlay on Escape; toggle terminal with ⌘`
   useEffect(() => {
-    if (!diffFile) return;
     function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") setDiffFile(null);
+      if (e.key === "Escape" && diffFile) setDiffFile(null);
+      if ((e.metaKey || e.ctrlKey) && e.key === "`") {
+        e.preventDefault();
+        setTerminalOpen((v) => !v);
+      }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -88,11 +92,27 @@ export function ChatPanel({ workspaceId }: ChatPanelProps) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ ...springs.smooth, delay: 0.15 }}
       >
-        <Composer />
+        <Composer
+          isTerminalOpen={terminalOpen}
+          onToggleTerminal={() => setTerminalOpen((v) => !v)}
+        />
       </motion.div>
 
       {/* Terminal panel below composer */}
-      <ChatTerminalPanel worktreePath={activeWs?.worktree_path} />
+      <AnimatePresence>
+        {terminalOpen && (
+          <motion.div
+            key="chat-terminal"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={springs.smooth}
+            style={{ overflow: "hidden" }}
+          >
+            <ChatTerminalPanel worktreePath={activeWs?.worktree_path} />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Diff overlay — floats above everything */}
       <AnimatePresence>
