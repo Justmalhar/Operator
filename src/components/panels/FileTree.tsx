@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { memo, useState } from "react";
 import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FileIcon } from "@/components/shared/FileIcon";
@@ -46,7 +46,10 @@ interface TreeNodeProps {
   onOpenFile?: (filename: string, filePath: string) => void;
 }
 
-function TreeNode({
+// Memoized so that selecting a file only re-renders the two nodes whose
+// isSelected state actually changed (was selected → deselected, and vice versa),
+// rather than the entire tree.
+const TreeNode = memo(function TreeNode({
   node,
   depth = 0,
   selectedFile,
@@ -139,7 +142,7 @@ function TreeNode({
       )}
     </button>
   );
-}
+});
 
 interface FileTreeProps {
   onOpenFile?: (filename: string, filePath: string) => void;
