@@ -5,7 +5,6 @@ import {
   ChevronDown,
   Clock,
   FolderOpen,
-  GitBranch,
   X,
 } from "lucide-react";
 import {
@@ -182,23 +181,6 @@ export function NewAutomationModal({ open, onClose, initialPrompt = "" }: NewAut
         </DialogHeader>
 
         <div className="flex flex-col gap-3 p-4">
-
-          {/* ── Worktree callout ──────────────────────────────────── */}
-          <div
-            className="flex items-start gap-2 rounded-[3px] px-3 py-2 text-[11px]"
-            style={{
-              background: "var(--vscode-toolbar-hover-background)",
-              borderLeft: "2px solid var(--vscode-focus-border, #007fd4)",
-              color: "var(--vscode-descriptionForeground)",
-            }}
-          >
-            <GitBranch className="mt-px h-3 w-3 shrink-0" style={{ color: "var(--vscode-focus-border)" }} />
-            <span>
-              By default, automations run in{" "}
-              <strong style={{ color: "var(--vscode-editor-foreground)" }}>independent worktrees</strong>
-              {" "}— each run is isolated on its own branch, so your main workspace is never disrupted.
-            </span>
-          </div>
 
           {/* ── Title row ─────────────────────────────────────────── */}
           <div className="flex items-center gap-2">

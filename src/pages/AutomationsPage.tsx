@@ -336,69 +336,82 @@ function AutomationCard({
   const Icon = item.icon;
 
   return (
-    <motion.button
-      type="button"
-      onClick={() => onUse(item)}
+    <motion.div
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      whileTap={{ scale: 0.985 }}
+      whileTap={{ scale: 0.99 }}
       transition={{ duration: 0.08 }}
-      className="group relative flex w-full items-start gap-3 rounded-[4px] border p-3 text-left"
+      className="group relative flex flex-col rounded-[4px] border overflow-hidden"
       style={{
         background: hovered
           ? "var(--vscode-list-hover-background)"
-          : "var(--vscode-editor-background)",
+          : "var(--vscode-sideBar-background, var(--vscode-editor-background))",
         borderColor: hovered
-          ? "var(--vscode-focusBorder, rgba(0,127,212,0.4))"
+          ? "var(--vscode-focusBorder, rgba(0,127,212,0.5))"
           : "var(--vscode-panel-border)",
         color: "var(--vscode-editor-foreground)",
-        transition: "background 80ms ease, border-color 80ms ease",
+        transition: "background 80ms ease, border-color 80ms ease, box-shadow 80ms ease",
+        boxShadow: hovered ? "0 2px 8px rgba(0,0,0,0.18)" : "none",
       }}
     >
-      {/* Accent left border on hover */}
+      {/* Accent top border */}
       <span
-        className="absolute left-0 top-0 h-full w-[2px] rounded-l-[4px] transition-opacity duration-100"
+        className="absolute top-0 left-0 right-0 h-[2px] transition-opacity duration-100"
         style={{
-          background: item.iconColor,
+          background: `linear-gradient(90deg, ${item.iconColor}, transparent)`,
           opacity: hovered ? 1 : 0,
         }}
       />
 
-      {/* Icon badge */}
-      <div
-        className="mt-[1px] flex h-7 w-7 shrink-0 items-center justify-center rounded-[3px] transition-all duration-100"
-        style={{
-          background: hovered ? item.iconBg : "var(--vscode-toolbar-hover-background)",
-        }}
-      >
-        <Icon className="h-3.5 w-3.5 transition-transform duration-100" style={{ color: item.iconColor }} />
-      </div>
-
-      <div className="min-w-0 flex-1">
-        <div
-          className="text-[12px] font-medium leading-[1.4]"
-          style={{ color: "var(--vscode-editor-foreground)" }}
-        >
-          {item.title}
+      {/* Card body */}
+      <div className="flex flex-1 flex-col gap-2.5 p-3.5">
+        {/* Icon + title row */}
+        <div className="flex items-start gap-2.5">
+          <div
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[4px] transition-all duration-100"
+            style={{
+              background: hovered ? item.iconBg : "var(--vscode-toolbar-hover-background)",
+              border: `1px solid ${hovered ? item.iconColor + "40" : "var(--vscode-panel-border)"}`,
+            }}
+          >
+            <Icon className="h-4 w-4" style={{ color: item.iconColor }} />
+          </div>
+          <p
+            className="flex-1 text-[12px] font-medium leading-[1.45] pt-[1px]"
+            style={{ color: "var(--vscode-editor-foreground)" }}
+          >
+            {item.title}
+          </p>
         </div>
-        <div
-          className="mt-[3px] text-[11px] leading-[1.5]"
+
+        {/* Description */}
+        <p
+          className="text-[11px] leading-[1.55]"
           style={{ color: "var(--vscode-descriptionForeground)" }}
         >
           {item.description}
-        </div>
+        </p>
       </div>
 
-      {/* Arrow on hover */}
-      <ArrowRight
-        className="mt-[3px] h-3.5 w-3.5 shrink-0 transition-all duration-100"
-        style={{
-          color: item.iconColor,
-          opacity: hovered ? 0.8 : 0,
-          transform: hovered ? "translateX(0)" : "translateX(-4px)",
-        }}
-      />
-    </motion.button>
+      {/* Card footer / action */}
+      <div
+        className="flex items-center justify-between px-3.5 py-2"
+        style={{ borderTop: "1px solid var(--vscode-panel-border)" }}
+      >
+        <button
+          type="button"
+          onClick={() => onUse(item)}
+          className="flex items-center gap-1 text-[11px] font-medium transition-colors duration-75 hover:underline"
+          style={{ color: hovered ? item.iconColor : "var(--vscode-textLink-foreground)" }}
+        >
+          Use template
+          <ArrowRight
+            className="h-3 w-3 transition-transform duration-100"
+            style={{ transform: hovered ? "translateX(2px)" : "translateX(0)" }}
+          />
+        </button>
+      </div>
+    </motion.div>
   );
 }
 
@@ -420,21 +433,34 @@ function CategorySection({
       transition={{ duration: 0.18, delay: 0.06 + index * 0.04, ease: "easeOut" }}
     >
       {/* Section header */}
-      <div className="mb-2 flex items-center gap-2">
+      <div
+        className="mb-3 flex items-center gap-2 pb-2"
+        style={{ borderBottom: "1px solid var(--vscode-panel-border)" }}
+      >
         <span
-          className="h-[10px] w-[2px] rounded-full"
+          className="h-[12px] w-[3px] rounded-full"
           style={{ background: category.accentColor }}
         />
         <span
-          className="text-[10px] font-semibold uppercase tracking-[0.07em]"
-          style={{ color: "var(--vscode-sideBarSectionHeader-foreground)", opacity: 0.7 }}
+          className="text-[11px] font-semibold uppercase tracking-[0.06em]"
+          style={{ color: "var(--vscode-sideBarSectionHeader-foreground)", opacity: 0.8 }}
         >
           {category.title}
         </span>
+        <span
+          className="ml-1 rounded-[3px] px-1.5 py-[1px] text-[10px] font-medium"
+          style={{
+            background: category.accentColor + "1a",
+            color: category.accentColor,
+            border: `1px solid ${category.accentColor}30`,
+          }}
+        >
+          {category.items.length}
+        </span>
       </div>
 
-      {/* Cards grid */}
-      <div className="grid grid-cols-2 gap-[6px]">
+      {/* Cards grid — 2 columns */}
+      <div className="grid grid-cols-2 gap-3">
         {category.items.map((item) => (
           <AutomationCard key={item.id} item={item} onUse={onUse} />
         ))}
@@ -499,20 +525,6 @@ export function AutomationsPage() {
           </button>
         </div>
 
-        {/* Worktree callout */}
-        <div
-          className="mx-2 mt-2 mb-1 flex items-start gap-1.5 rounded-[3px] px-2 py-1.5"
-          style={{
-            background: "var(--vscode-toolbar-hover-background)",
-            borderLeft: "2px solid var(--vscode-focus-border, #007fd4)",
-          }}
-        >
-          <GitBranch className="mt-[1px] h-[10px] w-[10px] shrink-0 opacity-50" style={{ color: "var(--vscode-focus-border)" }} />
-          <span className="text-[10px] leading-[1.4]" style={{ color: "var(--vscode-descriptionForeground)" }}>
-            Runs in independent worktrees by default
-          </span>
-        </div>
-
         {/* Automation list */}
         <div className="vscode-scrollable flex-1 overflow-y-auto pt-1">
           <AnimatePresence mode="popLayout">
@@ -559,61 +571,52 @@ export function AutomationsPage() {
 
       {/* ── Main content area ────────────────────────────────────────── */}
       <div className="vscode-scrollable flex min-w-0 flex-1 flex-col overflow-y-auto">
-        <div className="flex h-full flex-col px-6 py-5">
 
-          {/* Page header */}
-          <motion.div
-            className="mb-5 flex items-center justify-between"
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.15, ease: "easeOut" }}
-          >
-            <div>
-              <h1
-                className="text-[16px] font-semibold tracking-[-0.01em]"
-                style={{ color: "var(--vscode-editor-foreground)" }}
-              >
-                Automations
-              </h1>
-              <p
-                className="mt-0.5 text-[11px]"
-                style={{ color: "var(--vscode-descriptionForeground)" }}
-              >
-                Schedule recurring threads to run automatically.{" "}
-                <span
-                  className="cursor-pointer hover:underline"
-                  style={{ color: "var(--vscode-textLink-foreground)" }}
-                >
-                  Learn more
-                </span>
-              </p>
-            </div>
-
-            <button
-              type="button"
-              onClick={openNew}
-              className="flex items-center gap-1.5 rounded-[3px] px-3 py-1.5 text-[12px] font-medium transition-opacity duration-75 hover:opacity-90"
-              style={{
-                background: "var(--vscode-button-background)",
-                color: "var(--vscode-button-foreground)",
-              }}
+        {/* Sticky toolbar header */}
+        <motion.div
+          className="sticky top-0 z-10 flex shrink-0 items-center justify-between px-5 py-0"
+          style={{
+            height: "35px",
+            borderBottom: "1px solid var(--vscode-panel-border)",
+            background: "var(--vscode-editor-background)",
+          }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.15 }}
+        >
+          <div className="flex items-center gap-2">
+            <Zap className="h-3.5 w-3.5 opacity-50" style={{ color: "var(--vscode-editor-foreground)" }} />
+            <span
+              className="text-[11px] font-semibold uppercase tracking-[0.07em]"
+              style={{ color: "var(--vscode-sideBarTitle-foreground)", opacity: 0.7 }}
             >
-              <Plus className="h-3.5 w-3.5" />
-              New automation
-            </button>
-          </motion.div>
-
-          {/* Category sections — fill all width, spaced evenly */}
-          <div className="flex flex-col gap-6">
-            {AUTOMATION_CATEGORIES.map((category, i) => (
-              <CategorySection
-                key={category.id}
-                category={category}
-                onUse={useTemplate}
-                index={i}
-              />
-            ))}
+              Suggested Automations
+            </span>
           </div>
+
+          <button
+            type="button"
+            onClick={openNew}
+            className="flex items-center gap-1 rounded-[3px] px-2.5 py-[3px] text-[11px] font-medium transition-opacity duration-75 hover:opacity-90"
+            style={{
+              background: "var(--vscode-button-background)",
+              color: "var(--vscode-button-foreground)",
+            }}
+          >
+            <Plus className="h-3 w-3" />
+            New automation
+          </button>
+        </motion.div>
+
+        <div className="flex flex-col gap-6 px-5 py-5">
+          {AUTOMATION_CATEGORIES.map((category, i) => (
+            <CategorySection
+              key={category.id}
+              category={category}
+              onUse={useTemplate}
+              index={i}
+            />
+          ))}
         </div>
       </div>
 
