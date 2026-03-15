@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
-import { GitCommit, Loader2, Plus, Minus, RefreshCw } from "lucide-react";
+import { ChevronDown, CloudDownload, CloudUpload, GitCommit, GitMerge, GitPullRequest, Loader2, Plus, Minus, RefreshCw } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { staggerContainer, staggerItem, springs } from "@/lib/animations";
 import * as api from "@/lib/tauri";
 import type { DiffFileStat } from "@/types/git";
+import { cn } from "@/lib/utils";
 
 interface ChangesTabProps {
   worktreePath?: string;
@@ -32,8 +33,10 @@ export function ChangesTab({ worktreePath }: ChangesTabProps) {
   const [totalInsertions, setTotalInsertions] = useState(0);
   const [totalDeletions, setTotalDeletions] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [commitMsg, setCommitMsg] = useState("");
   const [committing, setCommitting] = useState(false);
+  const [fetching, setFetching] = useState(false);
+  const [pulling, setPulling] = useState(false);
+  const [pushing, setPushing] = useState(false);
 
   const fetchChanges = useCallback(async () => {
     if (!worktreePath) return;
@@ -53,22 +56,56 @@ export function ChangesTab({ worktreePath }: ChangesTabProps) {
     fetchChanges();
   }, [fetchChanges]);
 
+  const handleFetch = useCallback(async () => {
+    if (!worktreePath) return;
+    setFetching(true);
+    try {
+      await api.gitFetch(worktreePath);
+    } catch (err) {
+      console.error("Failed to fetch:", err);
+    }
+    setFetching(false);
+  }, [worktreePath]);
+
+  const handlePull = useCallback(async () => {
+    if (!worktreePath) return;
+    setPulling(true);
+    try {
+      await api.gitPull(worktreePath);
+      await fetchChanges();
+    } catch (err) {
+      console.error("Failed to pull:", err);
+    }
+    setPulling(false);
+  }, [worktreePath, fetchChanges]);
+
   const handleCommit = useCallback(async () => {
-    if (!worktreePath || !commitMsg.trim()) return;
+    if (!worktreePath || files.length === 0) return;
     setCommitting(true);
     try {
       const paths = files.map((f) => f.path);
-      if (paths.length > 0) {
-        await api.gitStage(worktreePath, paths);
-      }
-      await api.gitCommit(worktreePath, commitMsg.trim());
-      setCommitMsg("");
+      await api.gitStage(worktreePath, paths);
+      const msg = files.length === 1
+        ? `Update ${files[0].path.split("/").pop()}`
+        : `Update ${files.length} files`;
+      await api.gitCommit(worktreePath, msg);
       await fetchChanges();
     } catch (err) {
       console.error("Failed to commit:", err);
     }
     setCommitting(false);
-  }, [worktreePath, commitMsg, files, fetchChanges]);
+  }, [worktreePath, files, fetchChanges]);
+
+  const handlePush = useCallback(async () => {
+    if (!worktreePath) return;
+    setPushing(true);
+    try {
+      await api.gitPush(worktreePath);
+    } catch (err) {
+      console.error("Failed to push:", err);
+    }
+    setPushing(false);
+  }, [worktreePath]);
 
   if (!worktreePath) {
     return (
@@ -107,11 +144,11 @@ export function ChangesTab({ worktreePath }: ChangesTabProps) {
         className="flex shrink-0 items-center gap-4 px-4 py-2.5 text-[12px]"
         style={{ borderBottom: "1px solid var(--vscode-sidebar-section-header-border)" }}
       >
-        <span className="flex items-center gap-1 font-medium" style={{ color: "#4ec994" }}>
+        <span className="flex items-center gap-1 font-medium" style={{ color: "var(--vscode-terminal-ansi-green, #4ec994)" }}>
           <Plus className="h-3 w-3" />
           {totalInsertions}
         </span>
-        <span className="flex items-center gap-1 font-medium" style={{ color: "#f48771" }}>
+        <span className="flex items-center gap-1 font-medium" style={{ color: "var(--vscode-errorForeground, #f48771)" }}>
           <Minus className="h-3 w-3" />
           {totalDeletions}
         </span>
@@ -121,18 +158,50 @@ export function ChangesTab({ worktreePath }: ChangesTabProps) {
         >
           {files.length} files changed
         </span>
-        <motion.button
-          type="button"
-          onClick={fetchChanges}
-          whileHover={{ scale: 1.2, rotate: 180 }}
-          whileTap={{ scale: 0.9 }}
-          transition={springs.snappy}
-          className="flex h-5 w-5 items-center justify-center rounded theme-hover-bg"
-          aria-label="Refresh"
-          title="Refresh changes"
-        >
-          <RefreshCw className="h-3 w-3" style={{ color: "var(--vscode-tab-inactive-foreground)" }} />
-        </motion.button>
+        <div className="flex items-center gap-1">
+          <motion.button
+            type="button"
+            onClick={handleFetch}
+            disabled={fetching}
+            whileHover={!fetching ? { scale: 1.1 } : {}}
+            whileTap={!fetching ? { scale: 0.9 } : {}}
+            transition={springs.snappy}
+            className={cn("flex h-5 items-center gap-1 rounded px-1.5 theme-hover-bg text-[10px] font-medium transition-opacity", fetching && "opacity-40 cursor-not-allowed")}
+            title="Git fetch"
+            style={{ color: "var(--vscode-tab-inactive-foreground)" }}
+          >
+            {fetching ? <Loader2 className="h-3 w-3 animate-spin" /> : <CloudDownload className="h-3 w-3" />}
+            Fetch
+          </motion.button>
+
+          <motion.button
+            type="button"
+            onClick={handlePull}
+            disabled={pulling}
+            whileHover={!pulling ? { scale: 1.1 } : {}}
+            whileTap={!pulling ? { scale: 0.9 } : {}}
+            transition={springs.snappy}
+            className={cn("flex h-5 items-center gap-1 rounded px-1.5 theme-hover-bg text-[10px] font-medium transition-opacity", pulling && "opacity-40 cursor-not-allowed")}
+            title="Git pull"
+            style={{ color: "var(--vscode-tab-inactive-foreground)" }}
+          >
+            {pulling ? <Loader2 className="h-3 w-3 animate-spin" /> : <GitMerge className="h-3 w-3" />}
+            Pull
+          </motion.button>
+
+          <motion.button
+            type="button"
+            onClick={fetchChanges}
+            whileHover={{ scale: 1.2, rotate: 180 }}
+            whileTap={{ scale: 0.9 }}
+            transition={springs.snappy}
+            className="flex h-5 w-5 items-center justify-center rounded theme-hover-bg"
+            aria-label="Refresh"
+            title="Refresh changes"
+          >
+            <RefreshCw className="h-3 w-3" style={{ color: "var(--vscode-tab-inactive-foreground)" }} />
+          </motion.button>
+        </div>
       </motion.div>
 
       {/* File list */}
@@ -211,10 +280,10 @@ export function ChangesTab({ worktreePath }: ChangesTabProps) {
                   style={{ fontFamily: "'SF Mono', Menlo, Monaco, 'Cascadia Code', monospace" }}
                 >
                   {change.insertions > 0 && (
-                    <span style={{ color: "#4ec994" }}>+{change.insertions}</span>
+                    <span style={{ color: "var(--vscode-terminal-ansi-green, #4ec994)" }}>+{change.insertions}</span>
                   )}
                   {change.deletions > 0 && (
-                    <span style={{ color: "#f48771" }}>-{change.deletions}</span>
+                    <span style={{ color: "var(--vscode-errorForeground, #f48771)" }}>-{change.deletions}</span>
                   )}
                 </span>
               </motion.button>
@@ -223,43 +292,102 @@ export function ChangesTab({ worktreePath }: ChangesTabProps) {
         </motion.div>
       </div>
 
-      {/* Commit area */}
+      {/* Action buttons grid */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ ...springs.smooth, delay: 0.1 }}
-        className="shrink-0 space-y-2 px-4 py-3"
-        style={{ borderTop: "1px solid var(--vscode-sidebar-section-header-border)" }}
+        className="shrink-0 px-3 py-3 flex flex-col gap-2"
+        style={{ borderTop: "1px solid var(--vscode-panel-border, rgba(128,128,128,0.2))" }}
       >
-        <input
-          type="text"
-          value={commitMsg}
-          onChange={(e) => setCommitMsg(e.target.value)}
-          placeholder="Commit message..."
-          className="vscode-input w-full rounded px-3 py-1.5 text-[12px]"
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              handleCommit();
-            }
-          }}
-        />
-        <motion.button
-          type="button"
-          onClick={handleCommit}
-          disabled={committing || files.length === 0 || !commitMsg.trim()}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.97 }}
+        {/* Row 1: Fetch + Pull */}
+        <div className="grid grid-cols-2 gap-2">
+          {[
+            { label: "Fetch", icon: CloudDownload, loading: fetching, onClick: handleFetch, title: "git fetch" },
+            { label: "Pull", icon: GitMerge, loading: pulling, onClick: handlePull, title: "git pull" },
+          ].map(({ label, icon: Icon, loading, onClick, title }) => (
+            <motion.button
+              key={label}
+              type="button"
+              onClick={onClick}
+              disabled={loading}
+              whileHover={!loading ? { scale: 1.02 } : {}}
+              whileTap={!loading ? { scale: 0.97 } : {}}
+              transition={springs.snappy}
+              title={title}
+              className="flex items-center justify-center gap-1.5 rounded-md py-[7px] text-[12px] font-medium transition-opacity duration-150 disabled:cursor-not-allowed disabled:opacity-40 theme-hover-bg"
+              style={{
+                border: "1px solid var(--vscode-sidebar-section-header-border, rgba(255,255,255,0.1))",
+                color: "var(--vscode-tab-inactive-foreground)",
+              }}
+            >
+              {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Icon className="h-3.5 w-3.5" />}
+              {label}
+            </motion.button>
+          ))}
+        </div>
+
+        {/* Row 2: Commit + Push */}
+        <div className="grid grid-cols-2 gap-2">
+          <motion.button
+            type="button"
+            onClick={handleCommit}
+            disabled={committing || files.length === 0}
+            whileHover={!committing && files.length > 0 ? { scale: 1.02 } : {}}
+            whileTap={!committing && files.length > 0 ? { scale: 0.97 } : {}}
+            transition={springs.snappy}
+            title="Stage all and commit"
+            className="vscode-button flex items-center justify-center gap-1.5 rounded-md py-[7px] text-[12px] font-semibold tracking-wide transition-opacity duration-150 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {committing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <GitCommit className="h-3.5 w-3.5" />}
+            Commit
+          </motion.button>
+
+          <motion.button
+            type="button"
+            onClick={handlePush}
+            disabled={pushing}
+            whileHover={!pushing ? { scale: 1.02 } : {}}
+            whileTap={!pushing ? { scale: 0.97 } : {}}
+            transition={springs.snappy}
+            title="git push"
+            className="flex items-center justify-center gap-1.5 rounded-md py-[7px] text-[12px] font-semibold tracking-wide transition-opacity duration-150 disabled:cursor-not-allowed disabled:opacity-40 theme-hover-bg"
+            style={{
+              border: "1px solid var(--vscode-sidebar-section-header-border, rgba(255,255,255,0.1))",
+              color: "var(--vscode-tab-inactive-foreground)",
+            }}
+          >
+            {pushing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CloudUpload className="h-3.5 w-3.5" />}
+            Push
+          </motion.button>
+        </div>
+
+        {/* Row 3: Create PR (full width split button) */}
+        <motion.div
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.98 }}
           transition={springs.snappy}
-          className="vscode-button flex w-full items-center justify-center gap-2 rounded py-2 text-[12px] font-medium disabled:opacity-50"
+          className="flex items-stretch overflow-hidden rounded-md"
+          style={{ border: "1px solid var(--vscode-sidebar-section-header-border, rgba(255,255,255,0.12))" }}
         >
-          {committing ? (
-            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-          ) : (
-            <GitCommit className="h-3.5 w-3.5" />
-          )}
-          Commit changes
-        </motion.button>
+          <button
+            type="button"
+            className="flex flex-1 items-center justify-center gap-1.5 px-3 py-[7px] text-[12px] font-semibold tracking-wide transition-colors duration-75 theme-hover-bg"
+            style={{ color: "var(--vscode-tab-inactive-foreground)" }}
+          >
+            <GitPullRequest className="h-3.5 w-3.5 shrink-0" />
+            Create PR
+          </button>
+          <div style={{ width: "1px", backgroundColor: "var(--vscode-sidebar-section-header-border, rgba(255,255,255,0.08))" }} />
+          <button
+            type="button"
+            className="flex items-center px-2.5 py-[7px] transition-colors duration-75 theme-hover-bg"
+            style={{ color: "var(--vscode-tab-inactive-foreground)" }}
+            title="PR options"
+          >
+            <ChevronDown className="h-3.5 w-3.5" />
+          </button>
+        </motion.div>
       </motion.div>
     </div>
   );

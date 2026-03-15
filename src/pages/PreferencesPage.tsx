@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Monitor, Type, Keyboard, LayoutTemplate, Code2, TerminalSquare, AlignLeft, Map, Baseline } from "lucide-react";
+import { Monitor, Type, Keyboard, LayoutTemplate, Code2, TerminalSquare, AlignLeft, Map, Baseline, Plug } from "lucide-react";
+import { applyTheme, getCurrentTheme, THEMES, type VscodeThemeId } from "@/styles/themes/themes";
+import { useSettingsStore, IDE_OPTIONS, type IdeId } from "@/store/settingsStore";
 
 interface NavSection {
   title: string;
@@ -32,6 +34,10 @@ const navSections: NavSection[] = [
     ],
   },
   {
+    title: "Integrations",
+    items: [{ id: "ide", label: "Default IDE", icon: Plug }],
+  },
+  {
     title: "Keybindings",
     items: [{ id: "keybindings", label: "Keyboard Shortcuts", icon: Keyboard }],
   },
@@ -40,17 +46,7 @@ const navSections: NavSection[] = [
 // ── Section content ────────────────────────────────────────────────────────────
 
 function ThemeSection() {
-  const [selectedTheme, setSelectedTheme] = useState("dark-default");
-  const themes = [
-    { id: "dark-default", label: "Dark+ (Default)" },
-    { id: "one-dark-pro", label: "One Dark Pro" },
-    { id: "github-dark", label: "GitHub Dark" },
-    { id: "dracula", label: "Dracula" },
-    { id: "monokai", label: "Monokai" },
-    { id: "nord", label: "Nord" },
-    { id: "solarized-dark", label: "Solarized Dark" },
-    { id: "light-default", label: "Light+ (Default)" },
-  ];
+  const [selectedTheme, setSelectedTheme] = useState<VscodeThemeId>(() => getCurrentTheme());
   return (
     <div className="space-y-6">
       <div>
@@ -62,22 +58,24 @@ function ThemeSection() {
         </p>
       </div>
       <div className="grid grid-cols-2 gap-2 max-w-sm">
-        {themes.map((t) => (
+        {THEMES.map((t) => (
           <button
             key={t.id}
             type="button"
-            onClick={() => setSelectedTheme(t.id)}
+            onClick={() => {
+              applyTheme(t.id);
+              setSelectedTheme(t.id);
+            }}
             className={cn(
-              "flex items-center gap-2 rounded-md border px-3 py-2 text-left text-[12px] transition-colors duration-75",
+              "vscode-btn flex items-center gap-2 px-3 py-2 text-left text-[12px] rounded-sm",
               selectedTheme === t.id
-                ? "border-[var(--vscode-focusBorder)] bg-[var(--vscode-list-active-selection-background)]"
-                : "border-[var(--vscode-widget-border,transparent)] hover:bg-[var(--vscode-list-hover-background)]",
+                ? "border-[var(--vscode-focusBorder)] bg-[var(--vscode-list-active-selection-background)] text-[var(--vscode-list-active-selection-foreground)]"
+                : "vscode-btn-secondary",
             )}
-            style={{ color: "var(--vscode-editor-foreground)" }}
           >
             <span
               className="h-3 w-3 shrink-0 rounded-full"
-              style={{ background: selectedTheme === t.id ? "var(--vscode-focusBorder)" : "var(--vscode-editor-foreground)", opacity: selectedTheme === t.id ? 1 : 0.3 }}
+              style={{ background: t.accent, opacity: selectedTheme === t.id ? 1 : 0.5 }}
             />
             {t.label}
           </button>
@@ -290,17 +288,9 @@ function SettingsToggle({ label, description, defaultChecked }: { label: string;
         role="switch"
         aria-checked={checked}
         onClick={() => setChecked((v) => !v)}
-        className={cn(
-          "relative mt-0.5 h-4 w-7 shrink-0 rounded-full transition-colors duration-150",
-          checked ? "bg-[var(--vscode-focusBorder)]" : "bg-[var(--vscode-input-border,rgba(255,255,255,0.15))]",
-        )}
+        className="vscode-toggle mt-0.5"
       >
-        <span
-          className={cn(
-            "absolute top-0.5 h-3 w-3 rounded-full bg-white shadow transition-transform duration-150",
-            checked ? "translate-x-3.5" : "translate-x-0.5",
-          )}
-        />
+        <span className="vscode-toggle-thumb" />
       </button>
     </div>
   );
@@ -353,6 +343,48 @@ function SettingsNumberInput({ label, description, defaultValue, min, max }: { l
   );
 }
 
+function IdeSection() {
+  const { defaultIde, setDefaultIde } = useSettingsStore();
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-[15px] font-semibold" style={{ color: "var(--vscode-editor-foreground)" }}>
+          Default IDE
+        </h2>
+        <p className="mt-1 text-[12px]" style={{ color: "var(--vscode-editor-foreground)", opacity: 0.6 }}>
+          Choose which editor opens when you click "Open" in the workspace header.
+        </p>
+      </div>
+      <div className="max-w-sm space-y-1.5">
+        {IDE_OPTIONS.map((ide) => {
+          const isSelected = defaultIde === ide.id;
+          return (
+            <button
+              key={ide.id}
+              type="button"
+              onClick={() => setDefaultIde(ide.id as IdeId)}
+              className={cn(
+                "vscode-btn flex w-full items-center justify-between px-3 py-2 text-left text-[13px] rounded-sm",
+                isSelected
+                  ? "border-[var(--vscode-focusBorder)] bg-[var(--vscode-list-active-selection-background)] text-[var(--vscode-list-active-selection-foreground)]"
+                  : "vscode-btn-secondary",
+              )}
+            >
+              <span>{ide.label}</span>
+              <span
+                className="font-mono text-[11px]"
+                style={{ color: "var(--vscode-editor-foreground)", opacity: 0.4 }}
+              >
+                {ide.command}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // ── Section registry ───────────────────────────────────────────────────────────
 
 const sectionComponents: Record<string, React.ComponentType> = {
@@ -364,6 +396,7 @@ const sectionComponents: Record<string, React.ComponentType> = {
   "editor-minimap": EditorMinimapSection,
   "terminal-general": TerminalGeneralSection,
   "terminal-font": TerminalFontSection,
+  ide: IdeSection,
   keybindings: KeybindingsSection,
 };
 

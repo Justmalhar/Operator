@@ -1,6 +1,5 @@
-import { useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Play, RotateCcw } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import * as api from "@/lib/tauri";
 
 interface TerminalLine {
@@ -14,19 +13,28 @@ cp .env.example .env
 bun run db:migrate
 bun run build:css`;
 
-export function SetupTab() {
+interface SetupTabProps {
+  /** Increment to trigger a fresh run */
+  runTrigger?: number;
+  /** Increment to clear output and rerun (reinstall) */
+  rerunTrigger?: number;
+  onRunningChange?: (running: boolean) => void;
+}
+
+export function SetupTab({ runTrigger = 0, rerunTrigger = 0, onRunningChange }: SetupTabProps) {
   const [script, setScript] = useState(DEFAULT_SCRIPT);
   const [running, setRunning] = useState(false);
-  const [hasRun, setHasRun] = useState(false);
   const [lines, setLines] = useState<TerminalLine[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const runningRef = useRef(false);
 
-  async function runSetup() {
-    if (running || !script.trim()) return;
+  async function runSetup(clearFirst = false) {
+    if (runningRef.current || !script.trim()) return;
+    runningRef.current = true;
     setRunning(true);
-    setHasRun(true);
+    onRunningChange?.(true);
+    if (clearFirst) setLines([]);
 
-    // Show each command line immediately
     const scriptLines = script
       .split("\n")
       .map((l) => l.trim())
@@ -63,14 +71,26 @@ export function SetupTab() {
       ]);
     }
 
+    runningRef.current = false;
     setRunning(false);
+    onRunningChange?.(false);
     setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 50);
   }
 
+  // Fire when header play button increments runTrigger
+  useEffect(() => {
+    if (runTrigger > 0) runSetup(false);
+  }, [runTrigger]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Fire when header reinstall button increments rerunTrigger
+  useEffect(() => {
+    if (rerunTrigger > 0) runSetup(true);
+  }, [rerunTrigger]); // eslint-disable-line react-hooks/exhaustive-deps
+
   return (
-    <div className="flex h-full flex-col overflow-hidden">
-      {/* Script editor */}
-      <div className="flex shrink-0 flex-col gap-2 px-3 py-3">
+    <div className="flex flex-col">
+      {/* Script editor only — run button lives in the section header */}
+      <div className="flex flex-col gap-2 px-3 py-3">
         <p
           className="text-[11px]"
           style={{ color: "var(--vscode-tab-inactive-foreground)" }}
@@ -81,8 +101,8 @@ export function SetupTab() {
         <textarea
           className="w-full resize-none rounded font-mono text-[11px] focus:outline-none"
           style={{
-            color: "#4ec994",
-            backgroundColor: "rgba(0,0,0,0.25)",
+            color: "var(--vscode-terminal-ansi-green, #4ec994)",
+            backgroundColor: "var(--vscode-terminal-background, var(--vscode-editor-background))",
             border: "1px solid var(--vscode-panel-border)",
             padding: "8px 10px",
             lineHeight: "1.7",
@@ -93,46 +113,6 @@ export function SetupTab() {
           spellCheck={false}
           rows={4}
         />
-
-        <div className="flex justify-end">
-          <motion.button
-            type="button"
-            onClick={runSetup}
-            disabled={running || !script.trim()}
-            whileHover={!running ? { scale: 1.02 } : {}}
-            whileTap={!running ? { scale: 0.97 } : {}}
-            className="flex items-center gap-1.5 rounded px-3 py-1.5 text-[11px] font-medium transition-colors duration-75"
-            style={{
-              backgroundColor: running
-                ? "rgba(255,255,255,0.04)"
-                : "rgba(78,201,148,0.1)",
-              color: running
-                ? "var(--vscode-tab-inactive-foreground)"
-                : "#4ec994",
-              border: "1px solid",
-              borderColor: running
-                ? "var(--vscode-panel-border)"
-                : "rgba(78,201,148,0.3)",
-              cursor: running ? "not-allowed" : "pointer",
-            }}
-          >
-            {running ? (
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-              >
-                <RotateCcw className="h-3 w-3" />
-              </motion.div>
-            ) : hasRun ? (
-              <RotateCcw className="h-3 w-3" />
-            ) : (
-              <Play className="h-3 w-3" />
-            )}
-            <span>
-              {running ? "Running..." : hasRun ? "Rerun setup" : "Run setup"}
-            </span>
-          </motion.button>
-        </div>
       </div>
 
       {/* Terminal output */}
@@ -143,18 +123,15 @@ export function SetupTab() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="min-h-0 flex-1 overflow-hidden"
+            className="overflow-hidden"
             style={{
               borderTop: "1px solid var(--vscode-panel-border)",
-              backgroundColor: "rgba(0,0,0,0.2)",
+              backgroundColor: "var(--vscode-terminal-background, var(--vscode-editor-background))",
             }}
           >
             <div
-              className="vscode-scrollable h-full overflow-y-auto px-3 py-3 text-[11px]"
-              style={{
-                fontFamily:
-                  "'SF Mono', Menlo, Monaco, 'Cascadia Code', monospace",
-              }}
+              className="vscode-scrollable overflow-y-auto px-3 py-3 text-[11px]"
+              style={{ maxHeight: "200px", fontFamily: "'SF Mono', Menlo, Monaco, 'Cascadia Code', monospace" }}
             >
               {lines.map((line) => (
                 <div
@@ -164,15 +141,15 @@ export function SetupTab() {
                     whiteSpace: "pre-wrap",
                     color:
                       line.type === "command"
-                        ? "var(--vscode-editor-foreground)"
+                        ? "var(--vscode-terminal-foreground, var(--vscode-editor-foreground))"
                         : line.type === "error"
-                          ? "#f48771"
+                          ? "var(--vscode-terminal-ansi-red, #f48771)"
                           : "var(--vscode-tab-inactive-foreground)",
                   }}
                 >
                   {line.type === "command" ? (
                     <span>
-                      <span style={{ color: "#4ec994" }}>$ </span>
+                      <span style={{ color: "var(--vscode-terminal-ansi-green, #4ec994)" }}>$ </span>
                       {line.text}
                     </span>
                   ) : (
@@ -180,6 +157,14 @@ export function SetupTab() {
                   )}
                 </div>
               ))}
+              {running && (
+                <motion.div
+                  animate={{ opacity: [1, 0, 1] }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
+                  className="inline-block h-[13px] w-[7px] align-middle"
+                  style={{ backgroundColor: "var(--vscode-terminal-foreground, var(--vscode-editor-foreground))" }}
+                />
+              )}
               <div ref={bottomRef} />
             </div>
           </motion.div>

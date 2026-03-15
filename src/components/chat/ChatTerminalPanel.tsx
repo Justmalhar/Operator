@@ -158,7 +158,7 @@ export function ChatTerminalPanel({ worktreePath }: ChatTerminalPanelProps) {
             onClick={addTerminal}
             whileHover={{ backgroundColor: "rgba(255,255,255,0.05)", scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
-            className="flex h-full items-center px-2.5"
+            className="flex h-full items-center px-4"
             aria-label="New terminal"
             title="New terminal (same worktree)"
           >

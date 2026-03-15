@@ -79,17 +79,9 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      className={cn(
-        "relative h-4 w-7 shrink-0 rounded-full transition-colors duration-150",
-        checked ? "bg-[var(--vscode-focusBorder)]" : "bg-[var(--vscode-input-border,rgba(255,255,255,0.2))]",
-      )}
+      className="vscode-toggle"
     >
-      <span
-        className={cn(
-          "absolute top-0.5 h-3 w-3 rounded-full bg-white shadow transition-transform duration-150",
-          checked ? "translate-x-3.5" : "translate-x-0.5",
-        )}
-      />
+      <span className="vscode-toggle-thumb" />
     </button>
   );
 }
@@ -406,15 +398,7 @@ function BackendsSection() {
               <Toggle checked={extendedContext} onChange={setExtendedContext} />
             </SettingRow>
             <div className="pt-2">
-              <button
-                type="button"
-                className="rounded px-3 py-1.5 text-[12px] transition-colors hover:opacity-80"
-                style={{
-                  background: "var(--vscode-button-secondaryBackground, rgba(255,255,255,0.08))",
-                  color: "var(--vscode-button-secondaryForeground, var(--vscode-editor-foreground))",
-                  border: "1px solid var(--vscode-widget-border, rgba(255,255,255,0.15))",
-                }}
-              >
+              <button type="button" className="vscode-btn vscode-btn-secondary vscode-btn-sm">
                 Disconnect
               </button>
             </div>
@@ -423,14 +407,7 @@ function BackendsSection() {
 
         <BackendCard name="OpenAI Codex" connected={false} statusLabel="Not connected">
           <div className="flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              className="rounded px-3 py-1.5 text-[12px] transition-colors hover:opacity-80"
-              style={{
-                background: "var(--vscode-button-background)",
-                color: "var(--vscode-button-foreground)",
-              }}
-            >
+            <button type="button" className="vscode-btn vscode-btn-primary vscode-btn-sm">
               Connect with ChatGPT account
             </button>
             <span className="text-[11px] opacity-40" style={{ color: "var(--vscode-editor-foreground)" }}>or</span>
@@ -473,8 +450,7 @@ function BackendsSection() {
                     <button
                       type="button"
                       onClick={() => setShowToken((v) => !v)}
-                      className="opacity-60 hover:opacity-100"
-                      style={{ color: "var(--vscode-editor-foreground)" }}
+                      className="vscode-btn vscode-btn-ghost h-6 w-6 p-0"
                     >
                       {showToken ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                     </button>
@@ -515,7 +491,7 @@ function PrivacySection() {
         <p className="font-semibold" style={{ color: "#4ec994" }}>Your data stays on your Mac.</p>
         <p className="mt-1 opacity-70">All chat history and code is stored locally. Nothing is sent to Operator's servers.</p>
         <p className="mt-1 font-mono text-[11px] opacity-50">~/Library/Application Support/com.operator.app</p>
-        <button type="button" className="mt-2 text-[11px] underline opacity-70 hover:opacity-100">
+        <button type="button" className="vscode-btn vscode-btn-link vscode-btn-sm mt-2">
           Open in Finder
         </button>
       </div>
@@ -559,11 +535,7 @@ function PrivacySection() {
       <Divider />
 
       <div className="mt-6">
-        <button
-          type="button"
-          className="rounded px-3 py-1.5 text-[12px] transition-colors hover:opacity-80"
-          style={{ background: "rgba(200,50,50,0.12)", color: "#f48771", border: "1px solid rgba(200,50,50,0.3)" }}
-        >
+        <button type="button" className="vscode-btn vscode-btn-danger vscode-btn-sm">
           Delete all local data…
         </button>
       </div>
@@ -612,11 +584,7 @@ function HooksSection() {
         <div className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--vscode-editor-foreground)", opacity: 0.45 }}>
           Custom global hooks
         </div>
-        <button
-          type="button"
-          className="flex items-center gap-1 rounded px-2.5 py-1 text-[12px] transition-colors hover:opacity-80"
-          style={{ background: "var(--vscode-button-background)", color: "var(--vscode-button-foreground)" }}
-        >
+        <button type="button" className="vscode-btn vscode-btn-primary vscode-btn-sm flex items-center gap-1">
           <Plus className="h-3 w-3" /> Add hook
         </button>
       </div>
@@ -673,16 +641,16 @@ function EnvVarsSection() {
                 {v.secret && !revealed.has(v.key) ? "●".repeat(14) : v.value}
               </span>
               {v.secret && (
-                <button type="button" onClick={() => toggleReveal(v.key)} className="shrink-0 opacity-50 hover:opacity-100">
+                <button type="button" onClick={() => toggleReveal(v.key)} className="vscode-btn vscode-btn-ghost h-5 w-5 shrink-0 p-0">
                   {revealed.has(v.key) ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
                 </button>
               )}
             </div>
             <div className="flex items-center gap-2">
               {v.secret && <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-400" title="Secret" />}
-              <button type="button" className="opacity-40 hover:opacity-80"><Pencil className="h-3 w-3" /></button>
-              <button type="button" className="opacity-40 hover:opacity-80" onClick={() => setVars((p) => p.filter((x) => x.key !== v.key))}>
-                <Trash2 className="h-3 w-3 text-red-400" />
+              <button type="button" className="vscode-btn vscode-btn-ghost h-5 w-5 p-0"><Pencil className="h-3 w-3" /></button>
+              <button type="button" className="vscode-btn vscode-btn-ghost h-5 w-5 p-0" onClick={() => setVars((p) => p.filter((x) => x.key !== v.key))}>
+                <Trash2 className="h-3 w-3" style={{ color: "var(--vscode-errorForeground, #f48771)" }} />
               </button>
             </div>
           </div>
@@ -691,8 +659,7 @@ function EnvVarsSection() {
 
       <button
         type="button"
-        className="mt-3 flex items-center gap-1.5 rounded px-3 py-1.5 text-[12px] transition-colors hover:opacity-80"
-        style={{ background: "var(--vscode-button-background)", color: "var(--vscode-button-foreground)" }}
+        className="vscode-btn vscode-btn-primary vscode-btn-sm mt-3 flex items-center gap-1.5"
         onClick={() => setVars((p) => [...p, { key: "NEW_VAR", value: "", secret: false }])}
       >
         <Plus className="h-3.5 w-3.5" /> Add variable
@@ -704,12 +671,7 @@ function EnvVarsSection() {
         </div>
         <div className="flex flex-wrap gap-2">
           {["OpenRouter", "AWS Bedrock", "Vertex AI", "Azure AI"].map((p) => (
-            <button
-              key={p}
-              type="button"
-              className="rounded px-3 py-1 text-[11px] transition-colors hover:opacity-80"
-              style={{ background: "var(--vscode-button-secondaryBackground, rgba(255,255,255,0.08))", color: "var(--vscode-editor-foreground)", border: "1px solid var(--vscode-widget-border, rgba(255,255,255,0.15))" }}
-            >
+            <button key={p} type="button" className="vscode-btn vscode-btn-secondary vscode-btn-sm">
               {p}
             </button>
           ))}
@@ -763,11 +725,7 @@ function ShortcutsSection() {
           </div>
         ))}
       </div>
-      <button
-        type="button"
-        className="mt-3 rounded px-3 py-1.5 text-[12px] opacity-70 transition-colors hover:opacity-100"
-        style={{ background: "rgba(255,255,255,0.08)", color: "var(--vscode-editor-foreground)", border: "1px solid var(--vscode-widget-border, rgba(255,255,255,0.15))" }}
-      >
+      <button type="button" className="vscode-btn vscode-btn-secondary vscode-btn-sm mt-3">
         Reset to defaults
       </button>
     </div>
@@ -795,10 +753,10 @@ function ReposSection() {
               <div>Workspaces: {repo.activeWorkspaces} active, {repo.archived} archived</div>
             </div>
             <div className="mt-3 flex gap-2">
-              <button type="button" className="rounded px-3 py-1 text-[11px] transition-colors hover:opacity-80" style={{ background: "rgba(255,255,255,0.08)", color: "var(--vscode-editor-foreground)", border: "1px solid var(--vscode-widget-border, rgba(255,255,255,0.15))" }}>
+              <button type="button" className="vscode-btn vscode-btn-secondary vscode-btn-sm">
                 Open settings
               </button>
-              <button type="button" className="rounded px-3 py-1 text-[11px] opacity-60 transition-colors hover:opacity-100" style={{ color: "#f48771" }}>
+              <button type="button" className="vscode-btn vscode-btn-sm vscode-btn-danger">
                 Remove
               </button>
             </div>
@@ -806,8 +764,8 @@ function ReposSection() {
         ))}
         <button
           type="button"
-          className="flex w-full items-center justify-center gap-2 rounded-lg py-3 text-[12px] transition-colors hover:opacity-80"
-          style={{ border: "1px dashed var(--vscode-widget-border, rgba(255,255,255,0.2))", color: "var(--vscode-editor-foreground)", opacity: 0.6 }}
+          className="vscode-btn vscode-btn-secondary flex w-full items-center justify-center gap-2 py-3"
+          style={{ borderStyle: "dashed" }}
         >
           <Plus className="h-3.5 w-3.5" /> Add repository
         </button>
@@ -919,12 +877,7 @@ function AdvancedSection() {
 
       <div className="flex flex-wrap gap-2">
         {["Import from Conductor", "Export all settings", "View logs", "Open app data folder"].map((label) => (
-          <button
-            key={label}
-            type="button"
-            className="rounded px-3 py-1.5 text-[12px] transition-colors hover:opacity-80"
-            style={{ background: "rgba(255,255,255,0.08)", color: "var(--vscode-editor-foreground)", border: "1px solid var(--vscode-widget-border, rgba(255,255,255,0.15))" }}
-          >
+          <button key={label} type="button" className="vscode-btn vscode-btn-secondary vscode-btn-sm">
             {label}
           </button>
         ))}

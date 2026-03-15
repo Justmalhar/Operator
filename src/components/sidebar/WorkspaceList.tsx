@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { ChevronRight, FolderOpen, ListFilter, Plus } from "lucide-react";
+import { ChevronRight, FolderOpen, Plus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useWorkspaceStore } from "@/store/workspaceStore";
@@ -42,7 +42,7 @@ function RepoGroup({
           type="button"
           onClick={() => hasWorkspaces && setIsExpanded((e) => !e)}
           className={cn(
-            "vscode-list-item flex min-w-0 flex-1 items-center gap-1 text-left text-[11px] font-semibold uppercase tracking-wider transition-colors duration-75",
+            "vscode-list-item flex min-w-0 flex-1 items-center gap-1 text-left text-[12px] font-bold transition-colors duration-75",
             !hasWorkspaces && "cursor-default",
           )}
           style={{ color: "var(--vscode-sidebar-section-header-foreground)" }}
@@ -59,19 +59,14 @@ function RepoGroup({
             </motion.span>
           )}
           {!hasWorkspaces && <div className="w-3 shrink-0" />}
-          <span className="min-w-0 flex-1 truncate">{repo.name}</span>
-          {hasWorkspaces && (
-            <span className="text-[10px] font-normal opacity-50">
-              {workspaces.length}
-            </span>
-          )}
+          <span className="min-w-0 flex-1 truncate text-[13px] font-bold" style={{ fontWeight: 700, color: "var(--vscode-editor-foreground)" }}>{repo.name}</span>
         </button>
         <motion.button
           type="button"
           onClick={() => onNewChatForRepo?.(repo.id)}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
-          className="mr-1 flex h-[16px] w-[16px] shrink-0 items-center justify-center rounded opacity-0 transition-opacity group-hover:opacity-100"
+          className="mr-1 flex h-[16px] w-[16px] shrink-0 items-center justify-center rounded opacity-60 hover:opacity-100 transition-opacity"
           style={{ color: "var(--vscode-sidebar-section-header-foreground)" }}
           title="New chat"
           aria-label="New chat"
@@ -140,25 +135,15 @@ export function WorkspaceList({ activeWorkspaceId, onWorkspaceSelect, onNewChatF
         <div className="flex items-center gap-0.5">
           <motion.button
             type="button"
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            className="vscode-list-item flex h-[20px] w-[20px] items-center justify-center rounded transition-colors duration-75"
-            style={{ color: "var(--vscode-sidebar-section-header-foreground)" }}
-            aria-label="Filter workspaces"
-          >
-            <ListFilter className="h-3 w-3" />
-          </motion.button>
-          <motion.button
-            type="button"
             onClick={handleOpenModal}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
-            className="vscode-list-item flex h-[20px] w-[20px] items-center justify-center rounded transition-colors duration-75"
+            className="vscode-list-item flex items-center justify-center rounded px-2 py-0.5 transition-colors duration-75"
             style={{ color: "var(--vscode-sidebar-section-header-foreground)" }}
             aria-label="New workspace"
             title="New workspace"
           >
-            <Plus className="h-3 w-3" />
+            <Plus className="h-3 w-3 mr-1.5" /> <span className="text-[11px] font-medium">New</span>
           </motion.button>
         </div>
       </motion.div>
@@ -183,7 +168,7 @@ export function WorkspaceList({ activeWorkspaceId, onWorkspaceSelect, onNewChatF
         <motion.div
           {...fadeInUp}
           className="px-4 py-3 text-[12px]"
-          style={{ color: "#f48771" }}
+          style={{ color: "var(--vscode-errorForeground, #f48771)" }}
         >
           {error}
         </motion.div>

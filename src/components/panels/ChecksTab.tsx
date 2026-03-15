@@ -19,16 +19,16 @@ const MOCK_CHECKS: Check[] = [
 ];
 
 const statusIcon = {
-  passed: <CheckCircle2 className="h-3.5 w-3.5 shrink-0" style={{ color: "#4ec994" }} />,
-  failed: <XCircle className="h-3.5 w-3.5 shrink-0" style={{ color: "#f48771" }} />,
-  running: <RefreshCw className="h-3.5 w-3.5 shrink-0 animate-spin" style={{ color: "#3b9edd" }} />,
+  passed: <CheckCircle2 className="h-3.5 w-3.5 shrink-0" style={{ color: "var(--vscode-terminal-ansi-green, #4ec994)" }} />,
+  failed: <XCircle className="h-3.5 w-3.5 shrink-0" style={{ color: "var(--vscode-errorForeground, #f48771)" }} />,
+  running: <RefreshCw className="h-3.5 w-3.5 shrink-0 animate-spin" style={{ color: "var(--vscode-terminal-ansi-blue, #3b9edd)" }} />,
   skipped: <AlertCircle className="h-3.5 w-3.5 shrink-0" style={{ color: "var(--vscode-tab-inactive-foreground)", opacity: 0.5 }} />,
 };
 
 const statusColor: Record<CheckStatus, string> = {
-  passed: "#4ec994",
-  failed: "#f48771",
-  running: "#3b9edd",
+  passed: "var(--vscode-terminal-ansi-green, #4ec994)",
+  failed: "var(--vscode-errorForeground, #f48771)",
+  running: "var(--vscode-terminal-ansi-blue, #3b9edd)",
   skipped: "var(--vscode-tab-inactive-foreground)",
 };
 
@@ -44,18 +44,18 @@ export function ChecksTab() {
         className="flex shrink-0 items-center gap-3 px-4 py-2.5 text-[12px]"
         style={{ borderBottom: "1px solid var(--vscode-sidebar-section-header-border)" }}
       >
-        <span className="flex items-center gap-1" style={{ color: "#4ec994" }}>
+        <span className="flex items-center gap-1" style={{ color: "var(--vscode-terminal-ansi-green, #4ec994)" }}>
           <CheckCircle2 className="h-3 w-3" />
           {passed} passed
         </span>
         {failed > 0 && (
-          <span className="flex items-center gap-1" style={{ color: "#f48771" }}>
+          <span className="flex items-center gap-1" style={{ color: "var(--vscode-errorForeground, #f48771)" }}>
             <XCircle className="h-3 w-3" />
             {failed} failed
           </span>
         )}
         {running > 0 && (
-          <span className="flex items-center gap-1" style={{ color: "#3b9edd" }}>
+          <span className="flex items-center gap-1" style={{ color: "var(--vscode-terminal-ansi-blue, #3b9edd)" }}>
             <Clock className="h-3 w-3" />
             {running} running
           </span>

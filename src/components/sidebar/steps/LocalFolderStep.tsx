@@ -74,7 +74,7 @@ export function LocalFolderStep({ onSuccess, onBack }: LocalFolderStepProps) {
   if (error) {
     return (
       <div className="flex flex-col gap-3">
-        <p className="text-[12px]" style={{ color: "#f48771" }}>
+        <p className="text-[12px]" style={{ color: "var(--vscode-errorForeground, #f48771)" }}>
           {error}
         </p>
         <button

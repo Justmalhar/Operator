@@ -1,367 +1,282 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "@/lib/utils";
 import { SetupTab } from "./SetupTab";
 import { RunTab, type RunScript } from "./RunTab";
-import { Activity, Globe, Square, Play, ChevronDown, RotateCcw } from "lucide-react";
-import { tabContent, springs, dropdownVariants } from "@/lib/animations";
+import { Globe, Square, Play, ChevronDown, RotateCcw } from "lucide-react";
 
-type BottomTab = "setup" | "run";
+interface SectionHeaderProps {
+  label: string;
+  isCollapsed: boolean;
+  onToggle: () => void;
+  actions?: React.ReactNode;
+}
 
-const ALL_TABS: { id: BottomTab; label: string }[] = [
-  { id: "setup", label: "Setup" },
-  { id: "run", label: "Run" },
-];
+function SectionHeader({ label, isCollapsed, onToggle, actions }: SectionHeaderProps) {
+  return (
+    <div
+      className="vscode-sidebar-section-header flex shrink-0 items-center justify-between"
+      style={{
+        height: "35px",
+        backgroundColor: "var(--vscode-sideBarSectionHeader-background, var(--vscode-sideBar-background))",
+        borderTop: "1px solid var(--vscode-panel-border, rgba(128,128,128,0.2))",
+        borderBottom: "1px solid var(--vscode-panel-border, rgba(128,128,128,0.2))",
+        cursor: "pointer",
+      }}
+      onClick={onToggle}
+    >
+      <div className="flex h-full items-center gap-1 overflow-hidden">
+        <div
+          className="flex h-full w-8 items-center justify-center transition-colors duration-75 theme-hover-bg"
+          aria-label={isCollapsed ? "Expand section" : "Collapse section"}
+        >
+          <motion.div
+            animate={{ rotate: isCollapsed ? -90 : 0 }}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
+            className="flex items-center justify-center"
+          >
+            <ChevronDown
+              className="h-3 w-3"
+              style={{ color: "var(--vscode-sidebar-foreground)" }}
+            />
+          </motion.div>
+        </div>
+        <span
+          className="truncate text-[11px] font-bold uppercase tracking-wider"
+          style={{ color: "var(--vscode-sidebar-section-header-foreground)" }}
+        >
+          {label}
+        </span>
+      </div>
+      {actions && !isCollapsed && (
+        <div className="flex items-center pr-2" onClick={(e) => e.stopPropagation()}>
+          {actions}
+        </div>
+      )}
+    </div>
+  );
+}
 
 interface BottomPanelProps {
   worktreePath?: string;
+  activeSection?: string | null;
+  onSectionOpen?: (section: string) => void;
 }
 
-export function BottomPanel({ worktreePath: _worktreePath }: BottomPanelProps) {
-  const [activeTab, setActiveTab] = useState<BottomTab>("setup");
+export function BottomPanel({ worktreePath: _worktreePath, activeSection, onSectionOpen }: BottomPanelProps) {
   const [runningScript, setRunningScript] = useState<RunScript | null>(null);
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // ⌘R / Ctrl+R toggles the active run script
+  const setupOpen = activeSection === "setup";
+  const runOpen = activeSection === "run";
+
+  const [setupRunTrigger, setSetupRunTrigger] = useState(0);
+  const [setupRerunTrigger, setSetupRerunTrigger] = useState(0);
+  const [setupRunning, setSetupRunning] = useState(false);
+
+  const isMac = typeof navigator !== "undefined" && navigator.platform.toUpperCase().includes("MAC");
+  const runShortcut = isMac ? "⌘R" : "Ctrl+R";
+  const stopShortcut = isMac ? "⌘." : "Ctrl+.";
+
+  // Keyboard shortcuts for Run section
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
-      if ((e.metaKey || e.ctrlKey) && e.key === "r") {
+      const mod = isMac ? e.metaKey : e.ctrlKey;
+      if (mod && e.key === "r") {
         e.preventDefault();
         if (runningScript) {
           setRunningScript(null);
         } else {
-          // Switch to Run tab and user can pick — for now just switch tab
-          setActiveTab("run");
+          onSectionOpen?.("run");
         }
+      }
+      if (mod && e.key === ".") {
+        e.preventDefault();
+        if (runningScript) setRunningScript(null);
       }
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [runningScript]);
-
-  // Close dropdown on outside click
-  useEffect(() => {
-    if (!showDropdown) return;
-    function onOutside(e: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setShowDropdown(false);
-      }
-    }
-    window.addEventListener("mousedown", onOutside);
-    return () => window.removeEventListener("mousedown", onOutside);
-  }, [showDropdown]);
+  }, [runningScript, isMac]);
 
   function openInBrowser() {
-    if (runningScript?.port) {
-      window.open(`http://localhost:${runningScript.port}`, "_blank");
-    }
-    setShowDropdown(false);
+    if (runningScript?.port) window.open(`http://localhost:${runningScript.port}`, "_blank");
   }
-
-  function stopScript() {
-    setRunningScript(null);
-    setShowDropdown(false);
-  }
-
-  function restartScript() {
-    const s = runningScript;
-    setRunningScript(null);
-    setShowDropdown(false);
-    setTimeout(() => setRunningScript(s), 80);
-  }
-
-  const isMac = navigator.platform.toUpperCase().includes("MAC");
-  const shortcut = isMac ? "⌘R" : "Ctrl+R";
 
   return (
-    <div className="vscode-panel flex h-full flex-col">
-      {/* Tab bar */}
-      <div
-        className="flex shrink-0 items-stretch"
-        style={{
-          height: "44px",
-          backgroundColor: "var(--vscode-panel-background)",
-          borderBottom: "1px solid var(--vscode-panel-border)",
-        }}
-      >
-        {/* Left: collapse + tabs */}
-        <div className="flex min-w-0 flex-1 items-stretch gap-4 pl-3">
-          <motion.button
-            type="button"
-            onClick={() => setCollapsed((v) => !v)}
-            className="flex h-full items-center px-2 transition-colors duration-75 theme-hover-bg"
-            aria-label={collapsed ? "Expand panel" : "Collapse panel"}
-            title={collapsed ? "Expand panel" : "Collapse panel"}
-          >
-            <motion.div
-              animate={{ rotate: collapsed ? 180 : 0 }}
-              transition={{ duration: 0.2, ease: "easeInOut" }}
-            >
-              <ChevronDown
-                className="h-[10px] w-[10px]"
-                style={{ color: "var(--vscode-panel-title-inactive-foreground)" }}
-              />
-            </motion.div>
-          </motion.button>
-
-          {ALL_TABS.map((tab) => {
-            const isActive = tab.id === activeTab;
-            return (
-              <button
-                key={tab.id}
+    <div className="flex flex-col">
+      {/* Setup Section */}
+      <div className="flex flex-col shrink-0">
+        <SectionHeader
+          label="Setup"
+          isCollapsed={!setupOpen}
+          onToggle={() => onSectionOpen?.("setup")}
+          actions={
+            <div className="flex items-center gap-1">
+              {/* Reinstall button */}
+              <motion.button
                 type="button"
-                onClick={() => setActiveTab(tab.id)}
-                className={cn(
-                  "relative flex h-full items-center gap-1.5 px-2 text-[12px] font-medium transition-colors duration-75 whitespace-nowrap",
-                  isActive
-                    ? "text-[var(--vscode-panel-title-active-foreground)]"
-                    : "text-[var(--vscode-panel-title-inactive-foreground)] hover:text-[var(--vscode-panel-title-active-foreground)]",
-                )}
+                whileTap={{ scale: 0.88 }}
+                onClick={() => {
+                  onSectionOpen?.("setup");
+                  setSetupRerunTrigger((n) => n + 1);
+                }}
+                disabled={setupRunning}
+                className="flex h-6 w-6 items-center justify-center rounded transition-colors duration-75 theme-hover-bg"
+                style={{
+                  border: "1px solid var(--vscode-panel-border, rgba(128,128,128,0.3))",
+                  opacity: setupRunning ? 0.4 : 1,
+                  cursor: setupRunning ? "not-allowed" : "pointer",
+                }}
+                title="Reinstall (clear & rerun setup)"
               >
-                {tab.id === "run" && runningScript && (
-                  <motion.span
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={springs.bouncy}
-                  >
-                    <Activity className="h-3.5 w-3.5 shrink-0" style={{ color: "#4ec994" }} />
-                  </motion.span>
-                )}
-                {tab.label}
-                {isActive && <span className="panel-tab-underline" />}
-              </button>
-            );
-          })}
-        </div>
+                <RotateCcw className="h-[10px] w-[10px]" style={{ color: "var(--vscode-tab-inactive-foreground)" }} />
+              </motion.button>
 
-        {/* Right: action buttons (only shown when Run tab active) */}
-        <AnimatePresence>
-          {activeTab === "run" && (
+              {/* Run Setup button */}
+              <motion.button
+                type="button"
+                whileTap={{ scale: 0.88 }}
+                onClick={() => {
+                  onSectionOpen?.("setup");
+                  setSetupRunTrigger((n) => n + 1);
+                }}
+                disabled={setupRunning}
+                className="flex items-center gap-1.5 rounded px-2 py-0.5 text-[10px] font-medium transition-colors duration-75 theme-hover-bg"
+                style={{
+                  color: setupRunning
+                    ? "var(--vscode-tab-inactive-foreground)"
+                    : "var(--vscode-terminal-ansi-green, #4ec994)",
+                  border: "1px solid var(--vscode-panel-border, rgba(128,128,128,0.3))",
+                  cursor: setupRunning ? "not-allowed" : "pointer",
+                }}
+                title="Run setup script"
+              >
+                {setupRunning ? (
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    className="flex items-center"
+                  >
+                    <RotateCcw className="h-[9px] w-[9px]" />
+                  </motion.div>
+                ) : (
+                  <Play className="h-[9px] w-[9px]" fill="currentColor" />
+                )}
+                <span>{setupRunning ? "Running…" : "Setup"}</span>
+              </motion.button>
+            </div>
+          }
+        />
+        <AnimatePresence initial={false}>
+          {setupOpen && (
             <motion.div
-              key="run-actions"
-              initial={{ opacity: 0, x: 8 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 8 }}
-              transition={springs.snappy}
-              className="flex shrink-0 items-center gap-1.5 pr-3"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.18, ease: "easeInOut" }}
+              className="overflow-hidden"
             >
-              {/* Open in browser button — only when running and port is set */}
-              <AnimatePresence>
-                {runningScript?.port && (
-                  <motion.button
-                    key="open-btn"
-                    initial={{ opacity: 0, scale: 0.85, width: 0 }}
-                    animate={{ opacity: 1, scale: 1, width: "auto" }}
-                    exit={{ opacity: 0, scale: 0.85, width: 0 }}
-                    transition={springs.snappy}
-                    type="button"
-                    onClick={openInBrowser}
-                    className="flex items-center gap-1.5 overflow-hidden rounded px-2.5 py-1 text-[11px] font-medium transition-colors duration-75 theme-hover-bg whitespace-nowrap"
-                    style={{
-                      color: "var(--vscode-sidebar-foreground)",
-                      border: "1px solid var(--vscode-panel-border)",
-                    }}
-                    title={`Open http://localhost:${runningScript.port}`}
-                  >
-                    <Globe className="h-3 w-3 shrink-0" />
-                    <span>Open :{runningScript.port}</span>
-                  </motion.button>
-                )}
-              </AnimatePresence>
-
-              {/* Run / Stop split button */}
-              <div className="relative flex items-stretch" ref={dropdownRef}>
-                {/* Main action button */}
-                <motion.button
-                  type="button"
-                  whileTap={{ scale: 0.96 }}
-                  onClick={() => {
-                    if (runningScript) {
-                      stopScript();
-                    } else {
-                      setActiveTab("run");
-                    }
-                  }}
-                  className="flex items-center gap-1.5 rounded-l px-2.5 py-1 text-[11px] font-medium transition-colors duration-75 theme-hover-bg whitespace-nowrap"
-                  style={{
-                    color: "var(--vscode-sidebar-foreground)",
-                    border: "1px solid var(--vscode-panel-border)",
-                    borderRight: "none",
-                  }}
-                  title={runningScript ? `Stop (${shortcut})` : `Run (${shortcut})`}
-                >
-                  {runningScript ? (
-                    <>
-                      <Square className="h-3 w-3 shrink-0" style={{ color: "#f48771" }} />
-                      <span>Stop</span>
-                    </>
-                  ) : (
-                    <>
-                      <Play className="h-3 w-3 shrink-0" style={{ color: "#4ec994" }} />
-                      <span>Run</span>
-                    </>
-                  )}
-                  <span
-                    className="ml-0.5 text-[10px] font-normal opacity-50"
-                  >
-                    {shortcut}
-                  </span>
-                </motion.button>
-
-                {/* Dropdown caret */}
-                <motion.button
-                  type="button"
-                  whileTap={{ scale: 0.9 }}
-                  onClick={() => setShowDropdown((v) => !v)}
-                  className="flex items-center rounded-r px-1.5 transition-colors duration-75 theme-hover-bg"
-                  style={{
-                    color: "var(--vscode-sidebar-foreground)",
-                    border: "1px solid var(--vscode-panel-border)",
-                  }}
-                  aria-label="More run options"
-                  aria-haspopup="menu"
-                  aria-expanded={showDropdown}
-                >
-                  <ChevronDown className="h-3 w-3 opacity-70" />
-                </motion.button>
-
-                {/* Dropdown menu */}
-                <AnimatePresence>
-                  {showDropdown && (
-                    <motion.div
-                      key="dropdown"
-                      variants={dropdownVariants}
-                      initial="hidden"
-                      animate="visible"
-                      exit="hidden"
-                      className="absolute right-0 top-full z-50 mt-1 min-w-[180px] overflow-hidden rounded-md py-1"
-                      style={{
-                        backgroundColor: "var(--vscode-menu-background, #1e1e1e)",
-                        border: "1px solid var(--vscode-menu-border, rgba(255,255,255,0.12))",
-                        boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
-                      }}
-                      role="menu"
-                    >
-                      {runningScript ? (
-                        <>
-                          <DropdownItem
-                            icon={<Square className="h-3.5 w-3.5" style={{ color: "#f48771" }} />}
-                            label="Stop"
-                            shortcut={shortcut}
-                            onClick={stopScript}
-                          />
-                          <DropdownItem
-                            icon={<RotateCcw className="h-3.5 w-3.5" />}
-                            label="Restart"
-                            onClick={restartScript}
-                          />
-                          {runningScript.port && (
-                            <>
-                              <div
-                                className="my-1 h-px"
-                                style={{ backgroundColor: "var(--vscode-menu-border, rgba(255,255,255,0.08))" }}
-                              />
-                              <DropdownItem
-                                icon={<Globe className="h-3.5 w-3.5" />}
-                                label={`Open in Browser (:${runningScript.port})`}
-                                onClick={openInBrowser}
-                              />
-                            </>
-                          )}
-                        </>
-                      ) : (
-                        <>
-                          <DropdownItem
-                            icon={<Play className="h-3.5 w-3.5" style={{ color: "#4ec994" }} />}
-                            label="Run"
-                            shortcut={shortcut}
-                            onClick={() => { setActiveTab("run"); setShowDropdown(false); }}
-                          />
-                          <div
-                            className="my-1 h-px"
-                            style={{ backgroundColor: "var(--vscode-menu-border, rgba(255,255,255,0.08))" }}
-                          />
-                          <DropdownItem
-                            icon={<Activity className="h-3.5 w-3.5" />}
-                            label="Run in Background"
-                            onClick={() => { setActiveTab("run"); setShowDropdown(false); }}
-                          />
-                        </>
-                      )}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+              <SetupTab
+                runTrigger={setupRunTrigger}
+                rerunTrigger={setupRerunTrigger}
+                onRunningChange={setSetupRunning}
+              />
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
-      {/* Panel content */}
-      <AnimatePresence initial={false}>
-        {!collapsed && (
-          <motion.div
-            key="panel-content"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.18, ease: "easeInOut" }}
-            className="min-h-0 flex-1 overflow-hidden"
-            style={{ minHeight: 0 }}
-          >
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeTab}
-                variants={tabContent}
-                initial="hidden"
-                animate="visible"
-                exit="exit"
-                className="h-full"
-              >
-                {activeTab === "setup" && <SetupTab />}
-                {activeTab === "run" && (
-                  <RunTab
-                    runningScriptId={runningScript?.id ?? null}
-                    onRunningChange={setRunningScript}
-                  />
+      {/* Run Section */}
+      <div className="flex flex-col shrink-0">
+        <SectionHeader
+          label="Run"
+          isCollapsed={!runOpen}
+          onToggle={() => onSectionOpen?.("run")}
+          actions={
+            <div className="flex items-center gap-1.5">
+              {/* Running pulse */}
+              <AnimatePresence>
+                {runningScript && (
+                  <motion.span
+                    initial={{ opacity: 0, scale: 0 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0 }}
+                  >
+                    <motion.span
+                      animate={{ opacity: [1, 0.3, 1] }}
+                      transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
+                      className="inline-flex h-[6px] w-[6px] rounded-full"
+                      style={{ backgroundColor: "var(--vscode-terminal-ansi-green, #4ec994)", boxShadow: "0 0 5px var(--vscode-terminal-ansi-green, #4ec994)" }}
+                    />
+                  </motion.span>
                 )}
-              </motion.div>
-            </AnimatePresence>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              </AnimatePresence>
+
+              {/* Open localhost:PORT */}
+              <AnimatePresence>
+                {runningScript?.port && (
+                  <motion.button
+                    initial={{ opacity: 0, width: 0 }}
+                    animate={{ opacity: 1, width: "auto" }}
+                    exit={{ opacity: 0, width: 0 }}
+                    type="button"
+                    onClick={openInBrowser}
+                    className="flex items-center gap-1 overflow-hidden rounded px-1.5 py-0.5 text-[10px] font-medium transition-colors duration-75 theme-hover-bg whitespace-nowrap"
+                    style={{
+                      color: "var(--vscode-textLink-foreground, #4ec994)",
+                      border: "1px solid var(--vscode-panel-border, rgba(128,128,128,0.3))",
+                    }}
+                    title={`Open http://localhost:${runningScript.port}`}
+                  >
+                    <Globe className="h-2.5 w-2.5 shrink-0" />
+                    <span>localhost:{runningScript.port}</span>
+                  </motion.button>
+                )}
+              </AnimatePresence>
+
+              {/* Run / Stop icon button */}
+              <motion.button
+                type="button"
+                whileTap={{ scale: 0.88 }}
+                onClick={() => {
+                  if (runningScript) {
+                    setRunningScript(null);
+                  } else {
+                    onSectionOpen?.("run");
+                  }
+                }}
+                className="flex h-6 w-6 items-center justify-center rounded transition-colors duration-75 theme-hover-bg"
+                style={{ border: "1px solid var(--vscode-panel-border, rgba(128,128,128,0.3))" }}
+                title={runningScript ? `Stop (${stopShortcut})` : `Run (${runShortcut})`}
+              >
+                {runningScript ? (
+                  <Square className="h-[9px] w-[9px]" fill="currentColor" style={{ color: "var(--vscode-errorForeground, #f48771)" }} />
+                ) : (
+                  <Play className="h-[10px] w-[10px]" fill="currentColor" style={{ color: "var(--vscode-terminal-ansi-green, #4ec994)" }} />
+                )}
+              </motion.button>
+            </div>
+          }
+        />
+        <AnimatePresence initial={false}>
+          {runOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.18, ease: "easeInOut" }}
+              className="overflow-hidden"
+            >
+              <RunTab
+                runningScriptId={runningScript?.id ?? null}
+                onRunningChange={(script) => {
+                  setRunningScript(script);
+                  if (script) onSectionOpen?.("run");
+                }}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
-  );
-}
-
-// ── Dropdown item ─────────────────────────────────────────────────────────────
-
-interface DropdownItemProps {
-  icon: React.ReactNode;
-  label: string;
-  shortcut?: string;
-  onClick: () => void;
-}
-
-function DropdownItem({ icon, label, shortcut, onClick }: DropdownItemProps) {
-  return (
-    <motion.button
-      type="button"
-      role="menuitem"
-      onClick={onClick}
-      whileHover={{ backgroundColor: "rgba(255,255,255,0.08)" }}
-      className="flex w-full items-center gap-2.5 px-3 py-1.5 text-[12px] transition-colors duration-75"
-      style={{ color: "var(--vscode-menu-foreground, var(--vscode-sidebar-foreground))" }}
-    >
-      <span className="flex h-4 w-4 shrink-0 items-center justify-center opacity-70">
-        {icon}
-      </span>
-      <span className="flex-1 text-left">{label}</span>
-      {shortcut && (
-        <span className="text-[10px] opacity-40">{shortcut}</span>
-      )}
-    </motion.button>
   );
 }

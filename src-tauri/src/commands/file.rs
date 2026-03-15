@@ -37,6 +37,14 @@ pub fn read_file(path: String) -> Result<String, AppError> {
     std::fs::read_to_string(&path).map_err(AppError::Io)
 }
 
+/// Read any file and return its raw bytes.
+///
+/// Used by binary viewers (PDF, images, Office docs) in the frontend.
+#[tauri::command]
+pub fn read_file_bytes(path: String) -> Result<Vec<u8>, AppError> {
+    std::fs::read(&path).map_err(AppError::Io)
+}
+
 /// Write `content` to the file at `path`, creating it if necessary.
 #[tauri::command]
 pub fn write_file(path: String, content: String) -> Result<(), AppError> {

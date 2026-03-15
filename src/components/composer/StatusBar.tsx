@@ -25,7 +25,7 @@ interface StatusBarProps {
 
 function ContextBar({ used, max }: { used: number; max: number }) {
   const pct = Math.min((used / max) * 100, 100);
-  const color = pct > 80 ? "#f14c4c" : pct > 60 ? "#cca700" : "var(--vscode-focus-border, #007fd4)";
+  const color = pct > 80 ? "var(--vscode-errorForeground, #f14c4c)" : pct > 60 ? "var(--vscode-warningForeground, #cca700)" : "var(--vscode-focusBorder, var(--vscode-focus-border, #007fd4))";
   const tokensK = Math.round(used / 1000);
   const maxK = Math.round(max / 1000);
   return (
@@ -78,14 +78,14 @@ export function StatusBar({
               <ChevronDown className="h-2.5 w-2.5 opacity-50" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="min-w-[160px]" style={dropdownStyle}>
-            <DropdownMenuLabel className="text-[10px] font-semibold uppercase tracking-wider opacity-50">
+          <DropdownMenuContent align="start" className="min-w-[180px] p-2" style={dropdownStyle}>
+            <DropdownMenuLabel className="px-2 py-2 text-[10px] font-semibold uppercase tracking-wider opacity-50">
               Context
             </DropdownMenuLabel>
-            <DropdownMenuSeparator style={{ backgroundColor: "var(--vscode-separator-color)" }} />
+            <DropdownMenuSeparator className="my-1" style={{ backgroundColor: "var(--vscode-separator-color)" }} />
             <DropdownMenuItem
               onClick={() => onContextModeChange("local")}
-              className="text-[12px]"
+              className="rounded-md px-3 py-2 text-[12px]"
               style={{ backgroundColor: contextMode === "local" ? "var(--vscode-toolbar-hover-background)" : undefined }}
             >
               <div>
@@ -95,7 +95,7 @@ export function StatusBar({
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => onContextModeChange("full")}
-              className="text-[12px]"
+              className="rounded-md px-3 py-2 text-[12px]"
               style={{ backgroundColor: contextMode === "full" ? "var(--vscode-toolbar-hover-background)" : undefined }}
             >
               <div>
@@ -125,14 +125,14 @@ export function StatusBar({
               <ChevronDown className="h-2.5 w-2.5 opacity-50" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="min-w-[160px]" style={dropdownStyle}>
-            <DropdownMenuLabel className="text-[10px] font-semibold uppercase tracking-wider opacity-50">
+          <DropdownMenuContent align="start" className="min-w-[180px] p-2" style={dropdownStyle}>
+            <DropdownMenuLabel className="px-2 py-2 text-[10px] font-semibold uppercase tracking-wider opacity-50">
               Edit Mode
             </DropdownMenuLabel>
-            <DropdownMenuSeparator style={{ backgroundColor: "var(--vscode-separator-color)" }} />
+            <DropdownMenuSeparator className="my-1" style={{ backgroundColor: "var(--vscode-separator-color)" }} />
             <DropdownMenuItem
               onClick={() => onEditModeChange("auto")}
-              className="text-[12px]"
+              className="rounded-md px-3 py-2 text-[12px]"
               style={{ backgroundColor: editMode === "auto" ? "var(--vscode-toolbar-hover-background)" : undefined }}
             >
               <div>
@@ -142,7 +142,7 @@ export function StatusBar({
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => onEditModeChange("ask")}
-              className="text-[12px]"
+              className="rounded-md px-3 py-2 text-[12px]"
               style={{ backgroundColor: editMode === "ask" ? "var(--vscode-toolbar-hover-background)" : undefined }}
             >
               <div>
@@ -164,7 +164,7 @@ export function StatusBar({
             "flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors theme-hover-bg",
           )}
           style={{
-            color: planMode ? "var(--vscode-focus-border, #007fd4)" : "var(--vscode-editor-foreground)",
+            color: planMode ? "var(--vscode-focusBorder, var(--vscode-focus-border, #007fd4))" : "var(--vscode-editor-foreground)",
             opacity: planMode ? 1 : 0.55,
           }}
         >
@@ -172,7 +172,7 @@ export function StatusBar({
           {planMode && (
             <span
               className="rounded px-1 py-px text-[9px] font-bold"
-              style={{ backgroundColor: "var(--vscode-focus-border, #007fd4)", color: "#fff" }}
+              style={{ backgroundColor: "var(--vscode-focusBorder, var(--vscode-focus-border, #007fd4))", color: "var(--vscode-button-foreground, #fff)" }}
             >
               ON
             </span>

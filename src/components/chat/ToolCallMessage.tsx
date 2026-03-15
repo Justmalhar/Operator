@@ -72,22 +72,18 @@ function StatusDot({ status }: { status: ToolCall["status"] }) {
 // ── ToolCallMessage ───────────────────────────────────────────────────────────
 
 export function ToolCallMessage({ toolCalls, duration }: ToolCallMessageProps) {
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(false);
   const errorCount = toolCalls.filter((c) => c.status === "error").length;
 
   return (
     <div
-      className="mb-3 overflow-hidden rounded-md text-[12px]"
-      style={{
-        border: "1px solid var(--vscode-panel-border, rgba(255,255,255,0.07))",
-        backgroundColor: "var(--vscode-sidebar-section-header-background, rgba(0,0,0,0.12))",
-      }}
+      className="mb-3 overflow-hidden text-[12px]"
     >
       {/* Summary row / toggle */}
       <button
         type="button"
         onClick={() => setExpanded((e) => !e)}
-        className="flex w-full items-center gap-2 px-3 py-[5px] text-left transition-colors theme-hover-bg"
+        className="flex w-full items-center gap-2 px-0 py-[3px] text-left transition-colors"
       >
         <ChevronRight
           className={cn(
@@ -103,7 +99,7 @@ export function ToolCallMessage({ toolCalls, duration }: ToolCallMessageProps) {
           {toolCalls.length} tool call{toolCalls.length !== 1 ? "s" : ""}
         </span>
         {errorCount > 0 && (
-          <span className="flex items-center gap-0.5" style={{ color: "#f48771" }}>
+          <span className="flex items-center gap-0.5" style={{ color: "var(--vscode-errorForeground, #f48771)" }}>
             <XCircle className="h-3 w-3" />
             {errorCount} error{errorCount > 1 ? "s" : ""}
           </span>
@@ -120,23 +116,13 @@ export function ToolCallMessage({ toolCalls, duration }: ToolCallMessageProps) {
 
       {/* Flat call rows */}
       {expanded && (
-        <div
-          style={{
-            borderTop: "1px solid var(--vscode-panel-border, rgba(255,255,255,0.06))",
-          }}
-        >
-          {toolCalls.map((call, i) => {
+        <div>
+          {toolCalls.map((call) => {
             const Icon = getToolIcon(call.tool);
             return (
               <div
                 key={call.id}
-                className={cn("flex items-center gap-2 px-3 py-[5px]")}
-                style={{
-                  borderBottom:
-                    i < toolCalls.length - 1
-                      ? "1px solid var(--vscode-panel-border, rgba(255,255,255,0.04))"
-                      : undefined,
-                }}
+                className={cn("flex items-center gap-2 px-0 py-[2px]")}
               >
                 <StatusDot status={call.status} />
                 <Icon

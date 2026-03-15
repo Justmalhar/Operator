@@ -93,7 +93,7 @@ export function CloneUrlStep({ onSuccess }: CloneUrlStepProps) {
           disabled={isLoading}
         />
         {error && (
-          <p className="text-[11px]" style={{ color: "#f48771" }}>
+          <p className="text-[11px]" style={{ color: "var(--vscode-errorForeground, #f48771)" }}>
             Clone failed: {error}
           </p>
         )}

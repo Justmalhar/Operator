@@ -136,48 +136,20 @@
 }
 
 /* ── VSCode Layout Primitives ─────────────────────────────────────── */
+/* Note: .vscode-activity-bar, .vscode-sidebar, .vscode-editor,
+   .vscode-statusbar, .vscode-scrollable, .vscode-panel-title,
+   .vscode-tab, etc. are defined in styles/themes/index.css.
+   Do NOT redeclare them here to avoid cascade conflicts. */
 
-/* Root app shell */
-.vscode-editor {
-  background-color: var(--vscode-editor-background);
-  color: var(--vscode-editor-foreground);
-}
-
-/* Activity bar — the narrow icon strip on the far left */
-.vscode-activity-bar {
-  background-color: var(--vscode-activityBar-background);
-  color: var(--vscode-activityBar-foreground);
-  border-right: 1px solid var(--vscode-activityBar-border);
-}
-
-/* Sidebar panel — the wider panel to the right of the activity bar */
-.vscode-sidebar {
-  background-color: var(--vscode-sideBar-background);
-  color: var(--vscode-sideBar-foreground);
-  border-right: 1px solid var(--vscode-sideBar-border);
-}
-
-/* Scrollable sidebar regions */
-.vscode-scrollable {
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-/* Status bar — the thin strip at the very bottom */
-.vscode-statusbar {
-  background-color: var(--vscode-statusBar-background);
-  color: var(--vscode-statusBar-foreground);
-}
-
-/* Section header labels inside sidebar panels */
+/* Section header labels inside sidebar panels — typography additions to index.css base */
 .vscode-sidebar-section-header {
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   padding: 8px 12px 4px;
-  color: var(--vscode-sideBarSectionHeader-foreground);
-  background-color: var(--vscode-sideBarSectionHeader-background);
+  color: var(--vscode-sidebar-section-header-foreground, var(--vscode-sideBarSectionHeader-foreground));
+  background-color: var(--vscode-sidebar-section-header-background, var(--vscode-sideBarSectionHeader-background));
   user-select: none;
   -webkit-user-select: none;
 }
@@ -299,7 +271,7 @@ a:hover {
 .animate-pulseGlow { animation: pulseGlow 2s ease-in-out infinite; }
 .animate-statusPulse { animation: statusPulse 2s ease-in-out infinite; }
 .animate-shimmer {
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
+  background: linear-gradient(90deg, transparent, var(--vscode-toolbar-hover-background, rgba(128,128,128,0.06)), transparent);
   background-size: 200% 100%;
   animation: shimmer 2s linear infinite;
 }
@@ -410,23 +382,23 @@ a:hover {
 
 /* ── Glassmorphism utility ────────────────────────────────────────── */
 .glass {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--vscode-toolbar-hover-background, rgba(128, 128, 128, 0.04));
   backdrop-filter: blur(16px) saturate(1.2);
   -webkit-backdrop-filter: blur(16px) saturate(1.2);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--vscode-widget-border, rgba(128, 128, 128, 0.12));
 }
 
 .glass-subtle {
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--vscode-toolbar-hover-background, rgba(128, 128, 128, 0.02));
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
 
 .glass-strong {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--vscode-toolbar-active-background, rgba(128, 128, 128, 0.07));
   backdrop-filter: blur(24px) saturate(1.4);
   -webkit-backdrop-filter: blur(24px) saturate(1.4);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--vscode-widget-border, rgba(128, 128, 128, 0.12));
 }
 
 /* ── Gradient accents ─────────────────────────────────────────────── */
@@ -489,9 +461,9 @@ a:hover {
 .skeleton {
   background: linear-gradient(
     90deg,
-    rgba(255, 255, 255, 0.04) 25%,
-    rgba(255, 255, 255, 0.08) 50%,
-    rgba(255, 255, 255, 0.04) 75%
+    var(--vscode-toolbar-hover-background, rgba(128, 128, 128, 0.06)) 25%,
+    var(--vscode-list-hover-background, rgba(128, 128, 128, 0.10)) 50%,
+    var(--vscode-toolbar-hover-background, rgba(128, 128, 128, 0.06)) 75%
   );
   background-size: 200% 100%;
   animation: shimmer 1.5s linear infinite;
@@ -552,7 +524,7 @@ a:hover {
 
 .markdown-preview code {
   border-radius: 4px;
-  background: var(--vscode-toolbar-hover-background, rgba(255, 255, 255, 0.07));
+  background: var(--vscode-toolbar-hover-background, rgba(128, 128, 128, 0.08));
   padding: 0.15rem 0.35rem;
   font-family: "SF Mono", "Menlo", "Monaco", "Cascadia Code", "Courier New", monospace;
   font-size: 0.92em;
@@ -560,9 +532,9 @@ a:hover {
 
 .markdown-preview pre {
   overflow-x: auto;
-  border: 1px solid var(--vscode-separator-color, rgba(255, 255, 255, 0.07));
+  border: 1px solid var(--vscode-separator-color, rgba(128, 128, 128, 0.15));
   border-radius: 6px;
-  background: var(--vscode-editor-background, #1e1e1e);
+  background: var(--vscode-editor-background);
   padding: 1rem;
 }
 
@@ -574,20 +546,20 @@ a:hover {
 .markdown-preview table {
   width: 100%;
   border-collapse: collapse;
-  border: 1px solid var(--vscode-separator-color, rgba(255, 255, 255, 0.08));
+  border: 1px solid var(--vscode-separator-color, rgba(128, 128, 128, 0.15));
   border-radius: 6px;
   overflow: hidden;
 }
 
 .markdown-preview th,
 .markdown-preview td {
-  border-bottom: 1px solid var(--vscode-separator-color, rgba(255, 255, 255, 0.07));
+  border-bottom: 1px solid var(--vscode-separator-color, rgba(128, 128, 128, 0.12));
   padding: 0.6rem 0.8rem;
   text-align: left;
 }
 
 .markdown-preview th {
-  background: var(--vscode-toolbar-hover-background, rgba(255, 255, 255, 0.04));
+  background: var(--vscode-toolbar-hover-background, rgba(128, 128, 128, 0.06));
   color: var(--vscode-tab-active-foreground, #ffffff);
   font-weight: 600;
 }
@@ -596,7 +568,7 @@ a:hover {
   border-left: 2px solid var(--vscode-focus-border, #007fd4);
   margin-left: 0;
   padding-left: 1rem;
-  color: var(--vscode-tab-inactive-foreground, #ffffff80);
+  color: var(--vscode-tab-inactive-foreground);
 }
 
 /* ── DOCX Preview ─────────────────────────────────────────────────── */
@@ -619,7 +591,7 @@ a:hover {
 /* ── Enhanced scrollbar for non-vscode areas ──────────────────────── */
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--vscode-scrollbar-slider-background, rgba(255, 255, 255, 0.12)) transparent;
+  scrollbar-color: var(--vscode-scrollbar-slider-background, rgba(100, 100, 100, 0.3)) transparent;
 }
 
 *::-webkit-scrollbar {
@@ -632,10 +604,10 @@ a:hover {
 }
 
 *::-webkit-scrollbar-thumb {
-  background: var(--vscode-scrollbar-slider-background, rgba(255, 255, 255, 0.12));
+  background: var(--vscode-scrollbar-slider-background, rgba(100, 100, 100, 0.3));
   border-radius: 3px;
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  background: var(--vscode-scrollbar-slider-hover, rgba(255, 255, 255, 0.2));
+  background: var(--vscode-scrollbar-slider-hover, rgba(100, 100, 100, 0.5));
 }

@@ -66,7 +66,7 @@ export function ChatPanel({ workspaceId }: ChatPanelProps) {
   return (
     <div
       className="relative flex h-full flex-col"
-      style={{ backgroundColor: "var(--vscode-sidebar-background)" }}
+      style={{ backgroundColor: "var(--vscode-editor-background)" }}
     >
       {/* Changed files bar at the very top (above messages) */}
       <AnimatePresence>
@@ -95,6 +95,7 @@ export function ChatPanel({ workspaceId }: ChatPanelProps) {
         <Composer
           isTerminalOpen={terminalOpen}
           onToggleTerminal={() => setTerminalOpen((v) => !v)}
+          className="mx-auto max-w-[720px]"
         />
       </motion.div>
 

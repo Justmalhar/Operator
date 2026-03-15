@@ -7,4 +7,5 @@ pub mod settings;
 pub mod shell;
 pub mod skill;
 pub mod terminal;
+pub mod webview;
 pub mod workspace;

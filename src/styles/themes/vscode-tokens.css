@@ -31,6 +31,7 @@
   /* ── Base / Editor ─────────────────────────────────────────────────────── */
   --vscode-editor-background:             #1e1e1e;
   --vscode-editor-foreground:             #d4d4d4;
+  --vscode-foreground:                    #d4d4d4;
   --vscode-editor-line-highlight:         #2a2d2e;
   --vscode-editor-selection:              #264f78;
   --vscode-editor-inactive-selection:     #3a3d41;
@@ -149,8 +150,28 @@
   --vscode-button-secondary-foreground:   #ffffff;
   --vscode-button-secondary-hover:        #45494e;
 
+  /* ── Description / Muted text ─────────────────────────────────────────── */
+  --vscode-descriptionForeground:       #8b8b8b;
+  --vscode-errorForeground:             #f14c4c;
+
+  /* ── Editor Widget ─────────────────────────────────────────────────────── */
+  --vscode-editorWidget-background:       #252526;
+
+  /* ── Toolbar ──────────────────────────────────────────────────────────── */
+  --vscode-toolbar-hover-background:      rgba(90, 93, 94, 0.31);
+  --vscode-toolbar-active-background:     rgba(99, 102, 103, 0.31);
+
+  /* ── Menu ─────────────────────────────────────────────────────────────── */
+  --vscode-menu-border:                   rgba(255, 255, 255, 0.12);
+
+  /* ── Viewer ──────────────────────────────────────────────────────────── */
+  --vscode-viewer-header-background:    #181818;
+  --vscode-viewer-checkerboard-a:       #252526;
+  --vscode-viewer-checkerboard-b:       #1f1f1f;
+
   /* ── Focus ────────────────────────────────────────────────────────────── */
   --vscode-focus-border:                  #007fd4;
+  --vscode-focus-highlight-background:    rgba(0, 127, 212, 0.12);
   --vscode-contras-border:                transparent;
   --vscode-contras-active-border:         transparent;
 

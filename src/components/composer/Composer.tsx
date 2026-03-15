@@ -1,18 +1,11 @@
 import { useRef, useState } from "react";
-import { ArrowUp, Brain, ChevronDown, Map, Plus, Slash } from "lucide-react";
+import { ArrowUp, Map, Plus, Slash, Terminal } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ComposerTextarea } from "./ComposerTextarea";
 import { AttachmentRow, type Attachment } from "./AttachmentRow";
 import { ModelPicker, type ModelId } from "./ModelPicker";
 import { FileMentionOverlay, type FileSuggestion } from "./FileMentionOverlay";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { ReasoningPicker, RadialContextIndicator, type ThinkingLevel } from "./ReasoningPicker";
 
 interface SlashCommand {
   id: string;
@@ -30,134 +23,20 @@ const SLASH_COMMANDS: SlashCommand[] = [
   { id: "deploy", name: "/deploy", description: "Deploy to Vercel" },
 ];
 
-type ThinkingLevel = "off" | "low" | "medium" | "high";
-
 interface ComposerProps {
   onSend?: (message: string, attachments: Attachment[]) => void;
   disabled?: boolean;
+  loading?: boolean;
   className?: string;
   isTerminalOpen?: boolean;
   onToggleTerminal?: () => void;
 }
 
-function ThinkingRects({ level }: { level: ThinkingLevel }) {
-  const counts: Record<ThinkingLevel, number> = { off: 0, low: 1, medium: 2, high: 3 };
-  const count = counts[level];
-  if (count === 0) return null;
-  return (
-    <span className="flex items-center gap-[2px]">
-      {Array.from({ length: 3 }).map((_, i) => (
-        <span
-          key={i}
-          className="inline-block rounded-[1px]"
-          style={{
-            width: "3px",
-            height: i < count ? "10px" : "6px",
-            backgroundColor: i < count ? "currentColor" : "currentColor",
-            opacity: i < count ? 1 : 0.2,
-          }}
-        />
-      ))}
-    </span>
-  );
-}
 
-function ThinkingPicker({
-  value,
-  onChange,
-}: {
-  value: ThinkingLevel;
-  onChange: (v: ThinkingLevel) => void;
-}) {
-  const isActive = value !== "off";
-  const OPTIONS: { id: ThinkingLevel; label: string }[] = [
-    { id: "off", label: "Off" },
-    { id: "low", label: "Low" },
-    { id: "medium", label: "Medium" },
-    { id: "high", label: "High" },
-  ];
-
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button
-          type="button"
-          className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[12px] font-medium transition-colors theme-hover-bg"
-          style={{
-            color: isActive ? "var(--vscode-focus-border, #007fd4)" : "var(--vscode-icon-foreground)",
-            backgroundColor: isActive ? "rgba(0,127,212,0.12)" : undefined,
-          }}
-        >
-          <Brain className="h-3.5 w-3.5" />
-          {value === "off" ? "Thinking" : OPTIONS.find((o) => o.id === value)?.label}
-          {isActive && <ThinkingRects level={value} />}
-          <ChevronDown className="h-2.5 w-2.5 opacity-40" />
-        </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="start"
-        className="min-w-[160px]"
-        style={{
-          backgroundColor: "var(--vscode-dropdown-background)",
-          border: "1px solid var(--vscode-dropdown-border, var(--vscode-panel-border))",
-          color: "var(--vscode-dropdown-foreground)",
-        }}
-      >
-        <DropdownMenuLabel className="text-[10px] font-semibold uppercase tracking-wider opacity-50">
-          Extended Thinking
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator style={{ backgroundColor: "var(--vscode-separator-color)" }} />
-        {OPTIONS.map((opt) => (
-          <DropdownMenuItem
-            key={opt.id}
-            onClick={() => onChange(opt.id)}
-            className="flex items-center justify-between gap-3 text-[12px]"
-            style={{ backgroundColor: value === opt.id ? "var(--vscode-toolbar-hover-background)" : undefined }}
-          >
-            <span>{opt.label}</span>
-            <ThinkingRects level={opt.id} />
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
-
-function RadialContextIndicator({ percentage = 0 }: { percentage?: number }) {
-  const r = 7;
-  const circ = 2 * Math.PI * r;
-  const offset = circ - (Math.min(percentage, 100) / 100) * circ;
-  const hasUsage = percentage > 0;
-  return (
-    <button
-      type="button"
-      className="flex h-7 w-7 items-center justify-center rounded-md transition-colors theme-hover-bg"
-      style={{ color: "var(--vscode-icon-foreground)" }}
-      title={`${percentage}% context used`}
-    >
-      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-        <circle cx="9" cy="9" r={r} stroke="currentColor" strokeWidth="1.5" opacity="0.2" />
-        {hasUsage && (
-          <circle
-            cx="9"
-            cy="9"
-            r={r}
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeDasharray={circ}
-            strokeDashoffset={offset}
-            strokeLinecap="round"
-            transform="rotate(-90 9 9)"
-          />
-        )}
-      </svg>
-    </button>
-  );
-}
-
-export function Composer({ onSend, disabled, className }: ComposerProps) {
+export function Composer({ onSend, disabled, loading, className, isTerminalOpen, onToggleTerminal }: ComposerProps) {
   const [message, setMessage] = useState("");
   const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const [isFocused, setIsFocused] = useState(false);
   const [model, setModel] = useState<ModelId>("claude-sonnet-4-6");
   const [thinking, setThinking] = useState<ThinkingLevel>("off");
   const [planMode, setPlanMode] = useState(false);
@@ -232,7 +111,7 @@ export function Composer({ onSend, disabled, className }: ComposerProps) {
   );
 
   return (
-    <div className={cn("relative px-2 pb-3 pt-1 sm:px-4 sm:pb-4", className)}>
+    <div className={cn("relative px-4 pb-4 pt-2 sm:px-5 sm:pb-5", className)}>
       {/* Slash command overlay */}
       {showSlashMenu && filteredSlashCmds.length > 0 && (
         <div
@@ -282,10 +161,14 @@ export function Composer({ onSend, disabled, className }: ComposerProps) {
 
       {/* Single unified card */}
       <div
-        className="overflow-hidden rounded-xl"
+        className="overflow-hidden rounded-2xl transition-all duration-150"
         style={{
           backgroundColor: "var(--vscode-input-background)",
-          border: "1px solid var(--vscode-input-border, var(--vscode-panel-border))",
+          border: "1px solid",
+          borderColor: isFocused ? "var(--vscode-focusBorder, #007fd4)" : "var(--vscode-input-border, rgba(128,128,128,0.2))",
+          boxShadow: isFocused
+            ? "0 8px 32px rgba(0,0,0,0.08), 0 0 0 1px var(--vscode-focusBorder, #007fd4) inset"
+            : "0 4px 16px rgba(0,0,0,0.06)",
         }}
       >
         {/* Attachment previews inside card */}
@@ -295,34 +178,57 @@ export function Composer({ onSend, disabled, className }: ComposerProps) {
         />
 
         {/* Textarea */}
-        <div className="px-3.5 pt-3 pb-1">
+        <div className="px-4 pt-4 pb-2">
           <ComposerTextarea
             value={message}
             onChange={handleTextChange}
             onSubmit={handleSend}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
             disabled={disabled}
             placeholder="Ask for code changes, @mention files, run /slash commands or add /skills"
           />
         </div>
 
         {/* Toolbar row */}
-        <div className="flex items-center gap-0.5 px-2 pb-2.5 pt-1">
+        <div className="flex items-center gap-4 px-3 pb-3 pt-2">
           {/* Left group: model, thinking, plan mode */}
           <ModelPicker value={model} onChange={setModel} />
-          <ThinkingPicker value={thinking} onChange={setThinking} />
+          <ReasoningPicker variant="pill" value={thinking} onChange={setThinking} />
           <button
             type="button"
             onClick={() => setPlanMode((v) => !v)}
-            className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[12px] font-medium transition-colors theme-hover-bg"
+            className="flex items-center gap-1.5 rounded-full px-4 py-2 text-[12px] font-medium transition-colors theme-hover-bg"
             style={{
-              color: planMode ? "var(--vscode-focus-border, #007fd4)" : "var(--vscode-icon-foreground)",
-              backgroundColor: planMode ? "rgba(0,127,212,0.12)" : undefined,
+              color: planMode ? "var(--vscode-focusBorder, var(--vscode-focus-border, #007fd4))" : "var(--vscode-icon-foreground)",
+              backgroundColor: planMode ? "var(--vscode-focus-highlight-background, rgba(0,127,212,0.12))" : undefined,
+              border: planMode ? "1px solid var(--vscode-focusBorder, #007fd4)" : "1px solid var(--vscode-separator-color, rgba(255,255,255,0.1))",
+              padding: "0.5rem 0.75rem",
             }}
             title="Toggle Plan mode"
           >
             <Map className="h-3.5 w-3.5" />
             Plan
           </button>
+
+          {/* Terminal toggle */}
+          {onToggleTerminal && (
+            <button
+              type="button"
+              onClick={onToggleTerminal}
+              className="flex items-center gap-1.5 rounded-full px-4 py-2 text-[12px] font-medium transition-colors theme-hover-bg"
+              style={{
+                color: isTerminalOpen ? "var(--vscode-focusBorder, var(--vscode-focus-border, #007fd4))" : "var(--vscode-icon-foreground)",
+                backgroundColor: isTerminalOpen ? "var(--vscode-focus-highlight-background, rgba(0,127,212,0.12))" : undefined,
+                border: isTerminalOpen ? "1px solid var(--vscode-focusBorder, #007fd4)" : "1px solid var(--vscode-separator-color, rgba(255,255,255,0.1))",
+                padding: "0.5rem 0.75rem",
+              }}
+              title="Toggle Terminal (⌘`)"
+            >
+              <Terminal className="h-3.5 w-3.5" />
+              Terminal
+            </button>
+          )}
 
           {/* Spacer */}
           <div className="flex-1" />
@@ -333,11 +239,11 @@ export function Composer({ onSend, disabled, className }: ComposerProps) {
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="flex h-7 w-7 items-center justify-center rounded-md transition-colors theme-hover-bg"
+            className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors theme-hover-bg"
             style={{ color: "var(--vscode-icon-foreground)" }}
             title="Add attachment"
           >
-            <Plus className="h-3.5 w-3.5" />
+            <Plus className="h-4 w-4" />
           </button>
           <input
             ref={fileInputRef}
@@ -351,10 +257,10 @@ export function Composer({ onSend, disabled, className }: ComposerProps) {
           <button
             type="button"
             onClick={handleSend}
-            disabled={!canSend || disabled}
+            disabled={!canSend || disabled || loading}
             className={cn(
-              "ml-0.5 flex h-7 w-7 items-center justify-center rounded-full transition-all duration-150",
-              canSend && !disabled
+              "ml-0.5 flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-150",
+              canSend && !disabled && !loading
                 ? "cursor-pointer opacity-100 hover:brightness-110 active:scale-95"
                 : "cursor-not-allowed opacity-40",
             )}
@@ -363,9 +269,16 @@ export function Composer({ onSend, disabled, className }: ComposerProps) {
                 canSend && !disabled ? "var(--vscode-button-background)" : "var(--vscode-toolbar-hover-background)",
               color: canSend && !disabled ? "var(--vscode-button-foreground)" : "var(--vscode-icon-foreground)",
             }}
-            title="Send (⌘↵)"
+            title={loading ? "Working…" : "Send (⌘↵)"}
           >
-            <ArrowUp className="h-3.5 w-3.5" strokeWidth={2.5} />
+            {loading ? (
+              <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+              </svg>
+            ) : (
+              <ArrowUp className="h-4 w-4" strokeWidth={2.5} />
+            )}
           </button>
         </div>
       </div>

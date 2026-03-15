@@ -167,6 +167,19 @@ pub async fn archive(pool: &SqlitePool, id: &str) -> Result<(), sqlx::Error> {
     Ok(())
 }
 
+pub async fn rename(pool: &SqlitePool, id: &str, city_name: &str) -> Result<(), sqlx::Error> {
+    sqlx::query(
+        "UPDATE workspaces
+         SET city_name = ?, updated_at = strftime('%Y-%m-%dT%H:%M:%SZ','now')
+         WHERE id = ?",
+    )
+    .bind(city_name)
+    .bind(id)
+    .execute(pool)
+    .await?;
+    Ok(())
+}
+
 pub async fn delete(pool: &SqlitePool, id: &str) -> Result<(), sqlx::Error> {
     sqlx::query("DELETE FROM workspaces WHERE id = ?")
         .bind(id)

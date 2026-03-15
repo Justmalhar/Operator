@@ -1,23 +1,31 @@
-import { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
   ChevronDown,
   Check,
   Plus,
-  Gamepad2,
-  FileText,
-  Lightbulb,
-  ArrowUp,
-  Star,
-  ExternalLink,
-  Brain,
-  Map,
   GitBranch,
   FolderGit2,
 } from "lucide-react";
+import { Composer } from "@/components/composer/Composer";
+// Inline SVG components for model provider logos
+function ClaudeIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
+  return (
+    <svg className={className} style={style} width="256" height="256" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+      <path fill="#D97757" d="m50.228 170.321l50.357-28.257l.843-2.463l-.843-1.361h-2.462l-8.426-.518l-28.775-.778l-24.952-1.037l-24.175-1.296l-6.092-1.297L0 125.796l.583-3.759l5.12-3.434l7.324.648l16.202 1.101l24.304 1.685l17.629 1.037l26.118 2.722h4.148l.583-1.685l-1.426-1.037l-1.101-1.037l-25.147-17.045l-27.22-18.017l-14.258-10.37l-7.713-5.25l-3.888-4.925l-1.685-10.758l7-7.713l9.397.649l2.398.648l9.527 7.323l20.35 15.75L94.817 91.9l3.889 3.24l1.555-1.102l.195-.777l-1.75-2.917l-14.453-26.118l-15.425-26.572l-6.87-11.018l-1.814-6.61c-.648-2.723-1.102-4.991-1.102-7.778l7.972-10.823L71.42 0l10.63 1.426l4.472 3.888l6.61 15.101l10.694 23.786l16.591 32.34l4.861 9.592l2.592 8.879l.973 2.722h1.685v-1.556l1.36-18.211l2.528-22.36l2.463-28.776l.843-8.1l4.018-9.722l7.971-5.25l6.222 2.981l5.12 7.324l-.713 4.73l-3.046 19.768l-5.962 30.98l-3.889 20.739h2.268l2.593-2.593l10.499-13.934l17.628-22.036l7.778-8.749l9.073-9.657l5.833-4.601h11.018l8.1 12.055l-3.628 12.443l-11.342 14.388l-9.398 12.184l-13.48 18.147l-8.426 14.518l.778 1.166l2.01-.194l30.46-6.481l16.462-2.982l19.637-3.37l8.88 4.148l.971 4.213l-3.5 8.62l-20.998 5.184l-24.628 4.926l-36.682 8.685l-.454.324l.519.648l16.526 1.555l7.065.389h17.304l32.21 2.398l8.426 5.574l5.055 6.805l-.843 5.184l-12.962 6.611l-17.498-4.148l-40.83-9.721l-14-3.5h-1.944v1.167l11.666 11.406l21.387 19.314l26.767 24.887l1.36 6.157l-3.434 4.86l-3.63-.518l-23.526-17.693l-9.073-7.972l-20.545-17.304h-1.36v1.814l4.73 6.935l25.017 37.59l1.296 11.536l-1.814 3.76l-6.481 2.268l-7.13-1.297l-14.647-20.544l-15.1-23.138l-12.185-20.739l-1.49.843l-7.194 77.448l-3.37 3.953l-7.778 2.981l-6.48-4.925l-3.436-7.972l3.435-15.749l4.148-20.544l3.37-16.333l3.046-20.285l1.815-6.74l-.13-.454l-1.49.194l-15.295 20.999l-23.267 31.433l-18.406 19.702l-4.407 1.75l-7.648-3.954l.713-7.064l4.277-6.286l25.47-32.405l15.36-20.092l9.917-11.6l-.065-1.686h-.583L44.07 198.125l-12.055 1.555l-5.185-4.86l.648-7.972l2.463-2.593l20.35-13.999z" />
+    </svg>
+  );
+}
+
+function OpenAIIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
+  return (
+    <svg className={className} style={style} width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.1 13.3L8 16.8l-4.2-2.6A4 4 0 0 1 6 6.7m6 7.8L6 11V6a4 4 0 0 1 7.6-2m-3.7 9.3V6.2l4.4-2.6a4 4 0 0 1 5.3 5.8m-9.7 1.3L16 7.2l4.2 2.6a4 4 0 0 1-2.2 7.5m-6-7.8l6 3.5v5a4 4 0 0 1-7.6 2m3.7-9.3v7.1l-4.4 2.6a4 4 0 0 1-5.3-5.8" />
+    </svg>
+  );
+}
 import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "@/lib/utils";
 import { useWorkspaceStore } from "@/store/workspaceStore";
-import { staggerContainer, staggerItemScale, dropdownVariants, springs } from "@/lib/animations";
+import { dropdownVariants, springs } from "@/lib/animations";
 import type { Repository } from "@/types/workspace";
 
 interface NewChatPageProps {
@@ -40,6 +48,7 @@ interface ModelOption {
 interface ModelGroup {
   label: string;
   provider: "claude" | "codex";
+  Logo: React.FC<{ className?: string; style?: React.CSSProperties }>;
   models: ModelOption[];
 }
 
@@ -47,6 +56,7 @@ const MODEL_GROUPS: ModelGroup[] = [
   {
     label: "Claude Code",
     provider: "claude",
+    Logo: ClaudeIcon,
     models: [
       { id: "claude-opus-4-6-1m", label: "Opus 4.6 1M", isNew: true, shortcut: 1 },
       { id: "claude-opus-4-6", label: "Opus 4.6", shortcut: 2 },
@@ -57,6 +67,7 @@ const MODEL_GROUPS: ModelGroup[] = [
   {
     label: "Codex",
     provider: "codex",
+    Logo: OpenAIIcon,
     models: [
       { id: "gpt-5.4", label: "GPT-5.4", isNew: true, isExternal: true, shortcut: 5 },
       { id: "gpt-5.3-codex-spark", label: "GPT-5.3-Codex-Spark", isExternal: true, shortcut: 6 },
@@ -68,27 +79,9 @@ const MODEL_GROUPS: ModelGroup[] = [
 
 const DEFAULT_MODEL_ID = "claude-sonnet-4-6";
 
-// ── Brand icons ───────────────────────────────────────────────────────────────
-
-function AnthropicIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
-      <path d="M12 2L13.5 8.5L20 7L15.5 12L20 17L13.5 15.5L12 22L10.5 15.5L4 17L8.5 12L4 7L10.5 8.5L12 2Z" />
-    </svg>
-  );
-}
-
-function OpenAIIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
-      <path d="M22.282 9.821a5.985 5.985 0 0 0-.516-4.91 6.046 6.046 0 0 0-6.51-2.9A6.065 6.065 0 0 0 4.981 4.18a5.985 5.985 0 0 0-3.998 2.9 6.046 6.046 0 0 0 .743 7.097 5.98 5.98 0 0 0 .51 4.911 6.051 6.051 0 0 0 6.515 2.9A5.985 5.985 0 0 0 13.26 24a6.056 6.056 0 0 0 5.772-4.206 5.99 5.99 0 0 0 3.997-2.9 6.056 6.056 0 0 0-.747-7.073zM13.26 22.43a4.476 4.476 0 0 1-2.876-1.04l.141-.081 4.779-2.758a.795.795 0 0 0 .392-.681v-6.737l2.02 1.168a.071.071 0 0 1 .038.052v5.583a4.504 4.504 0 0 1-4.494 4.494zM3.6 18.304a4.47 4.47 0 0 1-.535-3.014l.142.085 4.783 2.759a.771.771 0 0 0 .78 0l5.843-3.369v2.332a.08.08 0 0 1-.033.062L9.74 19.95a4.5 4.5 0 0 1-6.14-1.646zM2.34 7.896a4.485 4.485 0 0 1 2.366-1.973V11.6a.766.766 0 0 0 .388.676l5.815 3.355-2.02 1.168a.076.076 0 0 1-.071 0l-4.83-2.786A4.504 4.504 0 0 1 2.34 7.896zm16.597 3.855l-5.843-3.372 2.02-1.164a.08.08 0 0 1 .071 0l4.83 2.786a4.494 4.494 0 0 1-.676 8.105v-5.678a.79.79 0 0 0-.402-.677zm2.01-3.023l-.141-.085-4.774-2.782a.776.776 0 0 0-.785 0L9.409 9.23V6.897a.066.066 0 0 1 .028-.061l4.83-2.787a4.5 4.5 0 0 1 6.68 4.66zm-12.64 4.135l-2.02-1.164a.08.08 0 0 1-.038-.057V6.075a4.5 4.5 0 0 1 7.375-3.453l-.142.08L8.704 5.46a.795.795 0 0 0-.393.681zm1.097-2.365l2.602-1.5 2.607 1.5v2.999l-2.597 1.5-2.607-1.5z" />
-    </svg>
-  );
-}
-
 // ── Model picker dropdown ─────────────────────────────────────────────────────
 
-function ModelPicker({
+export function ModelPicker({
   selectedModelId,
   onSelect,
 }: {
@@ -128,10 +121,12 @@ function ModelPicker({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium transition-colors theme-hover-bg"
+        className="flex items-center gap-1.5 rounded px-2 py-1 text-[11px] font-medium transition-colors theme-hover-bg"
         style={{ color: "var(--vscode-tab-inactive-foreground)" }}
       >
-        {selected.label}
+        <span>
+          {MODEL_GROUPS.find((g) => g.models.some((m) => m.id === selected.id))?.label} {selected.label}
+        </span>
         <ChevronDown className="h-3 w-3 opacity-60" />
       </button>
 
@@ -142,63 +137,73 @@ function ModelPicker({
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="absolute bottom-full left-0 z-50 mb-1.5 w-64 overflow-hidden rounded-lg py-1.5 shadow-2xl"
+            className="absolute bottom-full left-0 z-50 mb-2 w-[300px] overflow-hidden rounded-xl px-[3px] py-2"
             style={{
-              backgroundColor: "var(--vscode-dropdown-background)",
-              border: "1px solid var(--vscode-panel-border, rgba(255,255,255,0.10))",
+              backgroundColor: "var(--vscode-dropdown-background, #252526)",
+              border: "1px solid var(--vscode-dropdown-border, var(--vscode-panel-border, rgba(128,128,128,0.3)))",
+              boxShadow: "0 8px 24px rgba(0,0,0,0.25), 0 2px 8px rgba(0,0,0,0.15)",
             }}
           >
-            {MODEL_GROUPS.map((group, gi) => (
-              <div key={group.label}>
+            {MODEL_GROUPS.map(({ label, Logo, provider, models }, gi) => (
+              <div key={label}>
                 {gi > 0 && (
                   <div
-                    className="mx-2 my-1"
-                    style={{ borderTop: "1px solid var(--vscode-panel-border, rgba(255,255,255,0.07))" }}
+                    className="my-2"
+                    style={{ borderTop: "1px solid var(--vscode-panel-border, rgba(128,128,128,0.25))" }}
                   />
                 )}
-                <p
-                  className="px-3 pb-1 pt-1.5 text-[10px] font-semibold uppercase tracking-wider"
-                  style={{ color: "var(--vscode-tab-inactive-foreground)", opacity: 0.5 }}
-                >
-                  {group.label}
-                </p>
-                {group.models.map((model) => {
+                {/* Group header: text only, no left padding */}
+                <div className="px-1 pb-1 pt-2">
+                  <span
+                    className="text-[10px] font-semibold uppercase tracking-wider"
+                    style={{ color: "var(--vscode-dropdown-foreground, #cccccc)", opacity: 0.5 }}
+                  >
+                    {label}
+                  </span>
+                </div>
+                {models.map((model) => {
                   const isSelected = model.id === selectedModelId;
-                  const Icon = group.provider === "claude" ? AnthropicIcon : OpenAIIcon;
                   return (
-                    <motion.button
+                    <button
                       key={model.id}
                       type="button"
                       onClick={() => { onSelect(model.id); setOpen(false); }}
-                      whileHover={{ backgroundColor: "var(--vscode-toolbar-hover-background)" }}
-                      whileTap={{ scale: 0.98 }}
-                      className="mx-1 flex items-center gap-2.5 rounded px-2.5 py-1.5 text-left text-[12px]"
+                      className="flex w-[calc(100%-8px)] items-center gap-2 rounded-lg mx-1 px-4 py-2.5 text-left text-[13px] transition-colors"
                       style={{
-                        color: "var(--vscode-dropdown-foreground)",
-                        width: "calc(100% - 8px)",
+                        color: isSelected
+                          ? "var(--vscode-focusBorder, #007fd4)"
+                          : "var(--vscode-dropdown-foreground, #cccccc)",
+                        backgroundColor: isSelected ? "var(--vscode-toolbar-hoverBackground, rgba(0,127,212,0.1))" : "transparent",
+                        fontWeight: isSelected ? 600 : 400,
+                        minHeight: "38px",
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!isSelected) e.currentTarget.style.backgroundColor = "var(--vscode-toolbar-hoverBackground, rgba(128,128,128,0.12))";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = isSelected ? "var(--vscode-toolbar-hoverBackground, rgba(0,127,212,0.1))" : "transparent";
                       }}
                     >
-                      <Icon className="h-3.5 w-3.5 shrink-0 opacity-60" />
+                      <Logo
+                        className="h-3.5 w-3.5 shrink-0"
+                        style={provider === "codex"
+                          ? { color: isSelected ? "var(--vscode-focusBorder, #007fd4)" : "var(--vscode-dropdown-foreground, #cccccc)", opacity: isSelected ? 1 : 0.6 }
+                          : { opacity: 1 }
+                        }
+                      />
                       <span className="flex-1 truncate">{model.label}</span>
-                      {model.isExternal && <ExternalLink className="h-3 w-3 shrink-0 opacity-35" />}
-                      {model.isNew && (
-                        <span
-                          className="shrink-0 rounded px-1.5 py-0.5 text-[9px] font-semibold"
-                          style={{ backgroundColor: "rgba(220,100,80,0.2)", color: "#e07060" }}
-                        >
-                          NEW
-                        </span>
-                      )}
-                      {isSelected && (
-                        <Check className="h-3 w-3 shrink-0" style={{ color: "var(--vscode-list-highlight-foreground)" }} />
-                      )}
-                      {model.isStarred && !isSelected && (
-                        <Star className="h-3 w-3 shrink-0" style={{ color: "#facc15", fill: "#facc15" }} />
-                      )}
-                      <span className="w-4 shrink-0 text-right text-[10px]" style={{ opacity: 0.3 }}>
-                        {model.shortcut}
+                      <span
+                        className="shrink-0 rounded px-1.5 py-0.5 font-mono text-[10px]"
+                        style={{
+                          color: "var(--vscode-dropdown-foreground, #cccccc)",
+                          backgroundColor: "var(--vscode-toolbar-hoverBackground, rgba(128,128,128,0.12))",
+                          opacity: 0.65,
+                          letterSpacing: "0.05em",
+                        }}
+                      >
+                        ⌘ M {model.shortcut}
                       </span>
-                    </motion.button>
+                    </button>
                   );
                 })}
               </div>
@@ -235,29 +240,35 @@ function WorkspaceDropdown({
 
   return (
     <div ref={ref} className="relative">
-      <motion.button
+      <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        className="flex items-center gap-1.5 rounded-md px-2 py-0.5"
+        className="flex items-center gap-1.5 rounded-md px-2 py-1 transition-colors"
+        style={{
+          backgroundColor: open ? "var(--vscode-toolbar-hoverBackground, rgba(128,128,128,0.1))" : "transparent",
+        }}
+        onMouseEnter={(e) => {
+          if (!open) e.currentTarget.style.backgroundColor = "var(--vscode-toolbar-hoverBackground, rgba(128,128,128,0.1))";
+        }}
+        onMouseLeave={(e) => {
+          if (!open) e.currentTarget.style.backgroundColor = "transparent";
+        }}
       >
         <span
-          className="text-base font-semibold leading-tight sm:text-lg md:text-[22px]"
+          className="text-base font-semibold leading-tight sm:text-lg md:text-[20px]"
           style={{ color: "var(--vscode-editor-foreground)" }}
         >
           {selectedRepo?.name ?? "Select project"}
         </span>
-        <motion.span
-          animate={{ rotate: open ? 180 : 0 }}
-          transition={springs.snappy}
+        <span
+          style={{ transform: open ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.15s ease" }}
         >
           <ChevronDown
             className="mt-0.5 h-4 w-4"
             style={{ color: "var(--vscode-tab-inactive-foreground)", opacity: 0.6 }}
           />
-        </motion.span>
-      </motion.button>
+        </span>
+      </button>
 
       <AnimatePresence>
         {open && (
@@ -266,10 +277,11 @@ function WorkspaceDropdown({
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="absolute left-1/2 top-full z-50 mt-1.5 w-56 -translate-x-1/2 overflow-hidden rounded-lg py-1 shadow-xl"
+            className="absolute left-1/2 top-full z-50 mt-2 w-64 -translate-x-1/2 overflow-hidden rounded-xl py-2"
             style={{
-              backgroundColor: "var(--vscode-dropdown-background)",
-              border: "1px solid var(--vscode-panel-border, rgba(255,255,255,0.10))",
+              backgroundColor: "var(--vscode-editorWidget-background, var(--vscode-dropdown-background))",
+              border: "1px solid var(--vscode-widget-border, rgba(128,128,128,0.2))",
+              boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
             }}
           >
             <p
@@ -334,149 +346,12 @@ function WorkspaceDropdown({
 
 // ── Suggested prompts ─────────────────────────────────────────────────────────
 
-const SUGGESTED_PROMPTS = [
-  { icon: Gamepad2, label: "Build a classic Snake game in this repo.", accent: "#4ade80", category: "Build" },
-  { icon: FileText, label: "Create a one-page PDF summarizing this app.", accent: "#f87171", category: "Document" },
-  { icon: Lightbulb, label: "Create a plan to…", accent: "#facc15", category: "Plan" },
-];
+
 
 function slugify(s: string): string {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
-// ── Thinking helpers ──────────────────────────────────────────────────────────
-
-type ThinkingLevel = "off" | "low" | "medium" | "high";
-
-function ThinkingRects({ level }: { level: ThinkingLevel }) {
-  const counts: Record<ThinkingLevel, number> = { off: 0, low: 1, medium: 2, high: 3 };
-  const count = counts[level];
-  if (count === 0) return null;
-  return (
-    <span className="flex items-center gap-[2px]">
-      {Array.from({ length: 3 }).map((_, i) => (
-        <span
-          key={i}
-          className="inline-block rounded-[1px]"
-          style={{
-            width: "3px",
-            height: i < count ? "10px" : "6px",
-            backgroundColor: "currentColor",
-            opacity: i < count ? 1 : 0.2,
-          }}
-        />
-      ))}
-    </span>
-  );
-}
-
-function RadialContextIndicator({ percentage = 0 }: { percentage?: number }) {
-  const r = 7;
-  const circ = 2 * Math.PI * r;
-  const offset = circ - (Math.min(percentage, 100) / 100) * circ;
-  return (
-    <button
-      type="button"
-      className="flex h-7 w-7 items-center justify-center rounded-md transition-colors theme-hover-bg"
-      style={{ color: "var(--vscode-icon-foreground)" }}
-      title={`${percentage}% context used`}
-    >
-      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-        <circle cx="9" cy="9" r={r} stroke="currentColor" strokeWidth="1.5" opacity="0.2" />
-        {percentage > 0 && (
-          <circle
-            cx="9" cy="9" r={r}
-            stroke="currentColor" strokeWidth="1.5"
-            strokeDasharray={circ} strokeDashoffset={offset}
-            strokeLinecap="round" transform="rotate(-90 9 9)"
-          />
-        )}
-      </svg>
-    </button>
-  );
-}
-
-function ComposerThinkingPicker({
-  value,
-  onChange,
-}: {
-  value: ThinkingLevel;
-  onChange: (v: ThinkingLevel) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-  const isActive = value !== "off";
-  const OPTIONS: { id: ThinkingLevel; label: string }[] = [
-    { id: "off", label: "Off" },
-    { id: "low", label: "Low" },
-    { id: "medium", label: "Medium" },
-    { id: "high", label: "High" },
-  ];
-
-  useEffect(() => {
-    function handleOutside(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    }
-    if (open) document.addEventListener("mousedown", handleOutside);
-    return () => document.removeEventListener("mousedown", handleOutside);
-  }, [open]);
-
-  return (
-    <div ref={ref} className="relative">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[12px] font-medium transition-colors theme-hover-bg"
-        style={{
-          color: isActive ? "var(--vscode-focus-border, #007fd4)" : "var(--vscode-tab-inactive-foreground)",
-          backgroundColor: isActive ? "rgba(0,127,212,0.12)" : undefined,
-        }}
-      >
-        <Brain className="h-3.5 w-3.5" />
-        {value === "off" ? "Thinking" : OPTIONS.find((o) => o.id === value)?.label}
-        {isActive && <ThinkingRects level={value} />}
-        <ChevronDown className="h-2.5 w-2.5 opacity-40" />
-      </button>
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            variants={dropdownVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            className="absolute bottom-full left-0 z-50 mb-1.5 w-44 overflow-hidden rounded-lg py-1.5 shadow-2xl"
-            style={{
-              backgroundColor: "var(--vscode-dropdown-background)",
-              border: "1px solid var(--vscode-panel-border, rgba(255,255,255,0.10))",
-            }}
-          >
-            <p
-              className="px-3 pb-1 pt-1.5 text-[10px] font-semibold uppercase tracking-wider"
-              style={{ color: "var(--vscode-tab-inactive-foreground)", opacity: 0.5 }}
-            >
-              Extended Thinking
-            </p>
-            {OPTIONS.map((opt) => (
-              <button
-                key={opt.id}
-                type="button"
-                onClick={() => { onChange(opt.id); setOpen(false); }}
-                className="flex w-full items-center justify-between gap-3 px-3 py-1.5 text-left text-[12px] transition-colors theme-hover-bg"
-                style={{
-                  color: "var(--vscode-dropdown-foreground)",
-                  backgroundColor: value === opt.id ? "var(--vscode-toolbar-hover-background)" : undefined,
-                }}
-              >
-                <span>{opt.label}</span>
-                <ThinkingRects level={opt.id} />
-              </button>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
 
 // ── NewChatPage ───────────────────────────────────────────────────────────────
 
@@ -485,15 +360,8 @@ export function NewChatPage({ repoId, onStartChat }: NewChatPageProps) {
   const [selectedRepoId, setSelectedRepoId] = useState<string | null>(
     repoId ?? repos[0]?.id ?? null,
   );
-  const [message, setMessage] = useState("");
-  const [selectedModelId, setSelectedModelId] = useState(DEFAULT_MODEL_ID);
-  const [composerFocused, setComposerFocused] = useState(false);
   const [branchName, setBranchName] = useState(() => `feature-${Date.now().toString(36)}`);
   const [isCreatingWorktree, setIsCreatingWorktree] = useState(false);
-  const [thinking, setThinking] = useState<ThinkingLevel>("off");
-  const [planMode, setPlanMode] = useState(false);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Resolve the active repo object
   const activeRepo = repos.find((r) => r.id === (repoId ?? selectedRepoId));
@@ -507,10 +375,9 @@ export function NewChatPage({ repoId, onStartChat }: NewChatPageProps) {
     if (repoId) setSelectedRepoId(repoId);
   }, [repoId]);
 
-  async function handleSend() {
+  async function handleSend(message: string) {
     if (!message.trim()) return;
     if (repoId && activeRepo) {
-      // Worktree mode: create the worktree first, then start chat
       setIsCreatingWorktree(true);
       try {
         const ws = await createWorkspace({
@@ -519,40 +386,16 @@ export function NewChatPage({ repoId, onStartChat }: NewChatPageProps) {
           cityName: branchName,
           branchName: slugify(branchName),
           baseBranch: activeRepo.default_branch ?? "main",
-          model: selectedModelId,
+          model: DEFAULT_MODEL_ID,
         });
         onStartChat?.(ws.id, message.trim());
-        setMessage("");
       } finally {
         setIsCreatingWorktree(false);
       }
     } else if (selectedRepoId) {
       onStartChat?.(selectedRepoId, message.trim());
-      setMessage("");
     }
   }
-
-  function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      void handleSend();
-    }
-  }
-
-  function handleSuggestedPrompt(label: string) {
-    setMessage(label);
-    textareaRef.current?.focus();
-  }
-
-  // Auto-resize textarea
-  useEffect(() => {
-    const el = textareaRef.current;
-    if (!el) return;
-    el.style.height = "auto";
-    el.style.height = `${Math.min(el.scrollHeight, 200)}px`;
-  }, [message]);
-
-  const canSend = message.trim().length > 0 && !isCreatingWorktree;
 
   return (
     <div
@@ -560,55 +403,53 @@ export function NewChatPage({ repoId, onStartChat }: NewChatPageProps) {
       style={{ backgroundColor: "var(--vscode-editor-background)" }}
     >
       {/* ── Hero ──────────────────────────────────────────────────────── */}
-      <div className="relative flex flex-1 flex-col items-center justify-center gap-0 pb-6">
-        {/* Floating gradient orb */}
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden">
-          <div
-            className="h-[400px] w-[400px] rounded-full opacity-[0.06] blur-[100px] animate-float animate-gradientShift"
-            style={{ background: "linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899)" }}
-          />
-        </div>
-
-        {/* Operator mark */}
+      <div className="relative flex flex-1 flex-col items-center justify-center gap-0 pb-12 pt-8">
+        {/* App Icon */}
         <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={springs.bouncy}
-          className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl text-[20px] font-bold gradient-accent animate-gradientShift"
+          initial={{ scale: 0.8, opacity: 0, y: 10 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          transition={{ ...springs.bouncy, delay: 0.1 }}
+          className="relative mb-6 flex h-14 w-14 items-center justify-center rounded-2xl overflow-hidden"
           style={{
-            color: "#fff",
-            boxShadow: "0 8px 32px rgba(59,130,246,0.30), 0 2px 8px rgba(0,0,0,0.4)",
+            backgroundColor: "var(--vscode-editorWidget-background, rgba(0,0,0,0.1))",
+            border: "1px solid var(--vscode-widget-border, rgba(128,128,128,0.2))",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
           }}
         >
-          O
+          <img src="/icon.png" alt="Operator Logo" className="h-full w-full object-cover" />
         </motion.div>
 
         {/* Headline + workspace picker */}
         <motion.div
-          initial={{ opacity: 0, y: 8 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ ...springs.smooth, delay: 0.1 }}
-          className="flex flex-col items-center gap-1"
+          transition={{ ...springs.smooth, delay: 0.2 }}
+          className="flex flex-col items-center gap-1.5"
         >
           <span
-            className="text-[12px] font-medium tracking-widest uppercase"
-            style={{ color: "var(--vscode-tab-inactive-foreground)", opacity: 0.45, letterSpacing: "0.12em" }}
+            className="text-[11px] font-semibold tracking-wide"
+            style={{ color: "var(--vscode-tab-inactive-foreground)", opacity: 0.8 }}
           >
-            Let&apos;s build
+            New Chat
           </span>
           {repoId && activeRepo ? (
             <span
-              className="text-[20px] font-semibold sm:text-[22px] md:text-[26px]"
-              style={{ color: "var(--vscode-editor-foreground)", letterSpacing: "-0.01em" }}
+              className="text-[24px] font-medium sm:text-[28px] md:text-[32px]"
+              style={{
+                color: "var(--vscode-editor-foreground)",
+                letterSpacing: "-0.01em",
+              }}
             >
               {activeRepo.name}
             </span>
           ) : (
-            <WorkspaceDropdown
-              repos={repos}
-              selectedRepoId={selectedRepoId}
-              onSelect={setSelectedRepoId}
-            />
+            <div className="mt-1">
+              <WorkspaceDropdown
+                repos={repos}
+                selectedRepoId={selectedRepoId}
+                onSelect={setSelectedRepoId}
+              />
+            </div>
           )}
         </motion.div>
 
@@ -618,10 +459,10 @@ export function NewChatPage({ repoId, onStartChat }: NewChatPageProps) {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ ...springs.smooth, delay: 0.15 }}
-            className="mt-5 w-full max-w-[420px] rounded-lg px-4 py-3"
+            className="mt-5 w-full max-w-[420px] rounded-md px-4 py-3"
             style={{
-              backgroundColor: "var(--vscode-sidebar-background)",
-              border: "1px solid var(--vscode-panel-border, rgba(255,255,255,0.07))",
+              backgroundColor: "var(--vscode-editorWidget-background, rgba(0,0,0,0.05))",
+              border: "1px solid var(--vscode-widget-border, rgba(128,128,128,0.2))",
             }}
           >
             {/* Branch name */}
@@ -708,189 +549,22 @@ export function NewChatPage({ repoId, onStartChat }: NewChatPageProps) {
           </motion.div>
         )}
 
-        {/* Suggested prompt cards */}
-        <motion.div
-          variants={staggerContainer}
-          initial="hidden"
-          animate="visible"
-          className="mt-8 flex flex-col items-center gap-3 px-4 sm:mt-10 sm:px-6"
-          style={{ maxWidth: "600px", width: "100%" }}
-        >
-          {/* Cards row */}
-          <div className="flex w-full flex-wrap justify-center gap-3">
-            {SUGGESTED_PROMPTS.map((prompt) => {
-              const Icon = prompt.icon;
-              return (
-                <motion.button
-                  key={prompt.label}
-                  variants={staggerItemScale}
-                  type="button"
-                  onClick={() => handleSuggestedPrompt(prompt.label)}
-                  whileHover={{ scale: 1.02, y: -3 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="group flex min-w-[160px] max-w-[185px] flex-1 flex-col gap-3 rounded-xl p-4 text-left transition-all duration-200"
-                  style={{
-                    backgroundColor: "var(--vscode-editorWidget-background, var(--vscode-sidebar-background))",
-                    border: "1px solid var(--vscode-panel-border, rgba(255,255,255,0.08))",
-                    color: "var(--vscode-editor-foreground)",
-                    boxShadow: "0 2px 12px rgba(0,0,0,0.25)",
-                  }}
-                >
-                  {/* Icon + category row */}
-                  <div className="flex items-center justify-between">
-                    <span
-                      className="flex h-7 w-7 items-center justify-center rounded-lg"
-                      style={{
-                        backgroundColor: `${prompt.accent}22`,
-                        border: `1px solid ${prompt.accent}33`,
-                      }}
-                    >
-                      <Icon className="h-3.5 w-3.5" style={{ color: prompt.accent }} />
-                    </span>
-                    <span
-                      className="rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider"
-                      style={{
-                        backgroundColor: `${prompt.accent}15`,
-                        color: prompt.accent,
-                        opacity: 0.85,
-                      }}
-                    >
-                      {prompt.category}
-                    </span>
-                  </div>
-                  {/* Label */}
-                  <span
-                    className="text-[12px] leading-snug"
-                    style={{ color: "var(--vscode-editor-foreground)", opacity: 0.75 }}
-                  >
-                    {prompt.label}
-                  </span>
-                </motion.button>
-              );
-            })}
-          </div>
 
-          {/* More button */}
-          <motion.button
-            variants={staggerItemScale}
-            type="button"
-            whileHover={{ scale: 1.05 }}
-            className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[11px] font-medium transition-colors theme-hover-bg"
-            style={{
-              color: "var(--vscode-tab-inactive-foreground)",
-              opacity: 0.5,
-              border: "1px solid var(--vscode-panel-border, rgba(255,255,255,0.06))",
-            }}
-          >
-            More suggestions
-            <ChevronDown className="h-3 w-3 -rotate-90" />
-          </motion.button>
-        </motion.div>
       </div>
 
       {/* ── Composer ──────────────────────────────────────────────────── */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ ...springs.smooth, delay: 0.2 }}
-        className="w-full min-w-0 shrink-0 px-3 pb-3 sm:px-5"
+        transition={{ ...springs.smooth, delay: 0.25 }}
+        className="w-full min-w-0 shrink-0"
       >
-        <div
-          className="mx-auto w-full max-w-[720px] overflow-hidden rounded-xl"
-          style={{
-            backgroundColor: "var(--vscode-input-background)",
-            border: "1px solid var(--vscode-input-border, rgba(255,255,255,0.10))",
-            boxShadow: composerFocused
-              ? "0 0 0 1px var(--vscode-focus-border), 0 0 12px rgba(0,127,212,0.15)"
-              : "none",
-          }}
-        >
-          {/* Textarea */}
-          <div className="px-3.5 pt-3 pb-1">
-            <textarea
-              ref={textareaRef}
-              value={message}
-              onChange={(e) => setMessage(e.currentTarget.value)}
-              onKeyDown={handleKeyDown}
-              onFocus={() => setComposerFocused(true)}
-              onBlur={() => setComposerFocused(false)}
-              placeholder="Ask for code changes, @mention files, run /slash commands or add /skills"
-              rows={1}
-              className="vscode-scrollable w-full resize-none bg-transparent text-[13px] leading-relaxed placeholder:opacity-40 focus:outline-none"
-              style={{
-                color: "var(--vscode-input-foreground)",
-                minHeight: "22px",
-                maxHeight: "200px",
-                overflowY: "auto",
-              }}
-            />
-          </div>
-
-          {/* Toolbar row */}
-          <div className="flex items-center gap-0.5 px-2 pb-2.5 pt-1">
-            {/* Left: model, thinking, plan */}
-            <ModelPicker selectedModelId={selectedModelId} onSelect={setSelectedModelId} />
-            <ComposerThinkingPicker value={thinking} onChange={setThinking} />
-            <button
-              type="button"
-              onClick={() => setPlanMode((v) => !v)}
-              className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[12px] font-medium transition-colors theme-hover-bg"
-              style={{
-                color: planMode ? "var(--vscode-focus-border, #007fd4)" : "var(--vscode-tab-inactive-foreground)",
-                backgroundColor: planMode ? "rgba(0,127,212,0.12)" : undefined,
-              }}
-              title="Toggle Plan mode"
-            >
-              <Map className="h-3.5 w-3.5" />
-              Plan
-            </button>
-
-            <div className="flex-1" />
-
-            {/* Right: context radial, attach, send */}
-            <RadialContextIndicator percentage={0} />
-
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="flex h-7 w-7 items-center justify-center rounded-md transition-colors theme-hover-bg"
-              style={{ color: "var(--vscode-tab-inactive-foreground)" }}
-              title="Add attachment"
-            >
-              <Plus className="h-3.5 w-3.5" />
-            </button>
-            <input ref={fileInputRef} type="file" multiple className="hidden" />
-
-            <motion.button
-              type="button"
-              onClick={() => void handleSend()}
-              disabled={!canSend}
-              whileHover={canSend ? { scale: 1.08 } : undefined}
-              whileTap={canSend ? { scale: 0.9 } : undefined}
-              transition={springs.snappy}
-              className={cn(
-                "ml-0.5 flex h-7 w-7 items-center justify-center rounded-full transition-all duration-150",
-                canSend ? "cursor-pointer opacity-100" : "cursor-not-allowed opacity-40",
-              )}
-              style={{
-                backgroundColor: canSend
-                  ? "var(--vscode-button-background, var(--vscode-focus-border, #007fd4))"
-                  : "var(--vscode-toolbar-hover-background)",
-                color: canSend ? "var(--vscode-button-foreground, #fff)" : "var(--vscode-icon-foreground)",
-              }}
-              title={isCreatingWorktree ? "Creating worktree…" : "Send (↵)"}
-            >
-              {isCreatingWorktree ? (
-                <svg className="h-3.5 w-3.5 animate-spin" viewBox="0 0 24 24" fill="none">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-                </svg>
-              ) : (
-                <ArrowUp className="h-3.5 w-3.5" strokeWidth={2.5} />
-              )}
-            </motion.button>
-          </div>
-        </div>
+        <Composer
+          onSend={handleSend}
+          disabled={isCreatingWorktree}
+          loading={isCreatingWorktree}
+          className="mx-auto max-w-[720px]"
+        />
       </motion.div>
     </div>
   );

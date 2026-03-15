@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Play, Square, RotateCcw, Plus, Trash2 } from "lucide-react";
 import { springs } from "@/lib/animations";
@@ -19,6 +19,12 @@ export const DEFAULT_SCRIPTS: RunScript[] = [
   { id: "lint", name: "lint", command: "bun run lint", description: "Run linter" },
 ];
 
+interface TerminalLine {
+  id: string;
+  type: "command" | "output" | "info";
+  text: string;
+}
+
 interface RunTabProps {
   runningScriptId: string | null;
   onRunningChange: (script: RunScript | null) => void;
@@ -31,6 +37,64 @@ export function RunTab({ runningScriptId, onRunningChange }: RunTabProps) {
   const [editCommand, setEditCommand] = useState("");
   const [editDescription, setEditDescription] = useState("");
   const [editPort, setEditPort] = useState("");
+  const [terminalLines, setTerminalLines] = useState<TerminalLine[]>([]);
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  const runningScript = scripts.find((s) => s.id === runningScriptId) ?? null;
+
+  // When a script starts running, populate terminal output
+  useEffect(() => {
+    if (!runningScript) return;
+
+    const startLines: TerminalLine[] = [
+      { id: crypto.randomUUID(), type: "command", text: runningScript.command },
+    ];
+
+    // Add simulated startup output based on script type
+    const outputLines: TerminalLine[] = [];
+    if (runningScript.command.includes("dev") || runningScript.command.includes("run dev")) {
+      outputLines.push(
+        { id: crypto.randomUUID(), type: "output", text: "" },
+        { id: crypto.randomUUID(), type: "info", text: "  VITE v5.4.0  ready in 312ms" },
+        { id: crypto.randomUUID(), type: "output", text: "" },
+        { id: crypto.randomUUID(), type: "info", text: `  ➜  Local:   http://localhost:${runningScript.port ?? 5173}/` },
+        { id: crypto.randomUUID(), type: "info", text: "  ➜  Network: use --host to expose" },
+        { id: crypto.randomUUID(), type: "output", text: "" },
+      );
+    } else if (runningScript.command.includes("build")) {
+      outputLines.push(
+        { id: crypto.randomUUID(), type: "output", text: "" },
+        { id: crypto.randomUUID(), type: "info", text: "  Building..." },
+      );
+    } else if (runningScript.command.includes("test")) {
+      outputLines.push(
+        { id: crypto.randomUUID(), type: "output", text: "" },
+        { id: crypto.randomUUID(), type: "info", text: "  Running test suite..." },
+      );
+    } else if (runningScript.command.includes("lint")) {
+      outputLines.push(
+        { id: crypto.randomUUID(), type: "output", text: "" },
+        { id: crypto.randomUUID(), type: "info", text: "  Checking files..." },
+      );
+    } else if (runningScript.command.includes("watch")) {
+      outputLines.push(
+        { id: crypto.randomUUID(), type: "output", text: "" },
+        { id: crypto.randomUUID(), type: "info", text: "  Watching for changes..." },
+      );
+    }
+
+    setTerminalLines([...startLines, ...outputLines]);
+    setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 80);
+  }, [runningScriptId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Clear terminal when stopped
+  useEffect(() => {
+    if (!runningScriptId) {
+      // Keep lines visible briefly after stop
+      const timer = setTimeout(() => setTerminalLines([]), 600);
+      return () => clearTimeout(timer);
+    }
+  }, [runningScriptId]);
 
   function toggle(script: RunScript) {
     if (runningScriptId === script.id) {
@@ -59,7 +123,6 @@ export function RunTab({ runningScriptId, onRunningChange }: RunTabProps) {
           description: editDescription.trim() || s.description,
           port: editPort.trim() ? Number(editPort.trim()) : undefined,
         };
-        // if this script was running, update the running script info too
         if (runningScriptId === id) onRunningChange(updated);
         return updated;
       }),
@@ -84,8 +147,9 @@ export function RunTab({ runningScriptId, onRunningChange }: RunTabProps) {
   }
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="vscode-scrollable min-h-0 flex-1 overflow-y-auto py-2">
+    <div className="flex flex-col">
+      {/* Script list */}
+      <div className="vscode-scrollable overflow-y-auto py-2">
         <AnimatePresence mode="popLayout">
           {scripts.map((script) => {
             const isRunning = runningScriptId === script.id;
@@ -136,7 +200,7 @@ export function RunTab({ runningScriptId, onRunningChange }: RunTabProps) {
                     </div>
                     <input
                       className="w-full bg-transparent font-mono text-[11px] focus:outline-none"
-                      style={{ color: "#4ec994" }}
+                      style={{ color: "var(--vscode-terminal-ansi-green, #4ec994)" }}
                       value={editCommand}
                       onChange={(e) => setEditCommand(e.target.value)}
                       placeholder="command to run..."
@@ -173,7 +237,7 @@ export function RunTab({ runningScriptId, onRunningChange }: RunTabProps) {
                         type="button"
                         onClick={() => saveEdit(script.id)}
                         className="text-[11px] font-medium transition-opacity hover:opacity-70"
-                        style={{ color: "#4ec994" }}
+                        style={{ color: "var(--vscode-terminal-ansi-green, #4ec994)" }}
                       >
                         Save
                       </button>
@@ -185,15 +249,23 @@ export function RunTab({ runningScriptId, onRunningChange }: RunTabProps) {
                     <motion.button
                       type="button"
                       onClick={() => toggle(script)}
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      className="vscode-list-item flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded transition-colors duration-75"
+                      whileHover={{ scale: 1.08 }}
+                      whileTap={{ scale: 0.88 }}
+                      className="flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded transition-all duration-75"
                       aria-label={isRunning ? "Stop" : "Run"}
+                      title={isRunning ? "Stop" : "Run"}
+                      style={isRunning ? {
+                        backgroundColor: "rgba(244,135,113,0.12)",
+                        border: "1px solid rgba(244,135,113,0.25)",
+                      } : {
+                        backgroundColor: "transparent",
+                        border: "1px solid transparent",
+                      }}
                     >
                       {isRunning ? (
-                        <Square className="h-3 w-3" style={{ color: "#f48771" }} />
+                        <Square className="h-[10px] w-[10px]" fill="currentColor" style={{ color: "var(--vscode-errorForeground, #f48771)" }} />
                       ) : (
-                        <Play className="h-3 w-3" style={{ color: "#4ec994" }} />
+                        <Play className="h-[11px] w-[11px]" fill="currentColor" style={{ color: "var(--vscode-terminal-ansi-green, #4ec994)" }} />
                       )}
                     </motion.button>
 
@@ -255,7 +327,7 @@ export function RunTab({ runningScriptId, onRunningChange }: RunTabProps) {
                         aria-label="Delete script"
                         title="Delete"
                       >
-                        <Trash2 className="h-3 w-3" style={{ color: "#f48771" }} />
+                        <Trash2 className="h-3 w-3" style={{ color: "var(--vscode-errorForeground, #f48771)" }} />
                       </button>
                     </div>
                   </div>
@@ -278,6 +350,63 @@ export function RunTab({ runningScriptId, onRunningChange }: RunTabProps) {
           Add script
         </motion.button>
       </div>
+
+      {/* Terminal output */}
+      <AnimatePresence>
+        {terminalLines.length > 0 && (
+          <motion.div
+            key="terminal"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.18, ease: "easeInOut" }}
+            className="overflow-hidden"
+            style={{
+              borderTop: "1px solid var(--vscode-panel-border)",
+              backgroundColor: "var(--vscode-terminal-background, var(--vscode-editor-background))",
+            }}
+          >
+            <div
+              className="vscode-scrollable overflow-y-auto px-3 py-3 text-[11px]"
+              style={{ fontFamily: "'SF Mono', Menlo, Monaco, 'Cascadia Code', monospace", maxHeight: "160px" }}
+            >
+              {terminalLines.map((line) => (
+                <div
+                  key={line.id}
+                  className="leading-[1.7]"
+                  style={{
+                    whiteSpace: "pre-wrap",
+                    color:
+                      line.type === "command"
+                        ? "var(--vscode-terminal-foreground, var(--vscode-editor-foreground))"
+                        : line.type === "info"
+                          ? "var(--vscode-terminal-ansi-green, #4ec994)"
+                          : "var(--vscode-tab-inactive-foreground)",
+                  }}
+                >
+                  {line.type === "command" ? (
+                    <span>
+                      <span style={{ color: "var(--vscode-terminal-ansi-green, #4ec994)" }}>$ </span>
+                      {line.text}
+                    </span>
+                  ) : (
+                    line.text || "\u00A0"
+                  )}
+                </div>
+              ))}
+              {runningScriptId && (
+                <motion.div
+                  animate={{ opacity: [1, 0, 1] }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
+                  className="inline-block h-[13px] w-[7px] align-middle"
+                  style={{ backgroundColor: "var(--vscode-terminal-foreground, var(--vscode-editor-foreground))" }}
+                />
+              )}
+              <div ref={bottomRef} />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

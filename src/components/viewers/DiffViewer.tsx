@@ -16,16 +16,16 @@ export interface DiffViewerProps {
 const diffTheme = EditorView.theme({
   "&": {
     height: "100%",
-    backgroundColor: "#1e1e1e",
+    backgroundColor: "var(--vscode-editor-background)",
   },
   ".cm-scroller": {
     fontFamily: '"SF Mono", "Menlo", "Monaco", "Courier New", monospace',
     lineHeight: "1.6",
   },
   ".cm-gutters": {
-    backgroundColor: "#1e1e1e",
+    backgroundColor: "var(--vscode-editor-background)",
     color: "#858585",
-    borderRight: "1px solid rgba(255,255,255,0.08)",
+    borderRight: "1px solid var(--vscode-panel-border)",
   },
 });
 

@@ -53,12 +53,12 @@ export function FileDiffOverlay({ file, onClose }: FileDiffOverlayProps) {
         </span>
         <div className="flex items-center gap-1.5 ml-2">
           {file.added > 0 && (
-            <span className="text-[11px] font-mono tabular-nums" style={{ color: "#4ec994" }}>
+            <span className="text-[11px] font-mono tabular-nums" style={{ color: "var(--vscode-terminal-ansi-green, #4ec994)" }}>
               +{file.added}
             </span>
           )}
           {file.removed > 0 && (
-            <span className="text-[11px] font-mono tabular-nums" style={{ color: "#f48771" }}>
+            <span className="text-[11px] font-mono tabular-nums" style={{ color: "var(--vscode-errorForeground, #f48771)" }}>
               -{file.removed}
             </span>
           )}

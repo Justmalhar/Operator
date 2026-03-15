@@ -6,6 +6,8 @@ interface ComposerTextareaProps {
   onChange: (value: string) => void;
   onSubmit: () => void;
   onSlashCommand?: (query: string) => void;
+  onFocus?: () => void;
+  onBlur?: () => void;
   placeholder?: string;
   disabled?: boolean;
   className?: string;
@@ -16,6 +18,8 @@ export function ComposerTextarea({
   onChange,
   onSubmit,
   onSlashCommand,
+  onFocus,
+  onBlur,
   placeholder = "Ask Operator anything, @ to add files, / for commands...",
   disabled,
   className,
@@ -59,15 +63,17 @@ export function ComposerTextarea({
       onKeyDown={handleKeyDown}
       disabled={disabled}
       placeholder={placeholder}
-      rows={1}
+      onFocus={onFocus}
+      onBlur={onBlur}
+      rows={3}
       className={cn(
-        "w-full resize-none bg-transparent text-[13px] leading-relaxed placeholder:opacity-40 focus:outline-none disabled:opacity-50",
+        "w-full resize-none bg-transparent text-[13px] leading-relaxed placeholder:opacity-35 focus:outline-none disabled:opacity-50",
         className,
       )}
       style={{
         color: "var(--vscode-editor-foreground)",
-        minHeight: "22px",
-        maxHeight: "240px",
+        minHeight: "72px",
+        maxHeight: "320px",
         overflowY: "auto",
       }}
     />

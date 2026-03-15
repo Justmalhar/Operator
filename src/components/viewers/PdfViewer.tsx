@@ -150,24 +150,44 @@ export function PdfViewer({ filePath, filename, className }: BaseViewerProps) {
   }, [document]);
 
   if (loading) {
-    return <div className="flex h-full items-center justify-center bg-[#1e1e1e] text-sm text-[#8b8b8b]">Loading PDF...</div>;
+    return (
+      <div
+        className="flex h-full items-center justify-center text-sm"
+        style={{ backgroundColor: "var(--vscode-editor-background)", color: "var(--vscode-descriptionForeground)" }}
+      >
+        Loading PDF...
+      </div>
+    );
   }
 
   if (error || !document) {
     return (
-      <div className="flex h-full items-center justify-center bg-[#1e1e1e] px-6 text-sm text-[#ff9b8a]">
+      <div
+        className="flex h-full items-center justify-center px-6 text-sm"
+        style={{ backgroundColor: "var(--vscode-editor-background)", color: "var(--vscode-errorForeground)" }}
+      >
         {error?.message ?? "Unable to render PDF."}
       </div>
     );
   }
 
   return (
-    <div className={cn("flex h-full min-h-0 flex-col bg-[#1e1e1e]", className)}>
-      <div className="flex items-center justify-between border-b border-white/8 bg-[#181818] px-4 py-2 text-xs text-[#8b8b8b]">
+    <div
+      className={cn("flex h-full min-h-0 flex-col", className)}
+      style={{ backgroundColor: "var(--vscode-editor-background)" }}
+    >
+      <div
+        className="flex items-center justify-between px-4 py-2 text-xs"
+        style={{
+          backgroundColor: "var(--vscode-viewer-header-background)",
+          borderBottom: "1px solid var(--vscode-panel-border)",
+          color: "var(--vscode-descriptionForeground)",
+        }}
+      >
         <span className="font-mono">{filename}</span>
         <span>{pageLabel}</span>
       </div>
-      <div ref={containerRef} className="min-h-0 flex-1 bg-[#252526]">
+      <div ref={containerRef} className="min-h-0 flex-1" style={{ backgroundColor: "var(--vscode-sidebar-background)" }}>
         <div ref={parentRef} className="h-full overflow-auto px-8 py-8">
           <div
             className="relative mx-auto"
@@ -193,8 +213,9 @@ export function PdfViewer({ filePath, filename, className }: BaseViewerProps) {
                   <div className="flex flex-col items-center gap-3">
                     <PdfPageCanvas document={document} pageNumber={virtualRow.index + 1} width={viewportWidth} />
                     <div
-                      className="text-xs text-[#8b8b8b]"
+                      className="text-xs"
                       style={{
+                        color: "var(--vscode-descriptionForeground)",
                         minHeight: `${Math.max(0, height - 20)}px`,
                       }}
                     >

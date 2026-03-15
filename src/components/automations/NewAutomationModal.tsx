@@ -1,11 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Asterisk,
   Brain,
   ChevronDown,
   Clock,
   FolderOpen,
+  Plus,
   X,
+  Zap,
 } from "lucide-react";
 import {
   Dialog,
@@ -31,7 +33,8 @@ const MODELS = [
   { id: "claude-sonnet-4-6" as ModelId, label: "Claude Sonnet 4.6", badge: "Fast" },
   { id: "claude-opus-4-6" as ModelId, label: "Claude Opus 4.6", badge: "Powerful" },
   { id: "claude-opus-4-6-1m" as ModelId, label: "Claude Opus 4.6 1M", badge: "1M ctx" },
-  { id: "gpt-5-4" as ModelId, label: "GPT-5.4" },
+  { id: "claude-haiku-3-5" as ModelId, label: "Claude Haiku 3.5", badge: "Lite" },
+  { id: "gpt-5-4" as ModelId, label: "GPT-5.4", badge: "New" },
   { id: "gpt-5-3-codex-spark" as ModelId, label: "GPT-5.3 Codex Spark" },
   { id: "gpt-5-3-codex" as ModelId, label: "GPT-5.3 Codex" },
   { id: "gpt-5-2-codex" as ModelId, label: "GPT-5.2 Codex" },
@@ -41,6 +44,7 @@ const SHORT_MODEL: Record<ModelId, string> = {
   "claude-sonnet-4-6": "Sonnet 4.6",
   "claude-opus-4-6": "Opus 4.6",
   "claude-opus-4-6-1m": "Opus 4.6 1M",
+  "claude-haiku-3-5": "Haiku 3.5",
   "gpt-5-4": "GPT-5.4",
   "gpt-5-3-codex-spark": "GPT-5.3 Spark",
   "gpt-5-3-codex": "GPT-5.3 Codex",
@@ -71,7 +75,7 @@ const dropdownStyle: React.CSSProperties = {
   backgroundColor: "var(--vscode-dropdown-background)",
   border: "1px solid var(--vscode-dropdown-border, var(--vscode-panel-border))",
   color: "var(--vscode-dropdown-foreground)",
-  borderRadius: "3px",
+  borderRadius: "6px",
   fontSize: "12px",
 };
 
@@ -94,19 +98,26 @@ function ToolbarPicker({
         <button
           type="button"
           className={cn(
-            "flex h-[26px] items-center gap-1 rounded-[3px] px-2 text-[11px] theme-hover-bg transition-colors duration-75",
+            "flex h-[28px] items-center gap-1.5 rounded-[4px] px-2.5 text-[11px] transition-all duration-75",
           )}
           style={{
-            color: active ? "var(--vscode-focus-border, #007fd4)" : "var(--vscode-foreground)",
-            opacity: active ? 1 : 0.75,
+            color: active ? "var(--vscode-textLink-foreground)" : "var(--vscode-foreground)",
+            opacity: active ? 1 : 0.7,
+            background: active ? "var(--vscode-toolbar-hover-background)" : "transparent",
+          }}
+          onMouseEnter={(e) => {
+            if (!active) e.currentTarget.style.background = "var(--vscode-toolbar-hover-background)";
+          }}
+          onMouseLeave={(e) => {
+            if (!active) e.currentTarget.style.background = "transparent";
           }}
         >
           <Icon className="h-3 w-3 shrink-0" />
-          <span className={cn(active && "font-medium")}>{label}</span>
-          <ChevronDown className="h-2.5 w-2.5 opacity-50" />
+          <span className={cn("max-w-[120px] truncate", active && "font-medium")}>{label}</span>
+          <ChevronDown className="h-2.5 w-2.5 opacity-40" />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="min-w-[180px]" style={dropdownStyle}>
+      <DropdownMenuContent align="start" className="min-w-[200px]" style={dropdownStyle}>
         {children}
       </DropdownMenuContent>
     </DropdownMenu>
@@ -116,7 +127,7 @@ function ToolbarPicker({
 function ToolbarSep() {
   return (
     <span
-      className="mx-0.5 h-3.5 w-px shrink-0"
+      className="mx-1 h-3.5 w-px shrink-0"
       style={{ background: "var(--vscode-panel-border)" }}
     />
   );
@@ -138,9 +149,14 @@ export function NewAutomationModal({ open, onClose, initialPrompt = "" }: NewAut
   const [model, setModel] = useState<ModelId>("claude-sonnet-4-6");
   const [reasoning, setReasoning] = useState<ThinkingLevel>("off");
 
+  // Sync initialPrompt when it changes (e.g. from template)
+  useEffect(() => {
+    setPrompt(initialPrompt);
+  }, [initialPrompt]);
+
   function handleClose() {
     setTitle("");
-    setPrompt(initialPrompt);
+    setPrompt("");
     setProject(null);
     setSchedule("daily-9am");
     setModel("claude-sonnet-4-6");
@@ -158,87 +174,112 @@ export function NewAutomationModal({ open, onClose, initialPrompt = "" }: NewAut
         style={{
           background: "var(--vscode-editor-background)",
           border: "1px solid var(--vscode-panel-border)",
-          borderRadius: "6px",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+          borderRadius: "8px",
+          boxShadow: "0 12px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04)",
           color: "var(--vscode-editor-foreground)",
         }}
       >
         {/* ── Header ─────────────────────────────────────────────── */}
         <DialogHeader
-          className="flex flex-row items-center justify-between px-4 py-3"
+          className="flex flex-row items-center justify-between px-5 py-3.5"
           style={{ borderBottom: "1px solid var(--vscode-panel-border)" }}
         >
-          <DialogTitle
-            className="text-[13px] font-semibold"
-            style={{ color: "var(--vscode-editor-foreground)" }}
-          >
-            New Automation
-          </DialogTitle>
+          <div className="flex items-center gap-2.5">
+            <div
+              className="flex h-7 w-7 items-center justify-center rounded-[5px]"
+              style={{
+                background: "linear-gradient(135deg, rgba(55,148,255,0.15), rgba(178,103,230,0.15))",
+                border: "1px solid rgba(55,148,255,0.2)",
+              }}
+            >
+              <Zap className="h-3.5 w-3.5" style={{ color: "var(--vscode-textLink-foreground, #3794ff)" }} />
+            </div>
+            <DialogTitle
+              className="text-[13px] font-semibold"
+              style={{ color: "var(--vscode-editor-foreground)" }}
+            >
+              New Automation
+            </DialogTitle>
+          </div>
           <button
             type="button"
             onClick={handleClose}
-            className="flex h-[22px] w-[22px] items-center justify-center rounded-[3px] theme-hover-bg"
-            style={{ color: "var(--vscode-icon-foreground)", opacity: 0.7 }}
+            className="flex h-[24px] w-[24px] items-center justify-center rounded-[4px] transition-all duration-75"
+            style={{ color: "var(--vscode-icon-foreground)", opacity: 0.5 }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.opacity = "0.9";
+              e.currentTarget.style.background = "var(--vscode-toolbar-hover-background)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.opacity = "0.5";
+              e.currentTarget.style.background = "transparent";
+            }}
           >
             <X className="h-3.5 w-3.5" />
           </button>
         </DialogHeader>
 
-        <div className="flex flex-col gap-3 p-4">
+        <div className="flex flex-col gap-4 px-5 py-4">
 
-          {/* ── Title row ─────────────────────────────────────────── */}
-          <div className="flex items-center gap-2">
+          {/* ── Title input ────────────────────────────────────────── */}
+          <div>
+            <label
+              className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.04em]"
+              style={{ color: "var(--vscode-descriptionForeground)", opacity: 0.7 }}
+            >
+              Title
+            </label>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Automation title"
+              placeholder="e.g. Daily standup summary"
               autoFocus
-              className="min-w-0 flex-1 rounded-[3px] px-3 py-[6px] text-[13px] outline-none focus:ring-1"
+              className="w-full rounded-[4px] px-3 py-[7px] text-[13px] outline-none transition-colors duration-75"
               style={{
                 background: "var(--vscode-input-background)",
                 color: "var(--vscode-input-foreground)",
-                border: "1px solid var(--vscode-input-border)",
+                border: `1px solid ${title ? "var(--vscode-focusBorder, #0078d4)" : "var(--vscode-input-border, var(--vscode-panel-border))"}`,
               }}
             />
-            <button
-              type="button"
-              className="shrink-0 rounded-[3px] px-3 py-[6px] text-[11px] font-medium transition-opacity duration-75 hover:opacity-90"
-              style={{
-                background: "var(--vscode-button-secondaryBackground)",
-                color: "var(--vscode-button-secondaryForeground)",
-                border: "1px solid var(--vscode-panel-border)",
-              }}
-            >
-              Use template
-            </button>
           </div>
 
           {/* ── Prompt textarea ───────────────────────────────────── */}
-          <textarea
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            placeholder="Describe what this automation should do…"
-            rows={5}
-            className="w-full resize-none rounded-[3px] px-3 py-2.5 text-[12px] leading-relaxed outline-none"
-            style={{
-              background: "var(--vscode-input-background)",
-              color: "var(--vscode-input-foreground)",
-              border: "1px solid var(--vscode-input-border)",
-            }}
-          />
+          <div>
+            <label
+              className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.04em]"
+              style={{ color: "var(--vscode-descriptionForeground)", opacity: 0.7 }}
+            >
+              Prompt
+            </label>
+            <textarea
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              placeholder="Describe what this automation should do…"
+              rows={5}
+              className="w-full resize-none rounded-[4px] px-3 py-2.5 text-[12px] leading-[1.6] outline-none transition-colors duration-75"
+              style={{
+                background: "var(--vscode-input-background)",
+                color: "var(--vscode-input-foreground)",
+                border: `1px solid ${prompt ? "var(--vscode-focusBorder, #0078d4)" : "var(--vscode-input-border, var(--vscode-panel-border))"}`,
+              }}
+            />
+          </div>
 
-          {/* ── Toolbar row ───────────────────────────────────────── */}
+          {/* ── Config toolbar ─────────────────────────────────────── */}
           <div
-            className="flex flex-wrap items-center gap-0.5"
-            style={{ borderTop: "1px solid var(--vscode-panel-border)", paddingTop: "8px" }}
+            className="flex flex-wrap items-center gap-1 rounded-[4px] px-1.5 py-1.5"
+            style={{
+              background: "var(--vscode-toolbar-hover-background)",
+              border: "1px solid var(--vscode-panel-border)",
+            }}
           >
             {/* Project */}
-            <ToolbarPicker icon={FolderOpen} label={project ?? "Select project"}>
+            <ToolbarPicker icon={FolderOpen} label={project ?? "Project"} active={!!project}>
               <DropdownMenuLabel className="text-[10px] font-semibold uppercase tracking-wider opacity-50">
                 Project
               </DropdownMenuLabel>
-              <DropdownMenuSeparator style={{ backgroundColor: "var(--vscode-separator-color)" }} />
+              <DropdownMenuSeparator style={{ backgroundColor: "var(--vscode-panel-border)" }} />
               {EXAMPLE_PROJECTS.map((p) => (
                 <DropdownMenuItem
                   key={p}
@@ -249,7 +290,7 @@ export function NewAutomationModal({ open, onClose, initialPrompt = "" }: NewAut
                   {p}
                 </DropdownMenuItem>
               ))}
-              <DropdownMenuSeparator style={{ backgroundColor: "var(--vscode-separator-color)" }} />
+              <DropdownMenuSeparator style={{ backgroundColor: "var(--vscode-panel-border)" }} />
               <DropdownMenuItem className="text-[12px] opacity-60" onClick={() => setProject(null)}>
                 No project
               </DropdownMenuItem>
@@ -258,11 +299,11 @@ export function NewAutomationModal({ open, onClose, initialPrompt = "" }: NewAut
             <ToolbarSep />
 
             {/* Schedule */}
-            <ToolbarPicker icon={Clock} label={scheduleLabel}>
+            <ToolbarPicker icon={Clock} label={scheduleLabel} active>
               <DropdownMenuLabel className="text-[10px] font-semibold uppercase tracking-wider opacity-50">
                 Schedule
               </DropdownMenuLabel>
-              <DropdownMenuSeparator style={{ backgroundColor: "var(--vscode-separator-color)" }} />
+              <DropdownMenuSeparator style={{ backgroundColor: "var(--vscode-panel-border)" }} />
               {SCHEDULES.map((s) => (
                 <DropdownMenuItem
                   key={s.id}
@@ -282,7 +323,7 @@ export function NewAutomationModal({ open, onClose, initialPrompt = "" }: NewAut
               <DropdownMenuLabel className="text-[10px] font-semibold uppercase tracking-wider opacity-50">
                 Model
               </DropdownMenuLabel>
-              <DropdownMenuSeparator style={{ backgroundColor: "var(--vscode-separator-color)" }} />
+              <DropdownMenuSeparator style={{ backgroundColor: "var(--vscode-panel-border)" }} />
               {MODELS.map((m) => (
                 <DropdownMenuItem
                   key={m.id}
@@ -293,11 +334,11 @@ export function NewAutomationModal({ open, onClose, initialPrompt = "" }: NewAut
                   <span>{m.label}</span>
                   {m.badge && (
                     <span
-                      className="text-[10px] opacity-60"
+                      className="rounded-[3px] px-1.5 py-[1px] text-[10px]"
                       style={{
                         background: "var(--vscode-toolbar-hover-background)",
-                        borderRadius: "2px",
-                        padding: "0 4px",
+                        color: "var(--vscode-descriptionForeground)",
+                        border: "1px solid var(--vscode-panel-border)",
                       }}
                     >
                       {m.badge}
@@ -322,7 +363,7 @@ export function NewAutomationModal({ open, onClose, initialPrompt = "" }: NewAut
               <DropdownMenuLabel className="text-[10px] font-semibold uppercase tracking-wider opacity-50">
                 Extended Thinking
               </DropdownMenuLabel>
-              <DropdownMenuSeparator style={{ backgroundColor: "var(--vscode-separator-color)" }} />
+              <DropdownMenuSeparator style={{ backgroundColor: "var(--vscode-panel-border)" }} />
               {REASONING_OPTIONS.map((opt) => (
                 <DropdownMenuItem
                   key={opt.id}
@@ -335,30 +376,29 @@ export function NewAutomationModal({ open, onClose, initialPrompt = "" }: NewAut
                 </DropdownMenuItem>
               ))}
             </ToolbarPicker>
-
-            {/* Push actions to the right */}
-            <div className="flex-1" />
-
-            <button
-              type="button"
-              onClick={handleClose}
-              className="rounded-[3px] px-3 py-1 text-[12px] transition-opacity duration-75 hover:opacity-80"
-              style={{ color: "var(--vscode-foreground)", opacity: 0.6 }}
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              disabled={!canCreate}
-              className="ml-1 rounded-[3px] px-3 py-1 text-[12px] font-medium transition-opacity duration-75 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-35"
-              style={{
-                background: "var(--vscode-button-background)",
-                color: "var(--vscode-button-foreground)",
-              }}
-            >
-              Create
-            </button>
           </div>
+        </div>
+
+        {/* ── Footer ───────────────────────────────────────────────── */}
+        <div
+          className="flex items-center justify-end gap-2 px-5 py-3"
+          style={{ borderTop: "1px solid var(--vscode-panel-border)" }}
+        >
+          <button
+            type="button"
+            onClick={handleClose}
+            className="vscode-btn vscode-btn-secondary"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            disabled={!canCreate}
+            className="vscode-btn vscode-btn-primary flex items-center gap-1.5"
+          >
+            <Plus className="h-3 w-3" />
+            Create automation
+          </button>
         </div>
       </DialogContent>
     </Dialog>

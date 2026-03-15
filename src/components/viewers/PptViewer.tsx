@@ -64,8 +64,8 @@ function SlideElement({ element }: { element: PptElement }) {
   if (element.content) {
     return (
       <div
-        className="absolute overflow-hidden text-[#1f1f1f]"
-        style={baseStyle}
+        className="absolute overflow-hidden"
+        style={{ ...baseStyle, color: "var(--vscode-editor-foreground)" }}
         dangerouslySetInnerHTML={{ __html: element.content }}
       />
     );
@@ -73,8 +73,13 @@ function SlideElement({ element }: { element: PptElement }) {
 
   return (
     <div
-      className="absolute flex items-center justify-center overflow-hidden rounded border border-dashed border-[#d4d4d4]/30 bg-black/5 text-[10px] uppercase tracking-[0.08em] text-[#8b8b8b]"
-      style={baseStyle}
+      className="absolute flex items-center justify-center overflow-hidden rounded border border-dashed text-[10px] uppercase tracking-[0.08em]"
+      style={{
+        ...baseStyle,
+        borderColor: "var(--vscode-panel-border)",
+        backgroundColor: "var(--vscode-toolbar-hover-background)",
+        color: "var(--vscode-descriptionForeground)",
+      }}
     >
       {element.type}
     </div>
@@ -121,28 +126,58 @@ export function PptViewer({ filePath, filename, className }: BaseViewerProps) {
   }, [deck, width]);
 
   if (loading) {
-    return <div className="flex h-full items-center justify-center bg-[#1e1e1e] text-sm text-[#8b8b8b]">Loading slide deck...</div>;
+    return (
+      <div
+        className="flex h-full items-center justify-center text-sm"
+        style={{ backgroundColor: "var(--vscode-editor-background)", color: "var(--vscode-descriptionForeground)" }}
+      >
+        Loading slide deck...
+      </div>
+    );
   }
 
   if (error || !deck) {
     return (
-      <div className="flex h-full items-center justify-center bg-[#1e1e1e] px-6 text-sm text-[#ff9b8a]">
+      <div
+        className="flex h-full items-center justify-center px-6 text-sm"
+        style={{ backgroundColor: "var(--vscode-editor-background)", color: "var(--vscode-errorForeground)" }}
+      >
         {error?.message ?? "Unable to render slide deck."}
       </div>
     );
   }
 
   return (
-    <div className={cn("flex h-full min-h-0 flex-col bg-[#1e1e1e]", className)}>
-      <div className="flex items-center justify-between border-b border-white/8 bg-[#181818] px-4 py-2 text-xs text-[#8b8b8b]">
+    <div
+      className={cn("flex h-full min-h-0 flex-col", className)}
+      style={{ backgroundColor: "var(--vscode-editor-background)" }}
+    >
+      <div
+        className="flex items-center justify-between px-4 py-2 text-xs"
+        style={{
+          backgroundColor: "var(--vscode-viewer-header-background)",
+          borderBottom: "1px solid var(--vscode-panel-border)",
+          color: "var(--vscode-descriptionForeground)",
+        }}
+      >
         <span className="font-mono">{filename}</span>
         <span>{deck.slides.length} slides</span>
       </div>
-      <ScrollArea className="min-h-0 flex-1 bg-[#252526]">
+      <ScrollArea className="min-h-0 flex-1" style={{ backgroundColor: "var(--vscode-sidebar-background)" }}>
         <div ref={containerRef} className="mx-auto flex max-w-6xl flex-col gap-8 px-6 py-8">
           {deck.slides.map((slide, slideIndex) => (
-            <section key={slideIndex} className="rounded-2xl border border-white/8 bg-[#1b1b1b] p-4 shadow-[0_30px_70px_rgba(0,0,0,0.35)]">
-              <div className="mb-3 flex items-center justify-between text-xs uppercase tracking-[0.08em] text-[#8b8b8b]">
+            <section
+              key={slideIndex}
+              className="rounded-2xl p-4 shadow-[0_30px_70px_rgba(0,0,0,0.15)]"
+              style={{
+                backgroundColor: "var(--vscode-editor-background)",
+                border: "1px solid var(--vscode-panel-border)",
+              }}
+            >
+              <div
+                className="mb-3 flex items-center justify-between text-xs uppercase tracking-[0.08em]"
+                style={{ color: "var(--vscode-descriptionForeground)" }}
+              >
                 <span>Slide {slideIndex + 1}</span>
                 {slide.note ? <span>Speaker notes</span> : null}
               </div>
@@ -167,7 +202,14 @@ export function PptViewer({ filePath, filename, className }: BaseViewerProps) {
                 </div>
               </div>
               {slide.note ? (
-                <div className="mt-4 rounded-xl border border-white/8 bg-black/20 px-4 py-3 text-sm leading-6 text-[#c5c5c5]">
+                <div
+                  className="mt-4 rounded-xl px-4 py-3 text-sm leading-6"
+                  style={{
+                    backgroundColor: "var(--vscode-toolbar-hover-background)",
+                    border: "1px solid var(--vscode-panel-border)",
+                    color: "var(--vscode-editor-foreground)",
+                  }}
+                >
                   {slide.note}
                 </div>
               ) : null}

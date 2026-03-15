@@ -126,7 +126,7 @@ export function TerminalTab({ worktreePath }: TerminalTabProps) {
             >
               {line.type === "command" ? (
                 <span>
-                  <span style={{ color: "#4ec994" }}>$</span>
+                  <span style={{ color: "var(--vscode-terminal-ansi-green, #4ec994)" }}>$</span>
                   <span>{line.text.slice(1)}</span>
                 </span>
               ) : (

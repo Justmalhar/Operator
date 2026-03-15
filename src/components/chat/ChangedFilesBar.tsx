@@ -86,12 +86,12 @@ export function ChangedFilesBar({ files, durationMs, onFileClick }: ChangedFiles
               >
                 <span className="font-medium">{shortName}</span>
                 {file.added > 0 && (
-                  <span className="font-mono tabular-nums" style={{ color: "#4ec994" }}>
+                  <span className="font-mono tabular-nums" style={{ color: "var(--vscode-terminal-ansi-green, #4ec994)" }}>
                     +{file.added}
                   </span>
                 )}
                 {file.removed > 0 && (
-                  <span className="font-mono tabular-nums" style={{ color: "#f48771" }}>
+                  <span className="font-mono tabular-nums" style={{ color: "var(--vscode-errorForeground, #f48771)" }}>
                     -{file.removed}
                   </span>
                 )}

@@ -226,7 +226,7 @@ export function TemplateStep({ onSuccess }: TemplateStepProps) {
         </div>
 
         {error && (
-          <p className="text-[11px]" style={{ color: "#f48771" }}>
+          <p className="text-[11px]" style={{ color: "var(--vscode-errorForeground, #f48771)" }}>
             {error}
           </p>
         )}

@@ -1,10 +1,12 @@
-import { useEffect, useRef } from "react";
-import { Copy, ExternalLink, Folder, GitBranch, GitFork, RotateCcw, Terminal } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ChevronDown, ChevronUp, Copy, Folder, GitBranch, GitFork, RotateCcw, Terminal } from "lucide-react";
 import { motion } from "framer-motion";
 import { UserMessage } from "./UserMessage";
 import { ToolCallMessage, type ToolCall } from "./ToolCallMessage";
 import { FileChangeBadges } from "./FileChangeBadges";
 import { staggerContainer, staggerItem, springs } from "@/lib/animations";
+import { useWorkspaceStore } from "@/store/workspaceStore";
+import type { Workspace, Repository } from "@/types/workspace";
 
 interface FileChange {
   filename: string;
@@ -119,31 +121,21 @@ function InlineCode({ children }: { children: React.ReactNode }) {
   );
 }
 
-function WorkspaceBadge({ children }: { children: React.ReactNode }) {
-  return (
-    <span
-      className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 font-mono text-[12px]"
-      style={{
-        backgroundColor: "rgba(255,255,255,0.07)",
-        border: "1px solid rgba(255,255,255,0.1)",
-        color: "rgba(255,255,255,0.75)",
-      }}
-    >
-      {children}
-    </span>
-  );
-}
-
 function SetupItem({
   icon,
   children,
+  alignStart,
 }: {
   icon: React.ReactNode;
   children: React.ReactNode;
+  alignStart?: boolean;
 }) {
   return (
-    <div className="flex items-center gap-3 text-[13px]" style={{ color: "rgba(255,255,255,0.55)" }}>
-      <span className="flex h-4 w-4 shrink-0 items-center justify-center opacity-50">
+    <div
+      className={`flex gap-3 text-[13px] ${alignStart ? "items-start" : "items-center"}`}
+      style={{ color: "rgba(255,255,255,0.55)" }}
+    >
+      <span className={`flex h-4 w-4 shrink-0 items-center justify-center opacity-50 ${alignStart ? "mt-0.5" : ""}`}>
         {icon}
       </span>
       <span className="leading-relaxed">{children}</span>
@@ -151,7 +143,30 @@ function SetupItem({
   );
 }
 
-function WorkspaceSetup() {
+interface WorkspaceSetupProps {
+  workspace: Workspace | undefined;
+  repo: Repository | undefined;
+}
+
+function WorkspaceSetup({ workspace, repo }: WorkspaceSetupProps) {
+  const [scriptExpanded, setScriptExpanded] = useState(false);
+
+  const cityName = workspace?.city_name ?? "workspace";
+  const branchName = workspace?.branch_name ?? "main";
+  const repoFullName = repo?.full_name ?? "origin";
+  const defaultBranch = repo?.default_branch ?? "main";
+
+  // Derive a sample setup script from operator_json if present, else show placeholder
+  const setupScript = (() => {
+    if (repo?.operator_json) {
+      try {
+        const parsed = JSON.parse(repo.operator_json) as { setup?: string };
+        if (parsed.setup) return parsed.setup;
+      } catch {}
+    }
+    return `#!/bin/bash\nset -e\n\n# Install dependencies\nnpm install\n\n# Build project\nnpm run build`;
+  })();
+
   return (
     <motion.div
       className="px-6 pb-6 pt-10"
@@ -167,30 +182,52 @@ function WorkspaceSetup() {
       >
         <span className="text-[14px] font-medium" style={{ color: "rgba(255,255,255,0.9)" }}>
           You're in a new copy of <InlineCode>Operator</InlineCode> called{" "}
-          <InlineCode>delhi</InlineCode>
+          <InlineCode>{cityName}</InlineCode>
         </span>
       </motion.div>
 
       {/* Status items */}
       <motion.div variants={staggerItem} className="flex flex-col gap-3.5">
         <SetupItem icon={<GitBranch className="h-3.5 w-3.5" />}>
-          Branched <InlineCode>Justmalhar/delhi</InlineCode> from{" "}
-          <InlineCode>origin/main</InlineCode>
+          Branched <InlineCode>{repoFullName}/{cityName}</InlineCode> from{" "}
+          <InlineCode>origin/{defaultBranch}</InlineCode>
         </SetupItem>
 
         <SetupItem icon={<Folder className="h-3.5 w-3.5" />}>
-          Created <WorkspaceBadge>delhi ▾</WorkspaceBadge> and copied 255 files
+          Created workspace <InlineCode>{cityName}</InlineCode> from branch{" "}
+          <InlineCode>{branchName}</InlineCode>
         </SetupItem>
 
-        <SetupItem icon={<Terminal className="h-3.5 w-3.5" />}>
-          <span>Completed setup script</span>
-          <button
-            type="button"
-            className="ml-1.5 inline-flex items-center gap-1 transition-opacity hover:opacity-100"
-            style={{ color: "rgba(255,255,255,0.4)", opacity: 0.7 }}
-          >
-            <ExternalLink className="h-3 w-3" />
-          </button>
+        <SetupItem icon={<Terminal className="h-3.5 w-3.5" />} alignStart={scriptExpanded}>
+          <div className="flex w-full flex-col gap-2">
+            <div className="flex items-center gap-1.5">
+              <span>Completed setup script</span>
+              <button
+                type="button"
+                onClick={() => setScriptExpanded((v) => !v)}
+                className="inline-flex items-center gap-0.5 rounded px-1 py-px text-[11px] transition-opacity hover:opacity-100"
+                style={{ color: "rgba(255,255,255,0.4)", opacity: 0.7 }}
+              >
+                {scriptExpanded ? (
+                  <ChevronUp className="h-3 w-3" />
+                ) : (
+                  <ChevronDown className="h-3 w-3" />
+                )}
+              </button>
+            </div>
+            {scriptExpanded && (
+              <pre
+                className="w-full overflow-x-auto rounded-md px-3 py-2.5 font-mono text-[12px] leading-relaxed"
+                style={{
+                  backgroundColor: "rgba(0,0,0,0.35)",
+                  border: "1px solid rgba(255,255,255,0.07)",
+                  color: "var(--vscode-terminal-ansi-green, #4ec994)",
+                }}
+              >
+                {setupScript}
+              </pre>
+            )}
+          </div>
         </SetupItem>
       </motion.div>
     </motion.div>
@@ -277,8 +314,22 @@ interface MessageListProps {
   workspaceId?: string;
 }
 
-export function MessageList({ workspaceId: _workspaceId }: MessageListProps) {
+export function MessageList({ workspaceId }: MessageListProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
+  const { repos, workspacesByRepo } = useWorkspaceStore();
+
+  // Resolve workspace + repo from the provided id
+  let workspace: Workspace | undefined;
+  let repo: Repository | undefined;
+  if (workspaceId) {
+    for (const list of Object.values(workspacesByRepo)) {
+      const found = (list as Workspace[]).find((w) => w.id === workspaceId);
+      if (found) { workspace = found; break; }
+    }
+    if (workspace) {
+      repo = repos.find((r) => r.id === workspace!.repository_id);
+    }
+  }
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -287,11 +338,11 @@ export function MessageList({ workspaceId: _workspaceId }: MessageListProps) {
   return (
     <div
       className="vscode-scrollable h-full overflow-y-auto"
-      style={{ backgroundColor: "var(--vscode-sidebar-background)" }}
+      style={{ backgroundColor: "var(--vscode-editor-background)" }}
     >
       <div className="mx-auto max-w-[720px] pb-4">
         {/* Workspace setup header */}
-        <WorkspaceSetup />
+        <WorkspaceSetup workspace={workspace} repo={repo} />
 
         {/* Conversation messages */}
         {MOCK_MESSAGES.map((msg, i) => (

@@ -4,6 +4,7 @@ import {
   HelpCircle,
   Lightbulb,
   MessageSquarePlus,
+  PanelLeft,
   Settings,
   SlidersHorizontal,
   Puzzle,
@@ -100,6 +101,8 @@ function ThemeToggleButton() {
 interface SidebarNavProps {
   activeItem: SidebarNavItemId;
   onItemChange: (item: SidebarNavItemId) => void;
+  sidebarVisible?: boolean;
+  onToggleSidebar?: () => void;
 }
 
 function NavButton({
@@ -171,15 +174,59 @@ function NavButton({
   );
 }
 
-export function SidebarNav({ activeItem, onItemChange }: SidebarNavProps) {
+export function SidebarNav({ activeItem, onItemChange, sidebarVisible, onToggleSidebar }: SidebarNavProps) {
+  const [toggleHovered, setToggleHovered] = useState(false);
+
   return (
-    <nav className="vscode-activity-bar flex h-full w-[48px] shrink-0 flex-col items-center py-2">
+    <nav className="vscode-activity-bar flex h-full w-[48px] shrink-0 flex-col items-center py-2" style={{ borderRight: "1px solid var(--vscode-activityBar-border, var(--vscode-sideBar-border, rgba(128,128,128,0.25)))" }}>
       <motion.div
         className="flex flex-col items-center gap-0.5"
         initial={{ opacity: 0, x: -10 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ ...springs.smooth, delay: 0.05 }}
       >
+        {/* Sidebar toggle */}
+        {onToggleSidebar && (
+          <div className="relative flex w-[48px] items-center justify-center mb-1">
+            <motion.button
+              type="button"
+              onClick={onToggleSidebar}
+              onMouseEnter={() => setToggleHovered(true)}
+              onMouseLeave={() => setToggleHovered(false)}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.9 }}
+              transition={springs.snappy}
+              className="relative flex h-[40px] w-[40px] items-center justify-center rounded-lg"
+              style={{
+                color: "var(--vscode-activity-bar-inactive, var(--vscode-activity-bar-foreground))",
+                opacity: sidebarVisible ? 0.8 : 0.4,
+              }}
+              aria-label="Toggle sidebar"
+            >
+              <PanelLeft className="h-[20px] w-[20px] shrink-0" strokeWidth={1.6} />
+            </motion.button>
+            <AnimatePresence>
+              {toggleHovered && (
+                <motion.div
+                  variants={tooltipVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  className="absolute left-[52px] top-1/2 z-50 -translate-y-1/2 whitespace-nowrap rounded-md px-2.5 py-1.5 text-[11px] font-medium shadow-lg"
+                  style={{
+                    backgroundColor: "var(--vscode-dropdown-background)",
+                    color: "var(--vscode-dropdown-foreground)",
+                    border: "1px solid var(--vscode-panel-border, rgba(255,255,255,0.1))",
+                  }}
+                >
+                  {sidebarVisible ? "Hide Sidebar" : "Show Sidebar"}
+                  <span className="absolute left-[-4px] top-1/2 h-2 w-2 -translate-y-1/2 rotate-45" style={{ backgroundColor: "var(--vscode-dropdown-background)" }} />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        )}
+
         {primaryItems.map((item) => (
           <NavButton
             key={item.id}

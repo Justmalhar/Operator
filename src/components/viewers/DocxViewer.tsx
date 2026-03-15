@@ -28,19 +28,35 @@ export function DocxViewer({ filePath, filename, className }: BaseViewerProps) {
   }, [data]);
 
   return (
-    <div className={cn("flex h-full min-h-0 flex-col bg-[#1e1e1e]", className)}>
-      <div className="flex items-center justify-between border-b border-white/8 bg-[#181818] px-4 py-2 text-xs text-[#8b8b8b]">
+    <div
+      className={cn("flex h-full min-h-0 flex-col", className)}
+      style={{ backgroundColor: "var(--vscode-editor-background)" }}
+    >
+      <div
+        className="flex items-center justify-between px-4 py-2 text-xs"
+        style={{
+          backgroundColor: "var(--vscode-viewer-header-background)",
+          borderBottom: "1px solid var(--vscode-panel-border)",
+          color: "var(--vscode-descriptionForeground)",
+        }}
+      >
         <span className="font-mono">{filename}</span>
         <span>Word Preview</span>
       </div>
-      <ScrollArea className="min-h-0 flex-1 bg-[#252526] px-8 py-8">
+      <ScrollArea className="min-h-0 flex-1 px-8 py-8" style={{ backgroundColor: "var(--vscode-sidebar-background)" }}>
         {loading ? (
-          <div className="flex h-full items-center justify-center text-sm text-[#8b8b8b]">
+          <div
+            className="flex h-full items-center justify-center text-sm"
+            style={{ color: "var(--vscode-descriptionForeground)" }}
+          >
             Rendering document...
           </div>
         ) : null}
         {error ? (
-          <div className="flex h-full items-center justify-center px-6 text-sm text-[#ff9b8a]">
+          <div
+            className="flex h-full items-center justify-center px-6 text-sm"
+            style={{ color: "var(--vscode-errorForeground)" }}
+          >
             {error.message}
           </div>
         ) : null}

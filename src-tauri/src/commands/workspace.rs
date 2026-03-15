@@ -259,6 +259,19 @@ pub async fn archive_workspace(
         .map_err(Into::into)
 }
 
+/// Rename a workspace — updates only the `city_name` display label in the DB.
+/// The worktree directory path on disk is not affected.
+#[tauri::command]
+pub async fn rename_workspace(
+    state: State<'_, AppState>,
+    id: String,
+    city_name: String,
+) -> Result<(), AppError> {
+    db::workspace::rename(&state.db, &id, &city_name)
+        .await
+        .map_err(Into::into)
+}
+
 /// Update the `status` field of a workspace (e.g. "idle", "running", "error").
 #[tauri::command]
 pub async fn set_workspace_status(

@@ -11,6 +11,7 @@ import {
   Table2,
   X,
 } from "lucide-react";
+import operatorIcon from "@/assets/icon.png";
 import type { LucideIcon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
@@ -137,12 +138,15 @@ export const CenterPanel = forwardRef<CenterPanelHandle, CenterPanelProps>(
     function closeTab(tabId: string, e: React.MouseEvent) {
       e.stopPropagation();
       setTabs((prev) => {
-        if (prev.length <= 1) return prev;
         const idx = prev.findIndex((t) => t.id === tabId);
         const next = prev.filter((t) => t.id !== tabId);
         if (tabId === activeTabId) {
-          const neighborIdx = Math.max(0, idx - 1);
-          setActiveTabId(next[neighborIdx]?.id ?? next[0].id);
+          if (next.length === 0) {
+            setActiveTabId("");
+          } else {
+            const neighborIdx = Math.max(0, idx - 1);
+            setActiveTabId(next[neighborIdx]?.id ?? next[0].id);
+          }
         }
         return next;
       });
@@ -154,7 +158,7 @@ export const CenterPanel = forwardRef<CenterPanelHandle, CenterPanelProps>(
       setActiveTabId(id);
     }
 
-    const activeTab = tabs.find((t) => t.id === activeTabId) ?? tabs[0];
+    const activeTab = tabs.find((t) => t.id === activeTabId) ?? (tabs.length > 0 ? tabs[0] : null);
 
     return (
       <div className="vscode-editor flex h-full flex-col overflow-hidden">
@@ -164,7 +168,7 @@ export const CenterPanel = forwardRef<CenterPanelHandle, CenterPanelProps>(
         {/* Tab bar */}
         <div
           className="vscode-tab-bar shrink-0 overflow-hidden"
-          style={{ height: "35px" }}
+          style={{ height: "35px", borderBottom: "1px solid var(--vscode-tab-border, var(--vscode-panel-border, rgba(128,128,128,0.2)))" }}
         >
           <ScrollArea className="h-full w-full whitespace-nowrap">
             <div className="flex h-[35px] min-w-full items-stretch">
@@ -198,22 +202,20 @@ export const CenterPanel = forwardRef<CenterPanelHandle, CenterPanelProps>(
                         }}
                       />
                       <span className="min-w-0 flex-1 truncate">{tab.label}</span>
-                      {tabs.length > 1 && (
-                        <motion.button
-                          type="button"
-                          aria-label={`Close ${tab.label}`}
-                          onClick={(e) => closeTab(tab.id, e)}
-                          whileHover={{ backgroundColor: "rgba(255,255,255,0.1)", scale: 1.1 }}
-                          whileTap={{ scale: 0.8 }}
-                          className={cn(
-                            "flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded",
-                            !isActive && "opacity-0 group-hover:opacity-100",
-                          )}
-                          style={{ color: "var(--vscode-tab-inactive-foreground)" }}
-                        >
-                          <X className="h-3 w-3" />
-                        </motion.button>
-                      )}
+                      <motion.button
+                        type="button"
+                        aria-label={`Close ${tab.label}`}
+                        onClick={(e) => closeTab(tab.id, e)}
+                        whileHover={{ backgroundColor: "rgba(255,255,255,0.1)", scale: 1.1 }}
+                        whileTap={{ scale: 0.8 }}
+                        className={cn(
+                          "flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded",
+                          !isActive && "opacity-0 group-hover:opacity-100",
+                        )}
+                        style={{ color: "var(--vscode-tab-inactive-foreground)" }}
+                      >
+                        <X className="h-3 w-3" />
+                      </motion.button>
                     </motion.div>
                   );
                 })}
@@ -240,44 +242,63 @@ export const CenterPanel = forwardRef<CenterPanelHandle, CenterPanelProps>(
         {/* Tab content with animated transitions */}
         <div className="min-h-0 min-w-0 flex-1 overflow-hidden">
           <AnimatePresence mode="wait">
-            <motion.div
-              key={activeTab?.id}
-              variants={tabContent}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              className="h-full"
-            >
-              {activeTab?.type === "chat" && (
-                <ChatPanel workspaceId={activeTab.workspaceId} />
-              )}
-              {activeTab?.type === "new-chat" && (
-                <NewChatPage
-                  repoId={activeTab.repoId}
-                  onStartChat={(wsId, _msg) => {
-                    // Replace this new-chat tab with a real chat tab
-                    const chatTabId = `chat-${wsId}`;
-                    setTabs((prev) =>
-                      prev.map((t) =>
-                        t.id === activeTab.id
-                          ? { id: chatTabId, type: "chat", label: "Chat", workspaceId: wsId }
-                          : t,
-                      ),
-                    );
-                    setActiveTabId(chatTabId);
-                    onWorkspaceCreated?.(wsId);
-                  }}
-                />
-              )}
-              {activeTab?.type === "file" &&
-                activeTab.filename &&
-                activeTab.filePath && (
-                  <FileViewer
-                    filename={activeTab.filename}
-                    filePath={activeTab.filePath}
+            {!activeTab ? (
+              <motion.div
+                key="welcome"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="flex h-full flex-col items-center justify-center gap-4"
+                style={{ backgroundColor: "var(--vscode-editor-background)" }}
+              >
+                <img src={operatorIcon} alt="Operator" className="h-12 w-12 opacity-60" />
+                <span
+                  className="text-[22px] font-semibold tracking-tight"
+                  style={{ color: "var(--vscode-editor-foreground)", opacity: 0.45 }}
+                >
+                  Operator
+                </span>
+              </motion.div>
+            ) : (
+              <motion.div
+                key={activeTab.id}
+                variants={tabContent}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                className="h-full"
+              >
+                {activeTab.type === "chat" && (
+                  <ChatPanel workspaceId={activeTab.workspaceId} />
+                )}
+                {activeTab.type === "new-chat" && (
+                  <NewChatPage
+                    repoId={activeTab.repoId}
+                    onStartChat={(wsId, _msg) => {
+                      const chatTabId = `chat-${wsId}`;
+                      setTabs((prev) =>
+                        prev.map((t) =>
+                          t.id === activeTab.id
+                            ? { id: chatTabId, type: "chat", label: "Chat", workspaceId: wsId }
+                            : t,
+                        ),
+                      );
+                      setActiveTabId(chatTabId);
+                      onWorkspaceCreated?.(wsId);
+                    }}
                   />
                 )}
-            </motion.div>
+                {activeTab.type === "file" &&
+                  activeTab.filename &&
+                  activeTab.filePath && (
+                    <FileViewer
+                      filename={activeTab.filename}
+                      filePath={activeTab.filePath}
+                    />
+                  )}
+              </motion.div>
+            )}
           </AnimatePresence>
         </div>
       </div>

@@ -84,6 +84,7 @@ pub fn run() {
             commands::workspace::delete_workspace,
             commands::workspace::archive_workspace,
             commands::workspace::set_workspace_status,
+            commands::workspace::rename_workspace,
             commands::workspace::find_repository_by_path,
             commands::workspace::clone_repository,
             commands::workspace::copy_template,
@@ -112,6 +113,7 @@ pub fn run() {
             commands::terminal::terminal_resize,
             // ── File system ───────────────────────────────────────────────────
             commands::file::read_file,
+            commands::file::read_file_bytes,
             commands::file::write_file,
             commands::file::list_directory,
             commands::file::file_exists,
@@ -142,6 +144,9 @@ pub fn run() {
             // ── Shell ─────────────────────────────────────────────────────────
             commands::shell::run_shell_command,
             commands::shell::run_shell_script,
+            // ── Webview ───────────────────────────────────────────────────────
+            commands::webview::navigate_webview,
+            commands::webview::close_webview,
         ])
         .run(tauri::generate_context!())
         .expect("error while running Operator");

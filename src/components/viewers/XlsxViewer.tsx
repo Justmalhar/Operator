@@ -43,21 +43,45 @@ export function XlsxViewer({ filePath, filename, className }: BaseViewerProps) {
   const columnCount = Math.max(...rows.map((row) => row.length), 1);
 
   if (loading) {
-    return <div className="flex h-full items-center justify-center bg-[#1e1e1e] text-sm text-[#8b8b8b]">Loading workbook...</div>;
+    return (
+      <div
+        className="flex h-full items-center justify-center text-sm"
+        style={{ backgroundColor: "var(--vscode-editor-background)", color: "var(--vscode-descriptionForeground)" }}
+      >
+        Loading workbook...
+      </div>
+    );
   }
 
   if (error || !workbook) {
     return (
-      <div className="flex h-full items-center justify-center bg-[#1e1e1e] px-6 text-sm text-[#ff9b8a]">
+      <div
+        className="flex h-full items-center justify-center px-6 text-sm"
+        style={{ backgroundColor: "var(--vscode-editor-background)", color: "var(--vscode-errorForeground)" }}
+      >
         {error?.message ?? "Unable to load workbook."}
       </div>
     );
   }
 
   return (
-    <div className={cn("flex h-full min-h-0 flex-col bg-[#1e1e1e]", className)}>
-      <div className="flex items-center gap-2 overflow-x-auto border-b border-white/8 bg-[#181818] px-4 py-2">
-        <span className="mr-2 text-xs uppercase tracking-[0.08em] text-[#8b8b8b]">{filename}</span>
+    <div
+      className={cn("flex h-full min-h-0 flex-col", className)}
+      style={{ backgroundColor: "var(--vscode-editor-background)" }}
+    >
+      <div
+        className="flex items-center gap-2 overflow-x-auto px-4 py-2"
+        style={{
+          backgroundColor: "var(--vscode-viewer-header-background)",
+          borderBottom: "1px solid var(--vscode-panel-border)",
+        }}
+      >
+        <span
+          className="mr-2 text-xs uppercase tracking-[0.08em]"
+          style={{ color: "var(--vscode-descriptionForeground)" }}
+        >
+          {filename}
+        </span>
         {sheetNames.map((sheetName) => {
           const isActive = sheetName === selectedSheetName;
           return (
@@ -65,7 +89,7 @@ export function XlsxViewer({ filePath, filename, className }: BaseViewerProps) {
               key={sheetName}
               className="rounded-md border px-3 py-1 text-xs transition-colors theme-hover-bg"
               style={isActive
-                ? { borderColor: "#007acc", backgroundColor: "#0e639c", color: "#ffffff" }
+                ? { borderColor: "var(--vscode-focus-border)", backgroundColor: "var(--vscode-button-background)", color: "var(--vscode-button-foreground, #ffffff)" }
                 : { borderColor: "var(--vscode-panel-border)", color: "var(--vscode-input-foreground)" }
               }
               type="button"

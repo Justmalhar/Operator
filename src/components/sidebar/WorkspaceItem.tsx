@@ -34,14 +34,19 @@ export function WorkspaceItem({ workspace, isActive, onClick }: WorkspaceItemPro
       whileTap={{ scale: 0.98 }}
       transition={springs.snappy}
       className={cn(
-        "vscode-list-item vscode-sidebar-item vscode-focusable group flex h-[22px] w-full items-center gap-1.5 text-left text-[13px]",
+        "vscode-list-item vscode-sidebar-item vscode-focusable group flex h-[32px] w-full items-center gap-1.5 text-left text-[13px]",
         isActive && "selected",
       )}
-      style={{ paddingLeft: 24 }}
+      style={{
+        paddingLeft: 24,
+        color: isActive
+          ? "var(--vscode-list-active-selection-foreground)"
+          : "var(--vscode-list-foreground, var(--vscode-sidebar-foreground, #1f1f1f))",
+      }}
     >
       <GitBranch
         className="h-3.5 w-3.5 shrink-0"
-        style={{ color: isActive ? "var(--vscode-list-active-selection-foreground)" : "var(--vscode-list-tree-indent-guide-stroke)" }}
+        style={{ color: isActive ? "var(--vscode-list-active-selection-foreground)" : "var(--vscode-sidebar-foreground, var(--vscode-list-foreground, #cccccc))", opacity: isActive ? 1 : 0.6 }}
       />
       <span className="min-w-0 flex-1 truncate">{workspace.city_name}</span>
       <span

@@ -31,18 +31,37 @@ export function TabularViewer({ columns, rows, summary, className }: TabularView
   const totalWidth = Math.max(columnCount * CELL_MIN_WIDTH, 960);
 
   return (
-    <div className={cn("flex h-full min-h-0 flex-col bg-[#1e1e1e]", className)}>
-      <div className="border-b border-white/8 bg-[#181818] px-4 py-2 text-xs text-[#8b8b8b]">
+    <div
+      className={cn("flex h-full min-h-0 flex-col", className)}
+      style={{ backgroundColor: "var(--vscode-editor-background)" }}
+    >
+      <div
+        className="px-4 py-2 text-xs"
+        style={{
+          backgroundColor: "var(--vscode-viewer-header-background)",
+          borderBottom: "1px solid var(--vscode-panel-border)",
+          color: "var(--vscode-descriptionForeground)",
+        }}
+      >
         {summary}
       </div>
       <div className="min-h-0 flex-1 overflow-auto">
         <div style={{ minWidth: totalWidth }}>
           <div
-            className="sticky top-0 z-20 grid border-b border-white/10 bg-[#252526] text-xs uppercase tracking-[0.08em] text-[#8b8b8b]"
-            style={{ gridTemplateColumns: `repeat(${columnCount}, minmax(${CELL_MIN_WIDTH}px, 1fr))` }}
+            className="sticky top-0 z-20 grid text-xs uppercase tracking-[0.08em]"
+            style={{
+              backgroundColor: "var(--vscode-sidebar-background)",
+              borderBottom: "1px solid var(--vscode-panel-border)",
+              color: "var(--vscode-descriptionForeground)",
+              gridTemplateColumns: `repeat(${columnCount}, minmax(${CELL_MIN_WIDTH}px, 1fr))`,
+            }}
           >
             {normalizedColumns.map((column) => (
-              <div key={column} className="truncate border-r border-white/8 px-3 py-2 last:border-r-0">
+              <div
+                key={column}
+                className="truncate px-3 py-2 last:border-r-0"
+                style={{ borderRight: "1px solid var(--vscode-panel-border)" }}
+              >
                 {column}
               </div>
             ))}
@@ -60,18 +79,21 @@ export function TabularViewer({ columns, rows, summary, className }: TabularView
                 return (
                   <div
                     key={virtualRow.key}
-                    className="absolute left-0 grid border-b border-white/6 text-sm text-[#d4d4d4] odd:bg-white/[0.02]"
+                    className="absolute left-0 grid text-sm odd:bg-black/[0.02]"
                     style={{
                       gridTemplateColumns: `repeat(${columnCount}, minmax(${CELL_MIN_WIDTH}px, 1fr))`,
                       top: 0,
                       transform: `translateY(${virtualRow.start}px)`,
                       width: "100%",
+                      borderBottom: "1px solid var(--vscode-panel-border)",
+                      color: "var(--vscode-editor-foreground)",
                     }}
                   >
                     {normalizedColumns.map((_, cellIndex) => (
                       <div
                         key={`${virtualRow.key}-${cellIndex}`}
-                        className="truncate border-r border-white/6 px-3 py-2 font-mono text-[12px] last:border-r-0"
+                        className="truncate px-3 py-2 font-mono text-[12px] last:border-r-0"
+                        style={{ borderRight: "1px solid var(--vscode-panel-border)" }}
                       >
                         {row[cellIndex] ?? ""}
                       </div>

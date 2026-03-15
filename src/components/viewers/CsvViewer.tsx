@@ -10,12 +10,22 @@ export function CsvViewer({ filePath, filename, className }: BaseViewerProps) {
   const { data, error, loading } = useFileText(filePath);
 
   if (loading) {
-    return <div className="flex h-full items-center justify-center bg-[#1e1e1e] text-sm text-[#8b8b8b]">Loading table preview...</div>;
+    return (
+      <div
+        className="flex h-full items-center justify-center text-sm"
+        style={{ backgroundColor: "var(--vscode-editor-background)", color: "var(--vscode-descriptionForeground)" }}
+      >
+        Loading table preview...
+      </div>
+    );
   }
 
   if (error || !data) {
     return (
-      <div className="flex h-full items-center justify-center bg-[#1e1e1e] px-6 text-sm text-[#ff9b8a]">
+      <div
+        className="flex h-full items-center justify-center px-6 text-sm"
+        style={{ backgroundColor: "var(--vscode-editor-background)", color: "var(--vscode-errorForeground)" }}
+      >
         {error?.message ?? "Unable to load table preview."}
       </div>
     );

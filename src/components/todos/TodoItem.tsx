@@ -1,4 +1,5 @@
 import { useRef, useEffect, KeyboardEvent } from "react";
+import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Todo } from "@/types/todo";
 
@@ -34,9 +35,9 @@ export function TodoItem({ todo, autoFocus, onToggle, onTextChange, onDelete, on
       <button
         type="button"
         onClick={() => onToggle(todo.id)}
-        className="flex h-[14px] w-[14px] shrink-0 items-center justify-center rounded-[4px] border transition-all duration-150"
+        className="flex h-[14px] w-[14px] shrink-0 items-center justify-center rounded-full transition-all duration-150"
         style={{
-          borderColor: todo.completed ? "var(--vscode-focus-border)" : "var(--vscode-list-inactive-selection-background)",
+          border: `1px solid ${todo.completed ? "var(--vscode-focus-border)" : "var(--vscode-descriptionForeground, #8b8b8b)"}`,
           backgroundColor: todo.completed ? "var(--vscode-focus-border)" : "transparent",
         }}
         aria-label={todo.completed ? "Mark incomplete" : "Mark complete"}
@@ -60,9 +61,20 @@ export function TodoItem({ todo, autoFocus, onToggle, onTextChange, onDelete, on
         style={{
           color: todo.completed
             ? "var(--vscode-tab-inactive-foreground)"
-            : "var(--vscode-list-foreground, var(--vscode-sidebar-foreground))",
+            : "var(--vscode-foreground)",
         }}
       />
+
+      {/* Delete */}
+      <button
+        type="button"
+        onClick={() => onDelete(todo.id)}
+        className="invisible flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded opacity-0 transition-all duration-100 group-hover:visible group-hover:opacity-100"
+        style={{ color: "var(--vscode-descriptionForeground)" }}
+        aria-label="Delete todo"
+      >
+        <X className="h-3 w-3" />
+      </button>
     </div>
   );
 }

@@ -1,0 +1,9 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "browser",
+  "description": "Capability for native browser webview windows (wbv-*)",
+  "windows": ["wbv-*"],
+  "permissions": [
+    "core:default"
+  ]
+}

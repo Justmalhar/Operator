@@ -25,6 +25,7 @@ interface WorkspaceState {
   deleteWorkspace: (id: string, repoId: string) => Promise<void>;
   setActiveWorkspace: (id: string | null) => void;
   updateWorkspaceStatus: (workspaceId: string, status: string) => void;
+  renameWorkspace: (workspaceId: string, newName: string) => Promise<void>;
   getActiveWorkspace: () => Workspace | undefined;
   getRepoList: () => RepoWithWorkspaces[];
 }
@@ -124,6 +125,19 @@ export const useWorkspaceStore = create<WorkspaceState>()(
           const ws = (list as Workspace[]).find((w) => w.id === workspaceId);
           if (ws) {
             ws.status = status as Workspace["status"];
+            break;
+          }
+        }
+      });
+    },
+
+    renameWorkspace: async (workspaceId, newName) => {
+      await api.renameWorkspace(workspaceId, newName);
+      set((s) => {
+        for (const list of Object.values(s.workspacesByRepo)) {
+          const ws = (list as Workspace[]).find((w) => w.id === workspaceId);
+          if (ws) {
+            ws.city_name = newName;
             break;
           }
         }

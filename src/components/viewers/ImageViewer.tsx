@@ -6,15 +6,32 @@ export function ImageViewer({ filePath, filename, className }: BaseViewerProps) 
   const [dimensions, setDimensions] = useState<{ width: number; height: number } | null>(null);
 
   return (
-    <div className={cn("flex h-full min-h-0 flex-col bg-[#1e1e1e]", className)}>
-      <div className="flex items-center justify-between border-b border-white/8 bg-[#181818] px-4 py-2 text-xs text-[#8b8b8b]">
+    <div
+      className={cn("flex h-full min-h-0 flex-col", className)}
+      style={{ backgroundColor: "var(--vscode-editor-background)" }}
+    >
+      <div
+        className="flex items-center justify-between px-4 py-2 text-xs"
+        style={{
+          backgroundColor: "var(--vscode-viewer-header-background)",
+          borderBottom: "1px solid var(--vscode-panel-border)",
+          color: "var(--vscode-descriptionForeground)",
+        }}
+      >
         <span className="font-mono">{filename}</span>
         <span>{dimensions ? `${dimensions.width} x ${dimensions.height}` : "Image Preview"}</span>
       </div>
-      <div className="flex min-h-0 flex-1 items-center justify-center overflow-auto bg-[linear-gradient(45deg,#252526_25%,#1f1f1f_25%,#1f1f1f_50%,#252526_50%,#252526_75%,#1f1f1f_75%,#1f1f1f_100%)] bg-[length:32px_32px] p-10">
+      <div
+        className="flex min-h-0 flex-1 items-center justify-center overflow-auto p-10"
+        style={{
+          background: `linear-gradient(45deg, var(--vscode-viewer-checkerboard-a) 25%, var(--vscode-viewer-checkerboard-b) 25%, var(--vscode-viewer-checkerboard-b) 50%, var(--vscode-viewer-checkerboard-a) 50%, var(--vscode-viewer-checkerboard-a) 75%, var(--vscode-viewer-checkerboard-b) 75%, var(--vscode-viewer-checkerboard-b) 100%)`,
+          backgroundSize: "32px 32px",
+        }}
+      >
         <img
           alt={filename}
-          className="max-h-full max-w-full rounded-lg border border-white/10 bg-white/95 shadow-2xl shadow-black/40"
+          className="max-h-full max-w-full rounded-lg bg-white/95 shadow-2xl"
+          style={{ border: "1px solid var(--vscode-panel-border)" }}
           src={getFileSourceUrl(filePath)}
           onLoad={(event) => {
             setDimensions({

@@ -49,23 +49,46 @@ function UnsupportedViewer({ filename, filePath, className }: BaseViewerProps) {
   const Icon = viewerIcons.binary;
 
   return (
-    <div className={cn("flex h-full items-center justify-center bg-[#1e1e1e] px-8", className)}>
-      <div className="max-w-lg rounded-2xl border border-white/10 bg-[#252526] p-6 text-sm text-[#cccccc] shadow-2xl shadow-black/20">
-        <div className="mb-4 flex items-center gap-3 text-white">
-          <div className="rounded-lg border border-white/10 bg-black/20 p-2">
+    <div
+      className={cn("flex h-full items-center justify-center px-8", className)}
+      style={{ backgroundColor: "var(--vscode-editor-background)" }}
+    >
+      <div
+        className="max-w-lg rounded-2xl p-6 text-sm shadow-2xl"
+        style={{
+          backgroundColor: "var(--vscode-sidebar-background)",
+          border: "1px solid var(--vscode-panel-border)",
+          color: "var(--vscode-sidebar-foreground)",
+        }}
+      >
+        <div className="mb-4 flex items-center gap-3" style={{ color: "var(--vscode-editor-foreground)" }}>
+          <div
+            className="rounded-lg p-2"
+            style={{
+              backgroundColor: "var(--vscode-toolbar-hover-background)",
+              border: "1px solid var(--vscode-panel-border)",
+            }}
+          >
             <Icon className="size-5" />
           </div>
           <div>
             <p className="font-medium">{filename}</p>
-            <p className="text-xs text-[#8b8b8b]">{viewer.description}</p>
+            <p className="text-xs" style={{ color: "var(--vscode-descriptionForeground)" }}>{viewer.description}</p>
           </div>
         </div>
-        <p className="leading-6 text-[#b0b0b0]">
+        <p className="leading-6" style={{ color: "var(--vscode-descriptionForeground)" }}>
           This file type does not have a dedicated in-app renderer yet. Keep the
           registry on the tab shell and add a focused viewer when the backend starts
           exposing richer file metadata.
         </p>
-        <p className="mt-4 rounded-lg border border-dashed border-white/10 bg-black/10 px-3 py-2 font-mono text-xs text-[#8b8b8b]">
+        <p
+          className="mt-4 rounded-lg border border-dashed px-3 py-2 font-mono text-xs"
+          style={{
+            borderColor: "var(--vscode-panel-border)",
+            backgroundColor: "var(--vscode-toolbar-hover-background)",
+            color: "var(--vscode-descriptionForeground)",
+          }}
+        >
           {filePath}
         </p>
       </div>
@@ -79,7 +102,13 @@ export function FileViewer({ filePath, filename, className }: BaseViewerProps) {
   const renderHeavyViewer = (node: ReactNode) => (
     <Suspense
       fallback={
-        <div className="flex h-full items-center justify-center bg-[#1e1e1e] text-sm text-[#8b8b8b]">
+        <div
+          className="flex h-full items-center justify-center text-sm"
+          style={{
+            backgroundColor: "var(--vscode-editor-background)",
+            color: "var(--vscode-descriptionForeground)",
+          }}
+        >
           Preparing preview...
         </div>
       }

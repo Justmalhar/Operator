@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { convertFileSrc, isTauri } from "@tauri-apps/api/core";
+import { convertFileSrc, invoke, isTauri } from "@tauri-apps/api/core";
 
 export type ViewerKind =
   | "code"
@@ -143,6 +143,19 @@ function getSourceUrl(filePath: string) {
 }
 
 async function fetchText(filePath: string) {
+  // Use Tauri's read_file command directly for local paths — more reliable
+  // than the asset protocol which requires scope configuration.
+  if (
+    isTauri() &&
+    !filePath.startsWith("blob:") &&
+    !filePath.startsWith("data:") &&
+    !filePath.startsWith("http://") &&
+    !filePath.startsWith("https://") &&
+    !filePath.startsWith("/assets/")
+  ) {
+    return invoke<string>("read_file", { path: filePath });
+  }
+
   const response = await fetch(getSourceUrl(filePath));
   if (!response.ok) {
     throw new Error(`Unable to load ${filePath}`);
@@ -152,6 +165,19 @@ async function fetchText(filePath: string) {
 }
 
 async function fetchArrayBuffer(filePath: string) {
+  // Use Tauri's read_file_bytes command for local paths to get binary data.
+  if (
+    isTauri() &&
+    !filePath.startsWith("blob:") &&
+    !filePath.startsWith("data:") &&
+    !filePath.startsWith("http://") &&
+    !filePath.startsWith("https://") &&
+    !filePath.startsWith("/assets/")
+  ) {
+    const bytes = await invoke<number[]>("read_file_bytes", { path: filePath });
+    return new Uint8Array(bytes).buffer;
+  }
+
   const response = await fetch(getSourceUrl(filePath));
   if (!response.ok) {
     throw new Error(`Unable to load ${filePath}`);
@@ -253,13 +279,25 @@ export function useFileObjectUrl(filePath: string) {
       loading: true,
     });
 
-    fetch(getSourceUrl(filePath))
-      .then(async (response) => {
-        if (!response.ok) {
-          throw new Error(`Unable to load ${filePath}`);
-        }
+    const fetchBlob = async (): Promise<Blob> => {
+      if (
+        isTauri() &&
+        !filePath.startsWith("blob:") &&
+        !filePath.startsWith("data:") &&
+        !filePath.startsWith("http://") &&
+        !filePath.startsWith("https://") &&
+        !filePath.startsWith("/assets/")
+      ) {
+        const bytes = await invoke<number[]>("read_file_bytes", { path: filePath });
+        return new Blob([new Uint8Array(bytes)]);
+      }
+      const response = await fetch(getSourceUrl(filePath));
+      if (!response.ok) throw new Error(`Unable to load ${filePath}`);
+      return response.blob();
+    };
 
-        const blob = await response.blob();
+    fetchBlob()
+      .then((blob) => {
         objectUrl = URL.createObjectURL(blob);
 
         if (!cancelled) {

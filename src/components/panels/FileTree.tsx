@@ -69,7 +69,7 @@ const TreeNode = memo(function TreeNode({
           {loading ? (
             <Loader2
               className="h-3 w-3 shrink-0 animate-spin"
-              style={{ color: "var(--vscode-list-tree-indent-guide-stroke)", opacity: 0.6 }}
+              style={{ color: "var(--vscode-sidebar-foreground, var(--vscode-list-foreground, #cccccc))", opacity: 0.7 }}
             />
           ) : (
             <motion.span
@@ -79,7 +79,7 @@ const TreeNode = memo(function TreeNode({
             >
               <ChevronRight
                 className="h-3 w-3"
-                style={{ color: "var(--vscode-list-tree-indent-guide-stroke)", opacity: 0.6 }}
+                style={{ color: "var(--vscode-sidebar-foreground, var(--vscode-list-foreground, #cccccc))", opacity: 0.75 }}
               />
             </motion.span>
           )}

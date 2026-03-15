@@ -333,3 +333,163 @@
 .vscode-input:focus {
   box-shadow: 0 0 0 1px var(--vscode-focus-border);
 }
+
+/* ─────────────────────────────────────────────────────────────────── */
+/* Button system — standardized variants for settings, dialogs, menus  */
+/* ─────────────────────────────────────────────────────────────────── */
+
+.vscode-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.4;
+  border-radius: 2px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  white-space: nowrap;
+  text-decoration: none;
+  outline: none;
+  transition: background-color 100ms ease, border-color 100ms ease, color 100ms ease, opacity 100ms ease, transform 100ms ease;
+}
+
+.vscode-btn:focus-visible {
+  outline: 1px solid var(--vscode-focus-border);
+  outline-offset: 1px;
+}
+
+.vscode-btn:active:not(:disabled) {
+  transform: scale(0.975);
+}
+
+.vscode-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Size modifiers */
+.vscode-btn-sm {
+  padding: 2px 8px;
+  font-size: 11px;
+}
+
+.vscode-btn-lg {
+  padding: 6px 16px;
+  font-size: 13px;
+}
+
+/* Primary — filled accent (Save, Apply, Confirm) */
+.vscode-btn-primary {
+  background-color: var(--vscode-button-background, #0e639c);
+  color: var(--vscode-button-foreground, #ffffff);
+  border-color: transparent;
+}
+
+.vscode-btn-primary:hover:not(:disabled) {
+  background-color: var(--vscode-button-hover-background, #1177bb);
+}
+
+/* Secondary — outlined / subtle fill (Cancel, Edit, Restore Defaults) */
+.vscode-btn-secondary {
+  background-color: var(--vscode-button-secondary-background, rgba(255, 255, 255, 0.08));
+  color: var(--vscode-button-secondary-foreground, var(--vscode-editor-foreground));
+  border-color: var(--vscode-widget-border, rgba(255, 255, 255, 0.12));
+}
+
+.vscode-btn-secondary:hover:not(:disabled) {
+  background-color: var(--vscode-button-secondary-hover, rgba(255, 255, 255, 0.12));
+  border-color: var(--vscode-focus-border, #007fd4);
+}
+
+/* Ghost — no background, hover only (icon actions, inline edit) */
+.vscode-btn-ghost {
+  background-color: transparent;
+  color: var(--vscode-icon-foreground, var(--vscode-editor-foreground));
+  border-color: transparent;
+}
+
+.vscode-btn-ghost:hover:not(:disabled) {
+  background-color: var(--vscode-toolbar-hover-background, rgba(90, 93, 94, 0.31));
+}
+
+.vscode-btn-ghost.active,
+.vscode-btn-ghost[aria-pressed="true"] {
+  background-color: var(--vscode-toolbar-active-background, rgba(99, 102, 103, 0.31));
+}
+
+/* Danger — destructive action (Delete, Uninstall) */
+.vscode-btn-danger {
+  background-color: transparent;
+  color: var(--vscode-errorForeground, #f48771);
+  border-color: var(--vscode-errorForeground, #f48771);
+}
+
+.vscode-btn-danger:hover:not(:disabled) {
+  background-color: rgba(244, 135, 113, 0.1);
+}
+
+/* Link-style button — inline text action */
+.vscode-btn-link {
+  background-color: transparent;
+  color: var(--vscode-textLink-foreground, #3794ff);
+  border-color: transparent;
+  padding-left: 0;
+  padding-right: 0;
+  text-decoration: none;
+}
+
+.vscode-btn-link:hover:not(:disabled) {
+  text-decoration: underline;
+  color: var(--vscode-textLink-activeForeground, #3794ff);
+}
+
+/* ─────────────────────────────────────────────────────────────────── */
+/* Toggle switch — theme-aware on/off control                          */
+/* ─────────────────────────────────────────────────────────────────── */
+
+.vscode-toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 16px;
+  border-radius: 9999px;
+  cursor: pointer;
+  border: none;
+  padding: 0;
+  background-color: rgba(128, 128, 128, 0.35);
+  transition: background-color 150ms ease;
+}
+
+.vscode-toggle[aria-checked="true"] {
+  background-color: var(--vscode-focusBorder, #007fd4);
+}
+
+.vscode-toggle:focus-visible {
+  outline: 1px solid var(--vscode-focus-border);
+  outline-offset: 2px;
+}
+
+.vscode-toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 9999px;
+  background-color: #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  transition: transform 150ms ease;
+  pointer-events: none;
+}
+
+.vscode-toggle[aria-checked="true"] .vscode-toggle-thumb {
+  transform: translateX(12px);
+}

@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { motion, LayoutGroup } from "framer-motion";
+import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { SidebarNav, type SidebarNavItemId } from "@/components/sidebar/SidebarNav";
 import { WorkspaceList } from "@/components/sidebar/WorkspaceList";
 import { ResizeHandle } from "@/components/shared/ResizeHandle";
-import { springs } from "@/lib/animations";
 
 const DEFAULT_SIDEBAR_WIDTH = 220;
 const MIN_SIDEBAR_WIDTH = 150;
@@ -27,40 +26,51 @@ export function SidebarLayout({
   onItemChange,
 }: SidebarLayoutProps) {
   const [sidebarWidth, setSidebarWidth] = useState(DEFAULT_SIDEBAR_WIDTH);
+  const [showSidebar, setShowSidebar] = useState(true);
   const isFullPage = FULL_PAGE_ITEMS.includes(activeItem);
 
   return (
     <LayoutGroup>
       <div className="flex h-full shrink-0">
-        <SidebarNav activeItem={activeItem} onItemChange={onItemChange} />
+        <SidebarNav
+          activeItem={activeItem}
+          onItemChange={onItemChange}
+          sidebarVisible={showSidebar}
+          onToggleSidebar={!isFullPage ? () => setShowSidebar((v) => !v) : undefined}
+        />
 
         {!isFullPage && (
-          <>
-            <motion.aside
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ ...springs.smooth, delay: 0.08 }}
-              className="vscode-sidebar flex h-full shrink-0 flex-col"
-              style={{ width: sidebarWidth }}
-            >
-              <div className="vscode-scrollable min-h-0 flex-1 overflow-y-auto py-1.5">
-                <WorkspaceList
-                  activeWorkspaceId={activeWorkspaceId}
-                  onWorkspaceSelect={onWorkspaceSelect}
-                  onNewChatForRepo={onNewChatForRepo}
-                />
-              </div>
-            </motion.aside>
+          <AnimatePresence initial={false}>
+            {showSidebar && (
+              <>
+                <motion.aside
+                  key="sidebar-panel"
+                  initial={{ width: 0, opacity: 0 }}
+                  animate={{ width: sidebarWidth, opacity: 1 }}
+                  exit={{ width: 0, opacity: 0 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 35 }}
+                  className="vscode-sidebar flex h-full shrink-0 flex-col overflow-hidden"
+                >
+                  <div className="vscode-scrollable min-h-0 flex-1 overflow-y-auto py-1.5" style={{ width: sidebarWidth }}>
+                    <WorkspaceList
+                      activeWorkspaceId={activeWorkspaceId}
+                      onWorkspaceSelect={onWorkspaceSelect}
+                      onNewChatForRepo={onNewChatForRepo}
+                    />
+                  </div>
+                </motion.aside>
 
-            <ResizeHandle
-              currentSize={sidebarWidth}
-              onResize={setSidebarWidth}
-              minSize={MIN_SIDEBAR_WIDTH}
-              maxSize={MAX_SIDEBAR_WIDTH}
-              direction="left"
-              defaultSize={DEFAULT_SIDEBAR_WIDTH}
-            />
-          </>
+                <ResizeHandle
+                  currentSize={sidebarWidth}
+                  onResize={setSidebarWidth}
+                  minSize={MIN_SIDEBAR_WIDTH}
+                  maxSize={MAX_SIDEBAR_WIDTH}
+                  direction="left"
+                  defaultSize={DEFAULT_SIDEBAR_WIDTH}
+                />
+              </>
+            )}
+          </AnimatePresence>
         )}
       </div>
     </LayoutGroup>

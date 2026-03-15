@@ -18,9 +18,6 @@ import { useSettingsStore } from "@/store/settingsStore";
 const DEFAULT_RIGHT_WIDTH = 360;
 const MIN_RIGHT_WIDTH = 260;
 const MAX_RIGHT_WIDTH = 700;
-const DEFAULT_BOTTOM_HEIGHT = 260;
-const MIN_BOTTOM_HEIGHT = 100;
-const MAX_BOTTOM_HEIGHT = 500;
 
 const FULL_PAGE_ITEMS: SidebarNavItemId[] = ["preferences", "help", "settings", "automations", "skills"];
 
@@ -29,7 +26,11 @@ function App() {
   const [showRightPanel, setShowRightPanel] = useState(true);
   const [activeItem, setActiveItem] = useState<SidebarNavItemId>("new-chat");
   const [rightPanelWidth, setRightPanelWidth] = useState(DEFAULT_RIGHT_WIDTH);
-  const [bottomPanelHeight, setBottomPanelHeight] = useState(DEFAULT_BOTTOM_HEIGHT);
+  const [activeSection, setActiveSection] = useState<string | null>(null);
+
+  const handleSectionOpen = useCallback((section: string) => {
+    setActiveSection((prev) => (prev === section ? null : section));
+  }, []);
   const [activeRepoId, setActiveRepoId] = useState<string | null>(null);
   const centerRef = useRef<CenterPanelHandle>(null);
 
@@ -120,27 +121,25 @@ function App() {
                   transition={{ type: "spring", stiffness: 400, damping: 35 }}
                   className="flex shrink-0 flex-col overflow-hidden"
                 >
-                  <div className="min-h-0 flex-1">
-                    <RightPanel
-                      worktreePath={activeWs?.worktree_path}
-                      onOpenFile={(filename, filePath) =>
-                        centerRef.current?.openFile(filename, filePath)
-                      }
-                    />
-                  </div>
-
-                  <ResizeHandle
-                    currentSize={bottomPanelHeight}
-                    onResize={setBottomPanelHeight}
-                    minSize={MIN_BOTTOM_HEIGHT}
-                    maxSize={MAX_BOTTOM_HEIGHT}
-                    direction="right"
-                    orientation="horizontal"
-                    defaultSize={DEFAULT_BOTTOM_HEIGHT}
-                  />
-
-                  <div style={{ height: bottomPanelHeight }} className="shrink-0">
-                    <BottomPanel worktreePath={activeWs?.worktree_path} />
+                  <div
+                    className="vscode-scrollable h-full overflow-y-auto"
+                    style={{ backgroundColor: "var(--vscode-sideBar-background)" }}
+                  >
+                    <div className="flex h-full flex-col" style={{ backgroundColor: "var(--vscode-sideBar-background)" }}>
+                      <RightPanel
+                        worktreePath={activeWs?.worktree_path}
+                        onOpenFile={(filename, filePath) =>
+                          centerRef.current?.openFile(filename, filePath)
+                        }
+                        activeSection={activeSection}
+                        onSectionOpen={handleSectionOpen}
+                      />
+                      <BottomPanel
+                        worktreePath={activeWs?.worktree_path}
+                        activeSection={activeSection}
+                        onSectionOpen={handleSectionOpen}
+                      />
+                    </div>
                   </div>
                 </motion.div>
               )}

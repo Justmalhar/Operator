@@ -270,6 +270,14 @@ export async function setWorkspaceStatus(id: string, status: string): Promise<vo
   return safeInvoke("set_workspace_status", { id, status });
 }
 
+export async function renameWorkspace(id: string, cityName: string): Promise<void> {
+  if (!isTauri) {
+    console.debug("[mock] renameWorkspace:", id, cityName);
+    return;
+  }
+  return safeInvoke("rename_workspace", { id, cityName });
+}
+
 // ---------------------------------------------------------------------------
 // Agent commands
 // ---------------------------------------------------------------------------
@@ -395,6 +403,22 @@ export async function gitPush(repoPath: string, remote?: string, branch?: string
   return safeInvoke("git_push", { repoPath, remote, branch });
 }
 
+export async function gitFetch(repoPath: string, remote?: string): Promise<void> {
+  if (!isTauri) {
+    console.debug("[mock] gitFetch:", repoPath, remote);
+    return;
+  }
+  return safeInvoke("git_fetch", { repoPath, remote });
+}
+
+export async function gitPull(repoPath: string, remote?: string, branch?: string): Promise<void> {
+  if (!isTauri) {
+    console.debug("[mock] gitPull:", repoPath, remote, branch);
+    return;
+  }
+  return safeInvoke("git_pull", { repoPath, remote, branch });
+}
+
 // ---------------------------------------------------------------------------
 // File commands
 // ---------------------------------------------------------------------------
@@ -407,6 +431,11 @@ export async function listDirectory(path: string): Promise<FileEntry[]> {
 export async function readFile(path: string): Promise<string> {
   if (!isTauri) return `// Mock file content for: ${path}\n// Running without Tauri backend.\n\nexport {};\n`;
   return safeInvoke<string>("read_file", { path }, "");
+}
+
+export async function readFileBytes(path: string): Promise<number[]> {
+  if (!isTauri) return [];
+  return safeInvoke<number[]>("read_file_bytes", { path }, []);
 }
 
 export async function writeFile(path: string, content: string): Promise<void> {
