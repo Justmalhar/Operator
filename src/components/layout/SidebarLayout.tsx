@@ -14,6 +14,7 @@ const FULL_PAGE_ITEMS: SidebarNavItemId[] = ["preferences", "help", "settings"];
 interface SidebarLayoutProps {
   activeWorkspaceId: string | null;
   onWorkspaceSelect: (workspaceId: string) => void;
+  onNewChatForRepo?: (repoId: string) => void;
   activeItem: SidebarNavItemId;
   onItemChange: (item: SidebarNavItemId) => void;
 }
@@ -21,6 +22,7 @@ interface SidebarLayoutProps {
 export function SidebarLayout({
   activeWorkspaceId,
   onWorkspaceSelect,
+  onNewChatForRepo,
   activeItem,
   onItemChange,
 }: SidebarLayoutProps) {
@@ -45,6 +47,7 @@ export function SidebarLayout({
                 <WorkspaceList
                   activeWorkspaceId={activeWorkspaceId}
                   onWorkspaceSelect={onWorkspaceSelect}
+                  onNewChatForRepo={onNewChatForRepo}
                 />
               </div>
             </motion.aside>

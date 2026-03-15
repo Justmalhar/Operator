@@ -31,6 +31,8 @@ interface CenterTab {
   type: TabType;
   label: string;
   workspaceId?: string;
+  /** Repo context for new-chat tabs that will create a worktree on start. */
+  repoId?: string;
   filename?: string;
   filePath?: string;
 }
@@ -38,6 +40,7 @@ interface CenterTab {
 export interface CenterPanelHandle {
   openFile(filename: string, filePath: string): void;
   openNewChat(): void;
+  openNewChatForRepo(repoId: string): void;
 }
 
 // ── Icon map ──────────────────────────────────────────────────────────────────
@@ -64,9 +67,12 @@ function getTabIcon(tab: CenterTab): LucideIcon {
 
 // ── Initial tab factory ───────────────────────────────────────────────────────
 
-function makeInitialTabs(workspaceId: string | null): CenterTab[] {
+function makeInitialTabs(workspaceId: string | null, repoId?: string | null): CenterTab[] {
   if (workspaceId) {
     return [{ id: `chat-${workspaceId}`, type: "chat", label: "Chat", workspaceId }];
+  }
+  if (repoId) {
+    return [{ id: `new-chat-repo-${repoId}`, type: "new-chat", label: "New Chat", repoId }];
   }
   return [{ id: "new-chat-initial", type: "new-chat", label: "New Chat" }];
 }
@@ -75,29 +81,31 @@ function makeInitialTabs(workspaceId: string | null): CenterTab[] {
 
 interface CenterPanelProps {
   workspaceId: string | null;
+  repoId?: string | null;
   showRightPanel?: boolean;
   onToggleRightPanel?: () => void;
+  onWorkspaceCreated?: (workspaceId: string) => void;
 }
 
 export const CenterPanel = forwardRef<CenterPanelHandle, CenterPanelProps>(
-  function CenterPanel({ workspaceId, showRightPanel, onToggleRightPanel }, ref) {
-    const [tabs, setTabs] = useState<CenterTab[]>(() => makeInitialTabs(workspaceId));
+  function CenterPanel({ workspaceId, repoId, showRightPanel, onToggleRightPanel, onWorkspaceCreated }, ref) {
+    const [tabs, setTabs] = useState<CenterTab[]>(() => makeInitialTabs(workspaceId, repoId));
     const [activeTabId, setActiveTabId] = useState<string>(
-      () => makeInitialTabs(workspaceId)[0].id,
+      () => makeInitialTabs(workspaceId, repoId)[0].id,
     );
 
     const prevWorkspaceIdRef = useRef<string | null | undefined>(undefined);
+    const prevRepoIdRef = useRef<string | null | undefined>(undefined);
     useEffect(() => {
-      if (prevWorkspaceIdRef.current === undefined) {
-        prevWorkspaceIdRef.current = workspaceId;
-        return;
-      }
-      if (prevWorkspaceIdRef.current === workspaceId) return;
+      const wsChanged = prevWorkspaceIdRef.current !== undefined && prevWorkspaceIdRef.current !== workspaceId;
+      const repoChanged = prevRepoIdRef.current !== undefined && prevRepoIdRef.current !== repoId;
       prevWorkspaceIdRef.current = workspaceId;
-      const initial = makeInitialTabs(workspaceId);
+      prevRepoIdRef.current = repoId;
+      if (!wsChanged && !repoChanged) return;
+      const initial = makeInitialTabs(workspaceId, repoId);
       setTabs(initial);
       setActiveTabId(initial[0].id);
-    }, [workspaceId]);
+    }, [workspaceId, repoId]);
 
     useImperativeHandle(ref, () => ({
       openFile(filename: string, filePath: string) {
@@ -117,6 +125,11 @@ export const CenterPanel = forwardRef<CenterPanelHandle, CenterPanelProps>(
       openNewChat() {
         const id = `new-chat-${Date.now()}`;
         setTabs((prev) => [...prev, { id, type: "new-chat", label: "New Chat" }]);
+        setActiveTabId(id);
+      },
+      openNewChatForRepo(rId: string) {
+        const id = `new-chat-repo-${rId}-${Date.now()}`;
+        setTabs((prev) => [...prev, { id, type: "new-chat", label: "New Chat", repoId: rId }]);
         setActiveTabId(id);
       },
     }));
@@ -238,7 +251,24 @@ export const CenterPanel = forwardRef<CenterPanelHandle, CenterPanelProps>(
               {activeTab?.type === "chat" && (
                 <ChatPanel workspaceId={activeTab.workspaceId} />
               )}
-              {activeTab?.type === "new-chat" && <NewChatPage />}
+              {activeTab?.type === "new-chat" && (
+                <NewChatPage
+                  repoId={activeTab.repoId}
+                  onStartChat={(wsId, _msg) => {
+                    // Replace this new-chat tab with a real chat tab
+                    const chatTabId = `chat-${wsId}`;
+                    setTabs((prev) =>
+                      prev.map((t) =>
+                        t.id === activeTab.id
+                          ? { id: chatTabId, type: "chat", label: "Chat", workspaceId: wsId }
+                          : t,
+                      ),
+                    );
+                    setActiveTabId(chatTabId);
+                    onWorkspaceCreated?.(wsId);
+                  }}
+                />
+              )}
               {activeTab?.type === "file" &&
                 activeTab.filename &&
                 activeTab.filePath && (

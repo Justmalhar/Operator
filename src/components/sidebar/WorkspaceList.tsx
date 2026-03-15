@@ -11,6 +11,7 @@ import type { Repository, Workspace } from "@/types/workspace";
 interface WorkspaceListProps {
   activeWorkspaceId: string | null;
   onWorkspaceSelect: (workspaceId: string) => void;
+  onNewChatForRepo?: (repoId: string) => void;
 }
 
 function RepoGroup({
@@ -19,46 +20,65 @@ function RepoGroup({
   defaultExpanded,
   activeWorkspaceId,
   onWorkspaceSelect,
+  onNewChatForRepo,
 }: {
   repo: Repository;
   workspaces: Workspace[];
   defaultExpanded: boolean;
   activeWorkspaceId: string | null;
   onWorkspaceSelect: (id: string) => void;
+  onNewChatForRepo?: (repoId: string) => void;
 }) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const hasWorkspaces = workspaces.length > 0;
 
   return (
     <motion.div variants={staggerItem}>
-      <button
-        type="button"
-        onClick={() => hasWorkspaces && setIsExpanded((e) => !e)}
-        className={cn(
-          "vscode-list-item flex h-[22px] w-full items-center gap-1 text-left text-[11px] font-semibold uppercase tracking-wider transition-colors duration-75",
-          !hasWorkspaces && "cursor-default",
-        )}
-        style={{ paddingLeft: 12, color: "var(--vscode-sidebar-section-header-foreground)" }}
+      <div
+        className="group flex h-[22px] w-full items-center gap-1"
+        style={{ paddingLeft: 12 }}
       >
-        {hasWorkspaces && (
-          <motion.span
-            animate={{ rotate: isExpanded ? 90 : 0 }}
-            transition={springs.snappy}
-          >
-            <ChevronRight
-              className="h-3 w-3 shrink-0"
-              style={{ opacity: 0.7 }}
-            />
-          </motion.span>
-        )}
-        {!hasWorkspaces && <div className="w-3 shrink-0" />}
-        <span className="min-w-0 flex-1 truncate">{repo.name}</span>
-        {hasWorkspaces && (
-          <span className="mr-2 text-[10px] font-normal opacity-50">
-            {workspaces.length}
-          </span>
-        )}
-      </button>
+        <button
+          type="button"
+          onClick={() => hasWorkspaces && setIsExpanded((e) => !e)}
+          className={cn(
+            "vscode-list-item flex min-w-0 flex-1 items-center gap-1 text-left text-[11px] font-semibold uppercase tracking-wider transition-colors duration-75",
+            !hasWorkspaces && "cursor-default",
+          )}
+          style={{ color: "var(--vscode-sidebar-section-header-foreground)" }}
+        >
+          {hasWorkspaces && (
+            <motion.span
+              animate={{ rotate: isExpanded ? 90 : 0 }}
+              transition={springs.snappy}
+            >
+              <ChevronRight
+                className="h-3 w-3 shrink-0"
+                style={{ opacity: 0.7 }}
+              />
+            </motion.span>
+          )}
+          {!hasWorkspaces && <div className="w-3 shrink-0" />}
+          <span className="min-w-0 flex-1 truncate">{repo.name}</span>
+          {hasWorkspaces && (
+            <span className="text-[10px] font-normal opacity-50">
+              {workspaces.length}
+            </span>
+          )}
+        </button>
+        <motion.button
+          type="button"
+          onClick={() => onNewChatForRepo?.(repo.id)}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          className="mr-1 flex h-[16px] w-[16px] shrink-0 items-center justify-center rounded opacity-0 transition-opacity group-hover:opacity-100"
+          style={{ color: "var(--vscode-sidebar-section-header-foreground)" }}
+          title="New chat"
+          aria-label="New chat"
+        >
+          <Plus className="h-3 w-3" />
+        </motion.button>
+      </div>
 
       <AnimatePresence>
         {isExpanded && hasWorkspaces && (
@@ -91,7 +111,7 @@ function RepoGroup({
   );
 }
 
-export function WorkspaceList({ activeWorkspaceId, onWorkspaceSelect }: WorkspaceListProps) {
+export function WorkspaceList({ activeWorkspaceId, onWorkspaceSelect, onNewChatForRepo }: WorkspaceListProps) {
   const { repos, workspacesByRepo, loading, error, fetchAll } = useWorkspaceStore();
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -209,6 +229,7 @@ export function WorkspaceList({ activeWorkspaceId, onWorkspaceSelect }: Workspac
               defaultExpanded={true}
               activeWorkspaceId={activeWorkspaceId}
               onWorkspaceSelect={onWorkspaceSelect}
+              onNewChatForRepo={onNewChatForRepo}
             />
           ))}
         </motion.div>
@@ -217,7 +238,10 @@ export function WorkspaceList({ activeWorkspaceId, onWorkspaceSelect }: Workspac
       <NewWorkspaceModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        onWorkspaceSelect={onWorkspaceSelect}
+        onRepoRegistered={(repoId) => {
+          setModalOpen(false);
+          onNewChatForRepo?.(repoId);
+        }}
       />
     </div>
   );

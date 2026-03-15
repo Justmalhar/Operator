@@ -37,6 +37,7 @@ function App() {
   const [activeItem, setActiveItem] = useState<SidebarNavItemId>("new-chat");
   const [rightPanelWidth, setRightPanelWidth] = useState(DEFAULT_RIGHT_WIDTH);
   const [bottomPanelHeight, setBottomPanelHeight] = useState(DEFAULT_BOTTOM_HEIGHT);
+  const [activeRepoId, setActiveRepoId] = useState<string | null>(null);
   const centerRef = useRef<CenterPanelHandle>(null);
 
   // Load settings store on mount (repos are loaded by WorkspaceList via fetchAll)
@@ -48,7 +49,27 @@ function App() {
   const isFullPage = FULL_PAGE_ITEMS.includes(activeItem);
 
   const handleWorkspaceSelect = useCallback(
-    (id: string) => setActiveWorkspace(id),
+    (id: string) => {
+      setActiveWorkspace(id);
+      setActiveRepoId(null);
+    },
+    [setActiveWorkspace],
+  );
+
+  const handleNewChatForRepo = useCallback(
+    (repoId: string) => {
+      setActiveRepoId(repoId);
+      setActiveWorkspace(null);
+      centerRef.current?.openNewChatForRepo(repoId);
+    },
+    [setActiveWorkspace],
+  );
+
+  const handleWorkspaceCreated = useCallback(
+    (wsId: string) => {
+      setActiveWorkspace(wsId);
+      setActiveRepoId(null);
+    },
     [setActiveWorkspace],
   );
 
@@ -59,6 +80,7 @@ function App() {
         <SidebarLayout
           activeWorkspaceId={activeWorkspaceId}
           onWorkspaceSelect={handleWorkspaceSelect}
+          onNewChatForRepo={handleNewChatForRepo}
           activeItem={activeItem}
           onItemChange={setActiveItem}
         />
@@ -75,8 +97,10 @@ function App() {
               <CenterPanel
                 ref={centerRef}
                 workspaceId={activeWorkspaceId}
+                repoId={activeRepoId}
                 showRightPanel={showRightPanel}
                 onToggleRightPanel={() => setShowRightPanel((v) => !v)}
+                onWorkspaceCreated={handleWorkspaceCreated}
               />
             </div>
 

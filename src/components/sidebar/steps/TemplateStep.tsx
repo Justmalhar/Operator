@@ -18,12 +18,8 @@ type SelectedTemplate =
 
 type InnerView = "grid" | "add-name" | "use-form";
 
-function slugify(s: string): string {
-  return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-}
-
 export function TemplateStep({ onSuccess }: TemplateStepProps) {
-  const { addRepo, createWorkspace } = useWorkspaceStore();
+  const { addRepo } = useWorkspaceStore();
   const { customTemplates, isLoaded, addCustomTemplate } = useSettingsStore();
 
   const [view, setView] = useState<InnerView>("grid");
@@ -95,15 +91,7 @@ export function TemplateStep({ onSuccess }: TemplateStepProps) {
         default_branch: "main",
       });
 
-      const ws = await createWorkspace({
-        repositoryId: repo.id,
-        repoPath: destinationPath,
-        cityName: workspaceName,
-        branchName: slugify(workspaceName),
-        baseBranch: "main",
-      });
-
-      onSuccess(ws.id);
+      onSuccess(repo.id);
     } catch (err) {
       setError(String(err));
       setIsLoading(false);

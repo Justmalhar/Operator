@@ -13,6 +13,8 @@ import {
   ExternalLink,
   Slash,
   Cpu,
+  GitBranch,
+  FolderGit2,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -21,6 +23,8 @@ import { staggerContainer, staggerItemScale, dropdownVariants, springs } from "@
 import type { Repository } from "@/types/workspace";
 
 interface NewChatPageProps {
+  /** When provided, this page operates in "new worktree" mode for the given repo. */
+  repoId?: string;
   onStartChat?: (workspaceId: string, message: string) => void;
 }
 
@@ -338,26 +342,65 @@ const SUGGESTED_PROMPTS = [
   { icon: Lightbulb, label: "Create a plan to…", accent: "#facc15" },
 ];
 
+function slugify(s: string): string {
+  return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+
 // ── NewChatPage ───────────────────────────────────────────────────────────────
 
-export function NewChatPage({ onStartChat }: NewChatPageProps) {
-  const repos = useWorkspaceStore((s) => s.repos);
-  const [selectedRepoId, setSelectedRepoId] = useState<string | null>(repos[0]?.id ?? null);
+export function NewChatPage({ repoId, onStartChat }: NewChatPageProps) {
+  const { repos, createWorkspace } = useWorkspaceStore();
+  const [selectedRepoId, setSelectedRepoId] = useState<string | null>(
+    repoId ?? repos[0]?.id ?? null,
+  );
   const [message, setMessage] = useState("");
   const [selectedModelId, setSelectedModelId] = useState(DEFAULT_MODEL_ID);
   const [composerFocused, setComposerFocused] = useState(false);
+  const [branchName, setBranchName] = useState(() => `feature-${Date.now().toString(36)}`);
+  const [isCreatingWorktree, setIsCreatingWorktree] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  function handleSend() {
-    if (!message.trim() || !selectedRepoId) return;
-    onStartChat?.(selectedRepoId, message.trim());
-    setMessage("");
+  // Resolve the active repo object
+  const activeRepo = repos.find((r) => r.id === (repoId ?? selectedRepoId));
+  const worktreePath = activeRepo
+    ? `${activeRepo.local_path}/../${activeRepo.name}-${slugify(branchName)}`
+    : "";
+  const upstream = `origin/${activeRepo?.default_branch ?? "main"}`;
+
+  // Sync selectedRepoId when repoId prop changes
+  useEffect(() => {
+    if (repoId) setSelectedRepoId(repoId);
+  }, [repoId]);
+
+  async function handleSend() {
+    if (!message.trim()) return;
+    if (repoId && activeRepo) {
+      // Worktree mode: create the worktree first, then start chat
+      setIsCreatingWorktree(true);
+      try {
+        const ws = await createWorkspace({
+          repositoryId: activeRepo.id,
+          repoPath: activeRepo.local_path,
+          cityName: branchName,
+          branchName: slugify(branchName),
+          baseBranch: activeRepo.default_branch ?? "main",
+          model: selectedModelId,
+        });
+        onStartChat?.(ws.id, message.trim());
+        setMessage("");
+      } finally {
+        setIsCreatingWorktree(false);
+      }
+    } else if (selectedRepoId) {
+      onStartChat?.(selectedRepoId, message.trim());
+      setMessage("");
+    }
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      handleSend();
+      void handleSend();
     }
   }
 
@@ -374,7 +417,7 @@ export function NewChatPage({ onStartChat }: NewChatPageProps) {
     el.style.height = `${Math.min(el.scrollHeight, 200)}px`;
   }, [message]);
 
-  const canSend = message.trim().length > 0;
+  const canSend = message.trim().length > 0 && !isCreatingWorktree;
 
   return (
     <div
@@ -418,12 +461,117 @@ export function NewChatPage({ onStartChat }: NewChatPageProps) {
           >
             Let&apos;s build
           </span>
-          <WorkspaceDropdown
-            repos={repos}
-            selectedRepoId={selectedRepoId}
-            onSelect={setSelectedRepoId}
-          />
+          {repoId && activeRepo ? (
+            <span
+              className="text-base font-semibold sm:text-lg md:text-[22px]"
+              style={{ color: "var(--vscode-editor-foreground)" }}
+            >
+              {activeRepo.name}
+            </span>
+          ) : (
+            <WorkspaceDropdown
+              repos={repos}
+              selectedRepoId={selectedRepoId}
+              onSelect={setSelectedRepoId}
+            />
+          )}
         </motion.div>
+
+        {/* Worktree config panel — shown only in repoId mode */}
+        {repoId && activeRepo && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ ...springs.smooth, delay: 0.15 }}
+            className="mt-5 w-full max-w-[420px] rounded-lg px-4 py-3"
+            style={{
+              backgroundColor: "var(--vscode-sidebar-background)",
+              border: "1px solid var(--vscode-panel-border, rgba(255,255,255,0.07))",
+            }}
+          >
+            {/* Branch name */}
+            <div className="flex items-center gap-2">
+              <GitBranch
+                className="h-3.5 w-3.5 shrink-0"
+                style={{ color: "var(--vscode-tab-inactive-foreground)", opacity: 0.6 }}
+              />
+              <span
+                className="w-[72px] shrink-0 text-[11px] font-medium uppercase tracking-wider opacity-50"
+                style={{ color: "var(--vscode-foreground)" }}
+              >
+                Branch
+              </span>
+              <input
+                type="text"
+                value={branchName}
+                onChange={(e) => setBranchName(e.target.value)}
+                className="min-w-0 flex-1 rounded px-2 py-0.5 text-[12px] outline-none"
+                style={{
+                  background: "var(--vscode-input-background)",
+                  border: "1px solid var(--vscode-input-border, rgba(255,255,255,0.08))",
+                  color: "var(--vscode-input-foreground)",
+                }}
+              />
+            </div>
+
+            <div
+              className="my-2.5"
+              style={{ borderTop: "1px solid var(--vscode-panel-border, rgba(255,255,255,0.06))" }}
+            />
+
+            {/* Worktree path */}
+            <div className="flex items-center gap-2">
+              <FolderGit2
+                className="h-3.5 w-3.5 shrink-0"
+                style={{ color: "var(--vscode-tab-inactive-foreground)", opacity: 0.6 }}
+              />
+              <span
+                className="w-[72px] shrink-0 text-[11px] font-medium uppercase tracking-wider opacity-50"
+                style={{ color: "var(--vscode-foreground)" }}
+              >
+                Path
+              </span>
+              <span
+                className="min-w-0 flex-1 truncate text-[11px] font-mono opacity-60"
+                style={{ color: "var(--vscode-foreground)" }}
+                title={worktreePath}
+              >
+                {worktreePath}
+              </span>
+            </div>
+
+            <div
+              className="my-2.5"
+              style={{ borderTop: "1px solid var(--vscode-panel-border, rgba(255,255,255,0.06))" }}
+            />
+
+            {/* Upstream */}
+            <div className="flex items-center gap-2">
+              <svg
+                viewBox="0 0 24 24"
+                className="h-3.5 w-3.5 shrink-0"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                style={{ color: "var(--vscode-tab-inactive-foreground)", opacity: 0.6 }}
+              >
+                <path d="M7 16V4m0 0L3 8m4-4 4 4M17 8v12m0 0 4-4m-4 4-4-4" />
+              </svg>
+              <span
+                className="w-[72px] shrink-0 text-[11px] font-medium uppercase tracking-wider opacity-50"
+                style={{ color: "var(--vscode-foreground)" }}
+              >
+                Upstream
+              </span>
+              <span
+                className="text-[12px] font-mono"
+                style={{ color: "var(--vscode-tab-inactive-foreground)" }}
+              >
+                {upstream}
+              </span>
+            </div>
+          </motion.div>
+        )}
 
         {/* Suggested prompt cards */}
         <motion.div
@@ -580,7 +728,7 @@ export function NewChatPage({ onStartChat }: NewChatPageProps) {
           {/* Send */}
           <motion.button
             type="button"
-            onClick={handleSend}
+            onClick={() => void handleSend()}
             disabled={!canSend}
             whileHover={canSend ? { scale: 1.08 } : undefined}
             whileTap={canSend ? { scale: 0.9 } : undefined}
@@ -595,9 +743,16 @@ export function NewChatPage({ onStartChat }: NewChatPageProps) {
                 : "var(--vscode-toolbar-hover-background)",
               color: "#fff",
             }}
-            title="Send (↵)"
+            title={isCreatingWorktree ? "Creating worktree…" : "Send (↵)"}
           >
-            <ArrowUp className="h-3.5 w-3.5" strokeWidth={2.5} />
+            {isCreatingWorktree ? (
+              <svg className="h-3.5 w-3.5 animate-spin" viewBox="0 0 24 24" fill="none">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+              </svg>
+            ) : (
+              <ArrowUp className="h-3.5 w-3.5" strokeWidth={2.5} />
+            )}
           </motion.button>
         </div>
 
