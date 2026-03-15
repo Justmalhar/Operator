@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { ChevronRight, File, Folder, FolderOpen } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { FileIcon } from "@/components/shared/FileIcon";
 
 interface FileNode {
   name: string;
@@ -37,15 +38,6 @@ const MOCK_TREE: FileNode[] = [
   { name: "operator.json", type: "file" },
 ];
 
-function getFileColor(name: string): string {
-  if (name.endsWith(".tsx") || name.endsWith(".ts")) return "#519aba";
-  if (name.endsWith(".css")) return "#563d7c";
-  if (name.endsWith(".json")) return "#cbcb41";
-  if (name.endsWith(".md")) return "#519aba";
-  if (name.endsWith(".svg")) return "#f1502f";
-  return "var(--vscode-list-tree-indent-guide-stroke)";
-}
-
 interface TreeNodeProps {
   node: FileNode;
   depth?: number;
@@ -80,18 +72,13 @@ function TreeNode({
             )}
             style={{ color: "var(--vscode-list-tree-indent-guide-stroke)", opacity: 0.6 }}
           />
-          {expanded ? (
-            <FolderOpen className="h-[14px] w-[14px] shrink-0" style={{ color: "#e8ab53" }} />
-          ) : (
-            <Folder className="h-[14px] w-[14px] shrink-0" style={{ color: "#e8ab53" }} />
-          )}
+          <FileIcon filename={node.name} isDir isOpen={expanded} size={16} />
           <span className="truncate font-medium" style={{ color: "var(--vscode-sidebar-foreground)" }}>
             {node.name}
           </span>
         </button>
         {expanded && (
           <div className="relative">
-            {/* Indent guide */}
             <span
               className="tree-indent-guide"
               style={{ left: `${indent + 7}px` }}
@@ -127,10 +114,7 @@ function TreeNode({
       )}
       style={{ paddingLeft: `${indent + 16}px` }}
     >
-      <File
-        className="h-[14px] w-[14px] shrink-0"
-        style={{ color: getFileColor(node.name) }}
-      />
+      <FileIcon filename={node.name} size={14} />
       <span
         className="min-w-0 flex-1 truncate"
         style={{
