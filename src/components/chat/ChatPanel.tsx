@@ -35,18 +35,24 @@ export function ChatPanel({ workspaceId }: ChatPanelProps) {
   return (
     <div
       className="relative flex h-full flex-col"
-      style={{ backgroundColor: "var(--vscode-editor-background)" }}
+      style={{ backgroundColor: "#0e0e0e" }}
     >
-      {/* Chat area (hidden behind overlay when diff is open) */}
+      {/* Changed files bar at the very top (above messages) */}
+      {MOCK_SESSION_CHANGES.length > 0 && (
+        <ChangedFilesBar
+          files={MOCK_SESSION_CHANGES}
+          durationMs={SESSION_DURATION_MS}
+          onFileClick={setDiffFile}
+        />
+      )}
+
+      {/* Message list */}
       <div className="min-h-0 flex-1">
         <MessageList workspaceId={workspaceId} />
       </div>
+
+      {/* Composer at bottom */}
       <Composer />
-      <ChangedFilesBar
-        files={MOCK_SESSION_CHANGES}
-        durationMs={SESSION_DURATION_MS}
-        onFileClick={setDiffFile}
-      />
 
       {/* Diff overlay — floats above everything */}
       {diffFile && (
