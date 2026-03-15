@@ -4,6 +4,7 @@ import { MessageList } from "./MessageList";
 import { Composer } from "@/components/composer/Composer";
 import { ChangedFilesBar, type ChangedFile } from "./ChangedFilesBar";
 import { FileDiffOverlay } from "./FileDiffOverlay";
+import { ChatTerminalPanel } from "./ChatTerminalPanel";
 import { useWorkspaceStore } from "@/store/workspaceStore";
 import { fadeInDown, fadeInScale, springs } from "@/lib/animations";
 import * as api from "@/lib/tauri";
@@ -89,6 +90,9 @@ export function ChatPanel({ workspaceId }: ChatPanelProps) {
       >
         <Composer />
       </motion.div>
+
+      {/* Terminal panel below composer */}
+      <ChatTerminalPanel worktreePath={activeWs?.worktree_path} />
 
       {/* Diff overlay — floats above everything */}
       <AnimatePresence>
