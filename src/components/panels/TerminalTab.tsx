@@ -2,19 +2,23 @@ import { useEffect, useRef, useState } from "react";
 
 interface TerminalLine {
   id: string;
-  type: "command" | "output" | "error";
+  type: "command" | "output" | "error" | "vite" | "url";
   text: string;
 }
 
 const INITIAL_LINES: TerminalLine[] = [
-  { id: "1", type: "output", text: "Operator terminal  —  Los Angeles workspace" },
-  { id: "2", type: "output", text: "" },
-  { id: "3", type: "command", text: "$ bun run dev" },
-  { id: "4", type: "output", text: "  vite v5.4.2 ready in 312 ms" },
-  { id: "5", type: "output", text: "" },
-  { id: "6", type: "output", text: "  ➜  Local:   http://localhost:5173/" },
-  { id: "7", type: "output", text: "  ➜  Network: use --host to expose" },
-  { id: "8", type: "output", text: "" },
+  { id: "1", type: "command", text: "bun run dev; exit" },
+  { id: "2", type: "output", text: "(eval):2: command not found: compdef" },
+  { id: "3", type: "output", text: "(eval):213: command not found: compdef" },
+  { id: "4", type: "output", text: "" },
+  { id: "5", type: "command", text: "> bun run dev; exit" },
+  { id: "6", type: "output", text: "$ vite" },
+  { id: "7", type: "output", text: "" },
+  { id: "8", type: "vite", text: "  VITE v7.3.1  ready in 1632 ms" },
+  { id: "9", type: "output", text: "" },
+  { id: "10", type: "url", text: "  ➜  Local:   http://localhost:1420/" },
+  { id: "11", type: "output", text: "  ➜  press h + enter to show help" },
+  { id: "12", type: "output", text: "" },
 ];
 
 export function TerminalTab() {
@@ -73,6 +77,16 @@ export function TerminalTab() {
     }
   }
 
+  function getLineColor(type: TerminalLine["type"]): string {
+    switch (type) {
+      case "command": return "var(--vscode-editor-foreground)";
+      case "error": return "#f48771";
+      case "vite": return "#e8ab53";
+      case "url": return "#3b9edd";
+      default: return "var(--vscode-tab-inactive-foreground)";
+    }
+  }
+
   return (
     <div
       className="vscode-panel flex h-full flex-col text-[12px]"
@@ -80,18 +94,13 @@ export function TerminalTab() {
       onClick={() => inputRef.current?.focus()}
     >
       {/* Output */}
-      <div className="vscode-scrollable min-h-0 flex-1 overflow-y-auto px-3 py-2">
+      <div className="vscode-scrollable min-h-0 flex-1 overflow-y-auto px-4 py-3">
         {lines.map((line) => (
           <div
             key={line.id}
-            className="leading-[1.6]"
+            className="leading-[1.8]"
             style={{
-              color:
-                line.type === "command"
-                  ? "var(--vscode-editor-foreground)"
-                  : line.type === "error"
-                    ? "#f48771"
-                    : "var(--vscode-tab-inactive-foreground)",
+              color: getLineColor(line.type),
               whiteSpace: "pre-wrap",
             }}
           >
@@ -104,7 +113,7 @@ export function TerminalTab() {
       {/* Input */}
       <form
         onSubmit={handleSubmit}
-        className="flex shrink-0 items-center gap-1.5 px-3 py-1.5"
+        className="flex shrink-0 items-center gap-1.5 px-4 py-2"
         style={{ borderTop: "1px solid var(--vscode-sidebar-section-header-border, rgba(255,255,255,0.06))" }}
       >
         <span className="font-bold" style={{ color: "#4ec994" }}>$</span>

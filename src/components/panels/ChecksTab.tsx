@@ -41,7 +41,7 @@ export function ChecksTab() {
     <div className="flex h-full flex-col">
       {/* Summary */}
       <div
-        className="flex shrink-0 items-center gap-3 px-3 py-2 text-[12px]"
+        className="flex shrink-0 items-center gap-3 px-4 py-2.5 text-[12px]"
         style={{ borderBottom: "1px solid var(--vscode-sidebar-section-header-border)" }}
       >
         <span className="flex items-center gap-1" style={{ color: "#4ec994" }}>
@@ -67,7 +67,7 @@ export function ChecksTab() {
         {MOCK_CHECKS.map((check) => (
           <div
             key={check.id}
-            className="flex items-start gap-2.5 px-3 py-[5px]"
+            className="flex items-start gap-2.5 px-4 py-[7px]"
           >
             <span className="mt-px">{statusIcon[check.status]}</span>
             <div className="min-w-0 flex-1">

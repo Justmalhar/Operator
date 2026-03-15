@@ -1,4 +1,4 @@
-import { FileDiff, GitCommit, Plus, Minus, Pencil } from "lucide-react";
+import { GitCommit, Plus, Minus } from "lucide-react";
 
 interface FileChange {
   filename: string;
@@ -15,22 +15,16 @@ const MOCK_CHANGES: FileChange[] = [
   { filename: "CLAUDE.md", added: 6, removed: 0, status: "modified" },
 ];
 
-const statusIcon = {
-  added: <Plus className="h-3 w-3" style={{ color: "#4ec994" }} />,
-  modified: <Pencil className="h-3 w-3" style={{ color: "#e2c08d" }} />,
-  deleted: <Minus className="h-3 w-3" style={{ color: "#f48771" }} />,
-};
-
-const statusLabel = {
-  added: "A",
-  modified: "M",
-  deleted: "D",
-};
-
 const statusColor = {
   added: "#4ec994",
   modified: "#e2c08d",
   deleted: "#f48771",
+};
+
+const statusLetter = {
+  added: "A",
+  modified: "M",
+  deleted: "D",
 };
 
 export function ChangesTab() {
@@ -41,7 +35,7 @@ export function ChangesTab() {
     <div className="flex h-full flex-col">
       {/* Summary */}
       <div
-        className="flex shrink-0 items-center gap-3 px-3 py-2 text-[12px]"
+        className="flex shrink-0 items-center gap-4 px-4 py-2.5 text-[12px]"
         style={{ borderBottom: "1px solid var(--vscode-sidebar-section-header-border)" }}
       >
         <span className="flex items-center gap-1 font-medium" style={{ color: "#4ec994" }}>
@@ -52,14 +46,16 @@ export function ChangesTab() {
           <Minus className="h-3 w-3" />
           {totalRemoved}
         </span>
-        <span className="ml-auto flex items-center gap-1" style={{ color: "var(--vscode-tab-inactive-foreground)" }}>
-          <FileDiff className="h-3 w-3" />
-          {MOCK_CHANGES.length} files
+        <span
+          className="ml-auto text-[11px]"
+          style={{ color: "var(--vscode-tab-inactive-foreground)" }}
+        >
+          {MOCK_CHANGES.length} files changed
         </span>
       </div>
 
       {/* File list */}
-      <div className="vscode-scrollable min-h-0 flex-1 overflow-y-auto py-1">
+      <div className="vscode-scrollable min-h-0 flex-1 overflow-y-auto px-4 py-3 flex flex-col gap-2">
         {MOCK_CHANGES.map((change) => {
           const shortName = change.filename.split("/").pop() ?? change.filename;
           const dir = change.filename.includes("/")
@@ -70,22 +66,54 @@ export function ChangesTab() {
             <button
               key={change.filename}
               type="button"
-              className="vscode-list-item flex w-full items-center gap-2 px-3 py-[4px] text-left text-[13px] transition-colors duration-75"
+              className="vscode-list-item flex w-full items-start gap-3 rounded-lg px-4 py-5 text-left transition-colors duration-75"
             >
-              {statusIcon[change.status]}
-              <span className="min-w-0 flex-1 truncate" style={{ color: "var(--vscode-sidebar-foreground)" }}>
-                {shortName}
+              {/* Status badge */}
+              <span
+                className="mt-[1px] flex h-5 w-5 shrink-0 items-center justify-center rounded text-[11px] font-bold"
+                style={{
+                  color: statusColor[change.status],
+                  backgroundColor: `${statusColor[change.status]}20`,
+                }}
+              >
+                {statusLetter[change.status]}
+              </span>
+
+              {/* File info */}
+              <span className="min-w-0 flex-1">
+                <span
+                  className="block truncate text-[13px] font-medium"
+                  style={{
+                    color: "var(--vscode-sidebar-foreground)",
+                    fontFamily: "'SF Mono', Menlo, Monaco, 'Cascadia Code', monospace",
+                  }}
+                >
+                  {shortName}
+                </span>
                 {dir && (
-                  <span className="ml-1 text-[11px]" style={{ color: "var(--vscode-tab-inactive-foreground)" }}>
+                  <span
+                    className="mt-0.5 block truncate text-[11px]"
+                    style={{
+                      color: "var(--vscode-tab-inactive-foreground)",
+                      fontFamily: "'SF Mono', Menlo, Monaco, 'Cascadia Code', monospace",
+                    }}
+                  >
                     {dir}
                   </span>
                 )}
               </span>
+
+              {/* Diff counts */}
               <span
-                className="shrink-0 text-[11px] font-semibold"
-                style={{ color: statusColor[change.status] }}
+                className="mt-[2px] flex shrink-0 items-center gap-1.5 text-[11px] font-medium"
+                style={{ fontFamily: "'SF Mono', Menlo, Monaco, 'Cascadia Code', monospace" }}
               >
-                {statusLabel[change.status]}
+                {change.added > 0 && (
+                  <span style={{ color: "#4ec994" }}>+{change.added}</span>
+                )}
+                {change.removed > 0 && (
+                  <span style={{ color: "#f48771" }}>-{change.removed}</span>
+                )}
               </span>
             </button>
           );
@@ -94,12 +122,12 @@ export function ChangesTab() {
 
       {/* Commit button */}
       <div
-        className="shrink-0 px-3 py-2"
+        className="shrink-0 px-4 py-3"
         style={{ borderTop: "1px solid var(--vscode-sidebar-section-header-border)" }}
       >
         <button
           type="button"
-          className="vscode-button flex w-full items-center justify-center gap-1.5 rounded py-1.5 text-[12px] font-medium"
+          className="vscode-button flex w-full items-center justify-center gap-2 rounded py-2 text-[12px] font-medium"
         >
           <GitCommit className="h-3.5 w-3.5" />
           Commit changes
