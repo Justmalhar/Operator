@@ -337,9 +337,9 @@ function WorkspaceDropdown({
 // ── Suggested prompts ─────────────────────────────────────────────────────────
 
 const SUGGESTED_PROMPTS = [
-  { icon: Gamepad2, label: "Build a classic Snake game in this repo.", accent: "#4ade80" },
-  { icon: FileText, label: "Create a one-page PDF summarizing this app.", accent: "#f87171" },
-  { icon: Lightbulb, label: "Create a plan to…", accent: "#facc15" },
+  { icon: Gamepad2, label: "Build a classic Snake game in this repo.", accent: "#4ade80", category: "Build" },
+  { icon: FileText, label: "Create a one-page PDF summarizing this app.", accent: "#f87171", category: "Document" },
+  { icon: Lightbulb, label: "Create a plan to…", accent: "#facc15", category: "Plan" },
 ];
 
 function slugify(s: string): string {
@@ -429,7 +429,7 @@ export function NewChatPage({ repoId, onStartChat }: NewChatPageProps) {
         {/* Floating gradient orb */}
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden">
           <div
-            className="h-[300px] w-[300px] rounded-full opacity-[0.07] blur-[80px] animate-float animate-gradientShift"
+            className="h-[400px] w-[400px] rounded-full opacity-[0.06] blur-[100px] animate-float animate-gradientShift"
             style={{ background: "linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899)" }}
           />
         </div>
@@ -439,10 +439,10 @@ export function NewChatPage({ repoId, onStartChat }: NewChatPageProps) {
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={springs.bouncy}
-          className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl text-[18px] font-bold gradient-accent animate-gradientShift"
+          className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl text-[20px] font-bold gradient-accent animate-gradientShift"
           style={{
             color: "#fff",
-            boxShadow: "0 4px 24px rgba(59,130,246,0.25)",
+            boxShadow: "0 8px 32px rgba(59,130,246,0.30), 0 2px 8px rgba(0,0,0,0.4)",
           }}
         >
           O
@@ -453,18 +453,18 @@ export function NewChatPage({ repoId, onStartChat }: NewChatPageProps) {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ ...springs.smooth, delay: 0.1 }}
-          className="flex flex-col items-center gap-0.5"
+          className="flex flex-col items-center gap-1"
         >
           <span
-            className="text-[13px]"
-            style={{ color: "var(--vscode-tab-inactive-foreground)", opacity: 0.55 }}
+            className="text-[12px] font-medium tracking-widest uppercase"
+            style={{ color: "var(--vscode-tab-inactive-foreground)", opacity: 0.45, letterSpacing: "0.12em" }}
           >
             Let&apos;s build
           </span>
           {repoId && activeRepo ? (
             <span
-              className="text-base font-semibold sm:text-lg md:text-[22px]"
-              style={{ color: "var(--vscode-editor-foreground)" }}
+              className="text-[20px] font-semibold sm:text-[22px] md:text-[26px]"
+              style={{ color: "var(--vscode-editor-foreground)", letterSpacing: "-0.01em" }}
             >
               {activeRepo.name}
             </span>
@@ -578,47 +578,76 @@ export function NewChatPage({ repoId, onStartChat }: NewChatPageProps) {
           variants={staggerContainer}
           initial="hidden"
           animate="visible"
-          className="mt-6 flex flex-wrap justify-center gap-2 px-3 sm:mt-8 sm:px-6"
-          style={{ maxWidth: "520px", width: "100%" }}
+          className="mt-8 flex flex-col items-center gap-3 px-4 sm:mt-10 sm:px-6"
+          style={{ maxWidth: "600px", width: "100%" }}
         >
-          {SUGGESTED_PROMPTS.map((prompt) => {
-            const Icon = prompt.icon;
-            return (
-              <motion.button
-                key={prompt.label}
-                variants={staggerItemScale}
-                type="button"
-                onClick={() => handleSuggestedPrompt(prompt.label)}
-                whileHover={{ scale: 1.03, y: -2 }}
-                whileTap={{ scale: 0.97 }}
-                className="flex min-w-[120px] max-w-[155px] flex-1 items-start gap-2.5 rounded-lg px-3 py-2.5 text-left text-[12px] hover-lift"
-                style={{
-                  backgroundColor: "var(--vscode-sidebar-background)",
-                  border: "1px solid var(--vscode-panel-border, rgba(255,255,255,0.07))",
-                  color: "var(--vscode-editor-foreground)",
-                }}
-              >
-                <span
-                  className="mt-px flex h-5 w-5 shrink-0 items-center justify-center rounded"
-                  style={{ backgroundColor: `${prompt.accent}1a` }}
+          {/* Cards row */}
+          <div className="flex w-full flex-wrap justify-center gap-3">
+            {SUGGESTED_PROMPTS.map((prompt) => {
+              const Icon = prompt.icon;
+              return (
+                <motion.button
+                  key={prompt.label}
+                  variants={staggerItemScale}
+                  type="button"
+                  onClick={() => handleSuggestedPrompt(prompt.label)}
+                  whileHover={{ scale: 1.02, y: -3 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="group flex min-w-[160px] max-w-[185px] flex-1 flex-col gap-3 rounded-xl p-4 text-left transition-all duration-200"
+                  style={{
+                    backgroundColor: "var(--vscode-editorWidget-background, var(--vscode-sidebar-background))",
+                    border: "1px solid var(--vscode-panel-border, rgba(255,255,255,0.08))",
+                    color: "var(--vscode-editor-foreground)",
+                    boxShadow: "0 2px 12px rgba(0,0,0,0.25)",
+                  }}
                 >
-                  <Icon className="h-3 w-3" style={{ color: prompt.accent }} />
-                </span>
-                <span className="leading-snug" style={{ opacity: 0.8 }}>
-                  {prompt.label}
-                </span>
-              </motion.button>
-            );
-          })}
+                  {/* Icon + category row */}
+                  <div className="flex items-center justify-between">
+                    <span
+                      className="flex h-7 w-7 items-center justify-center rounded-lg"
+                      style={{
+                        backgroundColor: `${prompt.accent}22`,
+                        border: `1px solid ${prompt.accent}33`,
+                      }}
+                    >
+                      <Icon className="h-3.5 w-3.5" style={{ color: prompt.accent }} />
+                    </span>
+                    <span
+                      className="rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider"
+                      style={{
+                        backgroundColor: `${prompt.accent}15`,
+                        color: prompt.accent,
+                        opacity: 0.85,
+                      }}
+                    >
+                      {prompt.category}
+                    </span>
+                  </div>
+                  {/* Label */}
+                  <span
+                    className="text-[12px] leading-snug"
+                    style={{ color: "var(--vscode-editor-foreground)", opacity: 0.75 }}
+                  >
+                    {prompt.label}
+                  </span>
+                </motion.button>
+              );
+            })}
+          </div>
 
+          {/* More button */}
           <motion.button
             variants={staggerItemScale}
             type="button"
             whileHover={{ scale: 1.05 }}
-            className="flex items-center gap-1 self-center rounded px-2 py-1 text-[11px] transition-colors theme-hover-bg"
-            style={{ color: "var(--vscode-tab-inactive-foreground)", opacity: 0.6 }}
+            className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[11px] font-medium transition-colors theme-hover-bg"
+            style={{
+              color: "var(--vscode-tab-inactive-foreground)",
+              opacity: 0.5,
+              border: "1px solid var(--vscode-panel-border, rgba(255,255,255,0.06))",
+            }}
           >
-            More
+            More suggestions
             <ChevronDown className="h-3 w-3 -rotate-90" />
           </motion.button>
         </motion.div>
