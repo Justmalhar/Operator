@@ -29,16 +29,34 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_notification::init())
         .setup(|app| {
-            // Init tracing first so all subsequent setup steps are observable.
-            let log_dir = app.path().app_log_dir()?;
-            std::fs::create_dir_all(&log_dir)?;
-            logging::init_logging(&log_dir);
+            // Init tracing — tolerate failures so the app still launches.
+            match app.path().app_log_dir() {
+                Ok(log_dir) => {
+                    if let Err(e) = std::fs::create_dir_all(&log_dir) {
+                        eprintln!("[operator] failed to create log directory: {e}");
+                    } else {
+                        logging::init_logging(&log_dir);
+                    }
+                }
+                Err(e) => {
+                    eprintln!("[operator] failed to resolve app_log_dir: {e}");
+                }
+            }
 
             let handle = app.handle().clone();
             let pool = tauri::async_runtime::block_on(async {
-                db::schema::init_db(&handle)
-                    .await
-                    .expect("failed to initialise SQLite database")
+                match db::schema::init_db(&handle).await {
+                    Ok(pool) => pool,
+                    Err(e) => {
+                        eprintln!("[operator] failed to initialise SQLite database: {e}");
+                        // Return a fallback in-memory pool so the app can still render
+                        // the frontend even if persistent storage is unavailable.
+                        sqlx::sqlite::SqlitePoolOptions::new()
+                            .connect("sqlite::memory:")
+                            .await
+                            .expect("failed to create in-memory SQLite fallback")
+                    }
+                }
             });
 
             app.manage(AppState {

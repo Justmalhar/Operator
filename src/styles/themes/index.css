@@ -280,7 +280,8 @@
 
 .vscode-scrollable::-webkit-scrollbar-thumb {
   background-color: var(--vscode-scrollbar-slider-background);
-  border-radius: 0;
+  border-radius: 4px;
+  transition: background-color 150ms ease;
 }
 
 .vscode-scrollable::-webkit-scrollbar-thumb:hover {
@@ -289,4 +290,46 @@
 
 .vscode-scrollable::-webkit-scrollbar-thumb:active {
   background-color: var(--vscode-scrollbar-slider-active);
+}
+
+/* ── Enhanced transitions for theme switching ────────────────────── */
+.vscode-activity-bar,
+.vscode-sidebar,
+.vscode-editor,
+.vscode-panel,
+.vscode-titlebar,
+.vscode-statusbar,
+.vscode-tab-bar {
+  transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease;
+}
+
+/* ── Subtle inner glow on active tab ─────────────────────────────── */
+.vscode-tab.active::after,
+.vscode-tab[aria-selected="true"]::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--vscode-focus-border, #007fd4);
+  opacity: 0.6;
+}
+
+/* ── Button enhanced transitions ─────────────────────────────────── */
+.vscode-button {
+  transition: background-color 120ms ease, transform 100ms ease, box-shadow 120ms ease;
+}
+
+.vscode-button:active {
+  transform: scale(0.97);
+}
+
+/* ── Input enhanced focus ─────────────────────────────────────────── */
+.vscode-input {
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.vscode-input:focus {
+  box-shadow: 0 0 0 1px var(--vscode-focus-border);
 }
