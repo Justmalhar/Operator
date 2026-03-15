@@ -166,12 +166,13 @@ export function Composer({ onSend, disabled, className }: ComposerProps) {
       <AttachmentRow attachments={attachments} onRemove={(id) => setAttachments((a) => a.filter((x) => x.id !== id))} />
 
       {/* Main input area */}
-      <div className="mx-auto w-full max-w-[720px] px-5 py-3">
+      <div className="mx-auto w-full max-w-[720px] px-5 pt-3 pb-2">
         <div
-          className="rounded-lg px-3 py-2"
+          className="rounded-lg px-3 pt-2.5 pb-1.5"
           style={{
             backgroundColor: "var(--vscode-input-background)",
-            border: "1px solid var(--vscode-input-border, rgba(255,255,255,0.08))",
+            border: "1px solid var(--vscode-input-border, rgba(255,255,255,0.10))",
+            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03)",
           }}
         >
           <ComposerTextarea
@@ -180,6 +181,21 @@ export function Composer({ onSend, disabled, className }: ComposerProps) {
             onSubmit={handleSend}
             disabled={disabled}
           />
+          {/* Keyboard hint — shown when textarea is empty */}
+          {!message && (
+            <div
+              className="mt-1 flex items-center justify-end pb-0.5 text-[10px]"
+              style={{ color: "var(--vscode-input-placeholder-foreground)", opacity: 0.45 }}
+            >
+              <kbd
+                className="rounded px-1 py-px font-mono"
+                style={{ border: "1px solid var(--vscode-panel-border, rgba(255,255,255,0.1))" }}
+              >
+                ↵
+              </kbd>
+              <span className="ml-1">to send</span>
+            </div>
+          )}
         </div>
       </div>
 
