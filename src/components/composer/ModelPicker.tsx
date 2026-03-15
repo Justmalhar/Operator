@@ -1,4 +1,4 @@
-import { ChevronDown } from "lucide-react";
+import { Asterisk, ChevronDown } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -49,11 +49,12 @@ export function ModelPicker({ value = "claude-sonnet-4-6", onChange }: ModelPick
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium transition-colors hover:bg-white/5"
-          style={{ color: "var(--vscode-editor-foreground)", opacity: 0.75 }}
+          className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[12px] font-medium transition-colors hover:bg-white/5"
+          style={{ color: "rgba(255,255,255,0.65)" }}
         >
+          <Asterisk className="h-3.5 w-3.5" style={{ color: "rgba(255,255,255,0.5)" }} />
           {SHORT_LABEL[value]}
-          <ChevronDown className="h-3 w-3 opacity-60" />
+          <ChevronDown className="h-2.5 w-2.5 opacity-40" />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Copy, GitFork, RotateCcw } from "lucide-react";
+import { Copy, ExternalLink, Folder, GitBranch, GitFork, RotateCcw, Terminal } from "lucide-react";
 import { UserMessage } from "./UserMessage";
 import { ToolCallMessage, type ToolCall } from "./ToolCallMessage";
 import { FileChangeBadges } from "./FileChangeBadges";
@@ -101,15 +101,103 @@ const MOCK_MESSAGES: Message[] = [
   },
 ];
 
+// ── Workspace setup (initial state) ───────────────────────────────────────────
+
+function InlineCode({ children }: { children: React.ReactNode }) {
+  return (
+    <code
+      className="rounded px-1 py-px font-mono text-[13px]"
+      style={{
+        backgroundColor: "rgba(255,255,255,0.06)",
+        color: "rgba(255,255,255,0.85)",
+      }}
+    >
+      {children}
+    </code>
+  );
+}
+
+function WorkspaceBadge({ children }: { children: React.ReactNode }) {
+  return (
+    <span
+      className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 font-mono text-[12px]"
+      style={{
+        backgroundColor: "rgba(255,255,255,0.07)",
+        border: "1px solid rgba(255,255,255,0.1)",
+        color: "rgba(255,255,255,0.75)",
+      }}
+    >
+      {children}
+    </span>
+  );
+}
+
+function SetupItem({
+  icon,
+  children,
+}: {
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-center gap-3 text-[13px]" style={{ color: "rgba(255,255,255,0.55)" }}>
+      <span className="flex h-4 w-4 shrink-0 items-center justify-center opacity-50">
+        {icon}
+      </span>
+      <span className="leading-relaxed">{children}</span>
+    </div>
+  );
+}
+
+function WorkspaceSetup() {
+  return (
+    <div className="px-6 pb-6 pt-10">
+      {/* Setup card */}
+      <div
+        className="mb-5 inline-block max-w-[520px] rounded-xl px-4 py-3"
+        style={{ backgroundColor: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.07)" }}
+      >
+        <span className="text-[14px] font-medium" style={{ color: "rgba(255,255,255,0.9)" }}>
+          You're in a new copy of <InlineCode>Operator</InlineCode> called{" "}
+          <InlineCode>delhi</InlineCode>
+        </span>
+      </div>
+
+      {/* Status items */}
+      <div className="flex flex-col gap-3.5">
+        <SetupItem icon={<GitBranch className="h-3.5 w-3.5" />}>
+          Branched <InlineCode>Justmalhar/delhi</InlineCode> from{" "}
+          <InlineCode>origin/main</InlineCode>
+        </SetupItem>
+
+        <SetupItem icon={<Folder className="h-3.5 w-3.5" />}>
+          Created <WorkspaceBadge>delhi ▾</WorkspaceBadge> and copied 255 files
+        </SetupItem>
+
+        <SetupItem icon={<Terminal className="h-3.5 w-3.5" />}>
+          <span>Completed setup script</span>
+          <button
+            type="button"
+            className="ml-1.5 inline-flex items-center gap-1 transition-opacity hover:opacity-100"
+            style={{ color: "rgba(255,255,255,0.4)", opacity: 0.7 }}
+          >
+            <ExternalLink className="h-3 w-3" />
+          </button>
+        </SetupItem>
+      </div>
+    </div>
+  );
+}
+
 // ── Message action buttons (visible on hover) ─────────────────────────────────
 
 function MessageActions({ content }: { content: string }) {
   return (
     <div
-      className="absolute right-4 top-3 z-10 flex items-center overflow-hidden rounded-md opacity-0 shadow-md transition-opacity duration-100 group-hover:opacity-100"
+      className="absolute right-4 top-3 z-10 flex items-center overflow-hidden rounded-lg opacity-0 shadow-lg transition-opacity duration-100 group-hover:opacity-100"
       style={{
-        backgroundColor: "var(--vscode-dropdown-background, #252526)",
-        border: "1px solid var(--vscode-dropdown-border, rgba(255,255,255,0.08))",
+        backgroundColor: "#222",
+        border: "1px solid rgba(255,255,255,0.08)",
       }}
     >
       <button
@@ -117,7 +205,7 @@ function MessageActions({ content }: { content: string }) {
         title="Copy message"
         onClick={() => navigator.clipboard.writeText(content)}
         className="flex h-[26px] w-[28px] items-center justify-center transition-colors hover:bg-white/8"
-        style={{ color: "var(--vscode-tab-inactive-foreground)" }}
+        style={{ color: "rgba(255,255,255,0.5)" }}
       >
         <Copy className="h-3.5 w-3.5" />
       </button>
@@ -125,7 +213,7 @@ function MessageActions({ content }: { content: string }) {
         type="button"
         title="Fork from here"
         className="flex h-[26px] w-[28px] items-center justify-center transition-colors hover:bg-white/8"
-        style={{ color: "var(--vscode-tab-inactive-foreground)" }}
+        style={{ color: "rgba(255,255,255,0.5)" }}
       >
         <GitFork className="h-3.5 w-3.5" />
       </button>
@@ -133,7 +221,7 @@ function MessageActions({ content }: { content: string }) {
         type="button"
         title="Revert to here"
         className="flex h-[26px] w-[28px] items-center justify-center transition-colors hover:bg-white/8"
-        style={{ color: "var(--vscode-tab-inactive-foreground)" }}
+        style={{ color: "rgba(255,255,255,0.5)" }}
       >
         <RotateCcw className="h-3.5 w-3.5" />
       </button>
@@ -145,11 +233,11 @@ function MessageActions({ content }: { content: string }) {
 
 function AgentMessage({ message }: { message: AgentMsg }) {
   return (
-    <div className="px-5 py-3">
+    <div className="px-6 py-3">
       {/* Agent identity row */}
       <div
         className="mb-2.5 flex items-center gap-2 text-[11px]"
-        style={{ color: "var(--vscode-tab-inactive-foreground)" }}
+        style={{ color: "rgba(255,255,255,0.4)" }}
       >
         <span
           className="flex h-[18px] w-[18px] items-center justify-center rounded text-[9px] font-bold"
@@ -160,15 +248,10 @@ function AgentMessage({ message }: { message: AgentMsg }) {
         >
           O
         </span>
-        <span
-          className="text-[12px] font-semibold"
-          style={{ color: "var(--vscode-sidebar-foreground)" }}
-        >
+        <span className="text-[12px] font-semibold" style={{ color: "rgba(255,255,255,0.8)" }}>
           Operator
         </span>
-        {message.timestamp && (
-          <span style={{ opacity: 0.45 }}>{message.timestamp}</span>
-        )}
+        {message.timestamp && <span style={{ opacity: 0.45 }}>{message.timestamp}</span>}
         {message.duration && (
           <span style={{ opacity: 0.4 }}>· {(message.duration / 1000).toFixed(0)}s</span>
         )}
@@ -176,16 +259,13 @@ function AgentMessage({ message }: { message: AgentMsg }) {
 
       {/* Tool calls */}
       {message.toolCalls && message.toolCalls.length > 0 && (
-        <ToolCallMessage
-          toolCalls={message.toolCalls}
-          duration={message.duration}
-        />
+        <ToolCallMessage toolCalls={message.toolCalls} duration={message.duration} />
       )}
 
       {/* Message body */}
       <div
         className="text-[13px] leading-[1.65]"
-        style={{ color: "var(--vscode-editor-foreground)", whiteSpace: "pre-wrap" }}
+        style={{ color: "rgba(255,255,255,0.82)", whiteSpace: "pre-wrap" }}
       >
         {message.content}
       </div>
@@ -212,8 +292,15 @@ export function MessageList({ workspaceId: _workspaceId }: MessageListProps) {
   }, []);
 
   return (
-    <div className="vscode-scrollable h-full overflow-y-auto">
-      <div className="mx-auto max-w-[720px] pb-6 pt-4">
+    <div
+      className="vscode-scrollable h-full overflow-y-auto"
+      style={{ backgroundColor: "#0e0e0e" }}
+    >
+      <div className="mx-auto max-w-[720px] pb-4">
+        {/* Workspace setup header */}
+        <WorkspaceSetup />
+
+        {/* Conversation messages */}
         {MOCK_MESSAGES.map((msg, i) => (
           <div key={msg.id}>
             {msg.role === "user" ? (
@@ -227,13 +314,12 @@ export function MessageList({ workspaceId: _workspaceId }: MessageListProps) {
                 <MessageActions content={msg.content} />
               </div>
             )}
-            {/* Subtle hairline between conversation turns */}
+            {/* Hairline between conversation turns */}
             {i < MOCK_MESSAGES.length - 1 && MOCK_MESSAGES[i + 1].role === "user" && (
               <div
-                className="mx-5 my-2"
+                className="mx-6 my-1"
                 style={{
-                  borderTop: "1px solid var(--vscode-panel-border)",
-                  opacity: 0.25,
+                  borderTop: "1px solid rgba(255,255,255,0.05)",
                 }}
               />
             )}
