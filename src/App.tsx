@@ -10,6 +10,7 @@ import { PreferencesPage } from "@/pages/PreferencesPage";
 import { HelpPage } from "@/pages/HelpPage";
 import { SettingsPage } from "@/pages/SettingsPage";
 import { AutomationsPage } from "@/pages/AutomationsPage";
+import { SkillsPage } from "@/pages/SkillsPage";
 import { type SidebarNavItemId } from "@/components/sidebar/SidebarNav";
 import { useWorkspaceStore } from "@/store/workspaceStore";
 import { useSettingsStore } from "@/store/settingsStore";
@@ -21,7 +22,7 @@ const DEFAULT_BOTTOM_HEIGHT = 260;
 const MIN_BOTTOM_HEIGHT = 100;
 const MAX_BOTTOM_HEIGHT = 500;
 
-const FULL_PAGE_ITEMS: SidebarNavItemId[] = ["preferences", "help", "settings", "automations"];
+const FULL_PAGE_ITEMS: SidebarNavItemId[] = ["preferences", "help", "settings", "automations", "skills"];
 
 function App() {
   const { activeWorkspaceId, setActiveWorkspace, getActiveWorkspace } = useWorkspaceStore();
@@ -83,6 +84,7 @@ function App() {
             {activeItem === "help" && <HelpPage />}
             {activeItem === "settings" && <SettingsPage />}
             {activeItem === "automations" && <AutomationsPage />}
+            {activeItem === "skills" && <SkillsPage />}
           </div>
         ) : (
           <>

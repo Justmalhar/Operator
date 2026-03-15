@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { ArrowUp, Brain, ChevronDown, Circle, Map, Plus, Slash, TerminalSquare } from "lucide-react";
+import { ArrowUp, Brain, ChevronDown, Map, Plus, Slash } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ComposerTextarea } from "./ComposerTextarea";
 import { AttachmentRow, type Attachment } from "./AttachmentRow";
@@ -40,6 +40,28 @@ interface ComposerProps {
   onToggleTerminal?: () => void;
 }
 
+function ThinkingRects({ level }: { level: ThinkingLevel }) {
+  const counts: Record<ThinkingLevel, number> = { off: 0, low: 1, medium: 2, high: 3 };
+  const count = counts[level];
+  if (count === 0) return null;
+  return (
+    <span className="flex items-center gap-[2px]">
+      {Array.from({ length: 3 }).map((_, i) => (
+        <span
+          key={i}
+          className="inline-block rounded-[1px]"
+          style={{
+            width: "3px",
+            height: i < count ? "10px" : "6px",
+            backgroundColor: i < count ? "currentColor" : "currentColor",
+            opacity: i < count ? 1 : 0.2,
+          }}
+        />
+      ))}
+    </span>
+  );
+}
+
 function ThinkingPicker({
   value,
   onChange,
@@ -63,10 +85,12 @@ function ThinkingPicker({
           className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[12px] font-medium transition-colors theme-hover-bg"
           style={{
             color: isActive ? "var(--vscode-focus-border, #007fd4)" : "var(--vscode-icon-foreground)",
+            backgroundColor: isActive ? "rgba(0,127,212,0.12)" : undefined,
           }}
         >
           <Brain className="h-3.5 w-3.5" />
           {value === "off" ? "Thinking" : OPTIONS.find((o) => o.id === value)?.label}
+          {isActive && <ThinkingRects level={value} />}
           <ChevronDown className="h-2.5 w-2.5 opacity-40" />
         </button>
       </DropdownMenuTrigger>
@@ -87,10 +111,11 @@ function ThinkingPicker({
           <DropdownMenuItem
             key={opt.id}
             onClick={() => onChange(opt.id)}
-            className="text-[12px]"
+            className="flex items-center justify-between gap-3 text-[12px]"
             style={{ backgroundColor: value === opt.id ? "var(--vscode-toolbar-hover-background)" : undefined }}
           >
-            {opt.label}
+            <span>{opt.label}</span>
+            <ThinkingRects level={opt.id} />
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
@@ -98,11 +123,44 @@ function ThinkingPicker({
   );
 }
 
-export function Composer({ onSend, disabled, className, isTerminalOpen, onToggleTerminal }: ComposerProps) {
+function RadialContextIndicator({ percentage = 0 }: { percentage?: number }) {
+  const r = 7;
+  const circ = 2 * Math.PI * r;
+  const offset = circ - (Math.min(percentage, 100) / 100) * circ;
+  const hasUsage = percentage > 0;
+  return (
+    <button
+      type="button"
+      className="flex h-7 w-7 items-center justify-center rounded-md transition-colors theme-hover-bg"
+      style={{ color: "var(--vscode-icon-foreground)" }}
+      title={`${percentage}% context used`}
+    >
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <circle cx="9" cy="9" r={r} stroke="currentColor" strokeWidth="1.5" opacity="0.2" />
+        {hasUsage && (
+          <circle
+            cx="9"
+            cy="9"
+            r={r}
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeDasharray={circ}
+            strokeDashoffset={offset}
+            strokeLinecap="round"
+            transform="rotate(-90 9 9)"
+          />
+        )}
+      </svg>
+    </button>
+  );
+}
+
+export function Composer({ onSend, disabled, className }: ComposerProps) {
   const [message, setMessage] = useState("");
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [model, setModel] = useState<ModelId>("claude-sonnet-4-6");
   const [thinking, setThinking] = useState<ThinkingLevel>("off");
+  const [planMode, setPlanMode] = useState(false);
   const [showSlashMenu, setShowSlashMenu] = useState(false);
   const [showFileMention, setShowFileMention] = useState(false);
   const [slashQuery, setSlashQuery] = useState("");
@@ -243,50 +301,34 @@ export function Composer({ onSend, disabled, className, isTerminalOpen, onToggle
             onChange={handleTextChange}
             onSubmit={handleSend}
             disabled={disabled}
-            placeholder="Ask to make changes, @mention files, run /commands"
+            placeholder="Ask for code changes, @mention files, run /slash commands or add /skills"
           />
         </div>
 
         {/* Toolbar row */}
         <div className="flex items-center gap-0.5 px-2 pb-2.5 pt-1">
-          {/* Left group: model, thinking, map */}
+          {/* Left group: model, thinking, plan mode */}
           <ModelPicker value={model} onChange={setModel} />
           <ThinkingPicker value={thinking} onChange={setThinking} />
           <button
             type="button"
-            className="flex h-7 w-7 items-center justify-center rounded-md transition-colors theme-hover-bg"
-            style={{ color: "var(--vscode-icon-foreground)" }}
-            title="Context map"
+            onClick={() => setPlanMode((v) => !v)}
+            className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[12px] font-medium transition-colors theme-hover-bg"
+            style={{
+              color: planMode ? "var(--vscode-focus-border, #007fd4)" : "var(--vscode-icon-foreground)",
+              backgroundColor: planMode ? "rgba(0,127,212,0.12)" : undefined,
+            }}
+            title="Toggle Plan mode"
           >
             <Map className="h-3.5 w-3.5" />
-          </button>
-
-          {/* Terminal toggle */}
-          <button
-            type="button"
-            onClick={onToggleTerminal}
-            className="flex h-7 w-7 items-center justify-center rounded-md transition-colors theme-hover-bg"
-            style={{
-              color: isTerminalOpen ? "var(--vscode-focus-border, #007fd4)" : "var(--vscode-icon-foreground)",
-              backgroundColor: isTerminalOpen ? "rgba(0,127,212,0.12)" : undefined,
-            }}
-            title={isTerminalOpen ? "Hide terminal (⌘`)" : "Show terminal (⌘`)"}
-          >
-            <TerminalSquare className="h-3.5 w-3.5" />
+            Plan
           </button>
 
           {/* Spacer */}
           <div className="flex-1" />
 
-          {/* Right group: stop, add, send */}
-          <button
-            type="button"
-            className="flex h-7 w-7 items-center justify-center rounded-md transition-colors theme-hover-bg"
-            style={{ color: "var(--vscode-icon-foreground)", opacity: 0.5 }}
-            title="Stop"
-          >
-            <Circle className="h-4 w-4" />
-          </button>
+          {/* Right group: context indicator, add, send */}
+          <RadialContextIndicator percentage={0} />
 
           <button
             type="button"

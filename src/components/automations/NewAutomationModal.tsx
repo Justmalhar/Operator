@@ -28,19 +28,23 @@ import type { ThinkingLevel } from "@/components/composer/ReasoningPicker";
 // ── Constants ───────────────────────────────────────────────────────────────
 
 const MODELS = [
-  { id: "claude-opus-4-6" as ModelId, label: "Claude Opus 4.6", badge: "Powerful" },
   { id: "claude-sonnet-4-6" as ModelId, label: "Claude Sonnet 4.6", badge: "Fast" },
-  { id: "claude-haiku-4-5" as ModelId, label: "Claude Haiku 4.5", badge: "Lite" },
-  { id: "gpt-4o" as ModelId, label: "GPT 4o" },
-  { id: "gemini-2-5-pro" as ModelId, label: "Gemini 2.5 Pro" },
+  { id: "claude-opus-4-6" as ModelId, label: "Claude Opus 4.6", badge: "Powerful" },
+  { id: "claude-opus-4-6-1m" as ModelId, label: "Claude Opus 4.6 1M", badge: "1M ctx" },
+  { id: "gpt-5-4" as ModelId, label: "GPT-5.4" },
+  { id: "gpt-5-3-codex-spark" as ModelId, label: "GPT-5.3 Codex Spark" },
+  { id: "gpt-5-3-codex" as ModelId, label: "GPT-5.3 Codex" },
+  { id: "gpt-5-2-codex" as ModelId, label: "GPT-5.2 Codex" },
 ];
 
 const SHORT_MODEL: Record<ModelId, string> = {
-  "claude-opus-4-6": "Opus 4.6",
   "claude-sonnet-4-6": "Sonnet 4.6",
-  "claude-haiku-4-5": "Haiku 4.5",
-  "gpt-4o": "GPT 4o",
-  "gemini-2-5-pro": "Gemini 2.5",
+  "claude-opus-4-6": "Opus 4.6",
+  "claude-opus-4-6-1m": "Opus 4.6 1M",
+  "gpt-5-4": "GPT-5.4",
+  "gpt-5-3-codex-spark": "GPT-5.3 Spark",
+  "gpt-5-3-codex": "GPT-5.3 Codex",
+  "gpt-5-2-codex": "GPT-5.2 Codex",
 };
 
 const SCHEDULES = [
