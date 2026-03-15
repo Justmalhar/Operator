@@ -66,6 +66,10 @@ pub fn run() {
             commands::workspace::delete_workspace,
             commands::workspace::archive_workspace,
             commands::workspace::set_workspace_status,
+            commands::workspace::find_repository_by_path,
+            commands::workspace::clone_repository,
+            commands::workspace::copy_template,
+            commands::workspace::init_git_repo,
             // ── Agent ─────────────────────────────────────────────────────────
             commands::agent::launch_agent,
             commands::agent::stop_agent,
