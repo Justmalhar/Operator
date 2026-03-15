@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { ChevronRight, ListFilter, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { mockRepos } from "@/data/mockWorkspaces";
+import { useWorkspaceStore } from "@/store/workspaceStore";
 import { WorkspaceItem } from "./WorkspaceItem";
+import { NewWorkspaceModal } from "./NewWorkspaceModal";
 import type { Repo } from "@/types/workspace";
 
 interface WorkspaceListProps {
@@ -24,7 +25,6 @@ function RepoGroup({
 
   return (
     <div>
-      {/* Repo header */}
       <button
         type="button"
         onClick={() => hasWorkspaces && setIsExpanded((e) => !e)}
@@ -41,9 +41,7 @@ function RepoGroup({
           />
         )}
         {!hasWorkspaces && <div className="w-3 shrink-0" />}
-        <span className="min-w-0 flex-1 truncate">
-          {repo.name}
-        </span>
+        <span className="min-w-0 flex-1 truncate">{repo.name}</span>
         {hasWorkspaces && (
           <span className="mr-2 text-[10px] font-normal opacity-50">
             {repo.workspaces.length}
@@ -51,7 +49,6 @@ function RepoGroup({
         )}
       </button>
 
-      {/* Workspace rows */}
       {isExpanded && hasWorkspaces && (
         <div className="mt-px">
           {repo.workspaces.map((ws) => (
@@ -69,6 +66,9 @@ function RepoGroup({
 }
 
 export function WorkspaceList({ activeWorkspaceId, onWorkspaceSelect }: WorkspaceListProps) {
+  const repos = useWorkspaceStore((s) => s.repos);
+  const [modalOpen, setModalOpen] = useState(false);
+
   return (
     <div className="flex flex-col">
       {/* Section header */}
@@ -88,6 +88,7 @@ export function WorkspaceList({ activeWorkspaceId, onWorkspaceSelect }: Workspac
           </button>
           <button
             type="button"
+            onClick={() => setModalOpen(true)}
             className="vscode-list-item flex h-[20px] w-[20px] items-center justify-center rounded transition-colors duration-75"
             style={{ color: "var(--vscode-sidebar-section-header-foreground)" }}
             aria-label="New workspace"
@@ -99,7 +100,7 @@ export function WorkspaceList({ activeWorkspaceId, onWorkspaceSelect }: Workspac
 
       {/* Repo groups */}
       <div className="mt-1 space-y-2">
-        {mockRepos.map((repo) => (
+        {repos.map((repo) => (
           <RepoGroup
             key={repo.id}
             repo={repo}
@@ -108,6 +109,12 @@ export function WorkspaceList({ activeWorkspaceId, onWorkspaceSelect }: Workspac
           />
         ))}
       </div>
+
+      <NewWorkspaceModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onWorkspaceSelect={onWorkspaceSelect}
+      />
     </div>
   );
 }

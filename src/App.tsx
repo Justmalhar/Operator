@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./App.css";
 import { cn } from "@/lib/utils";
 import { SidebarLayout } from "@/components/layout/SidebarLayout";
@@ -9,6 +9,8 @@ import { PreferencesPage } from "@/pages/PreferencesPage";
 import { HelpPage } from "@/pages/HelpPage";
 import { SettingsPage } from "@/pages/SettingsPage";
 import { type SidebarNavItemId } from "@/components/sidebar/SidebarNav";
+import { useWorkspaceStore } from "@/store/workspaceStore";
+import { useSettingsStore } from "@/store/settingsStore";
 import {
   AlertCircle,
   Bell,
@@ -27,6 +29,12 @@ function App() {
   const [showRightPanel, setShowRightPanel] = useState(true);
   const [activeItem, setActiveItem] = useState<SidebarNavItemId>("activity");
   const centerRef = useRef<CenterPanelHandle>(null);
+
+  // Hydrate stores on mount
+  useEffect(() => {
+    void useWorkspaceStore.getState().loadRepos();
+    void useSettingsStore.getState().loadSettings();
+  }, []);
 
   const isFullPage = FULL_PAGE_ITEMS.includes(activeItem);
 
