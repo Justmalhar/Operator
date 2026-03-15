@@ -9,18 +9,10 @@ import { ResizeHandle } from "@/components/shared/ResizeHandle";
 import { PreferencesPage } from "@/pages/PreferencesPage";
 import { HelpPage } from "@/pages/HelpPage";
 import { SettingsPage } from "@/pages/SettingsPage";
+import { AutomationsPage } from "@/pages/AutomationsPage";
 import { type SidebarNavItemId } from "@/components/sidebar/SidebarNav";
 import { useWorkspaceStore } from "@/store/workspaceStore";
 import { useSettingsStore } from "@/store/settingsStore";
-import { springs } from "@/lib/animations";
-import {
-  AlertCircle,
-  CheckCircle2,
-  Cloud,
-  GitBranch,
-  Radio,
-  Wifi,
-} from "lucide-react";
 
 const DEFAULT_RIGHT_WIDTH = 360;
 const MIN_RIGHT_WIDTH = 260;
@@ -29,7 +21,7 @@ const DEFAULT_BOTTOM_HEIGHT = 260;
 const MIN_BOTTOM_HEIGHT = 100;
 const MAX_BOTTOM_HEIGHT = 500;
 
-const FULL_PAGE_ITEMS: SidebarNavItemId[] = ["preferences", "help", "settings"];
+const FULL_PAGE_ITEMS: SidebarNavItemId[] = ["preferences", "help", "settings", "automations"];
 
 function App() {
   const { activeWorkspaceId, setActiveWorkspace, getActiveWorkspace } = useWorkspaceStore();
@@ -90,6 +82,7 @@ function App() {
             {activeItem === "preferences" && <PreferencesPage />}
             {activeItem === "help" && <HelpPage />}
             {activeItem === "settings" && <SettingsPage />}
+            {activeItem === "automations" && <AutomationsPage />}
           </div>
         ) : (
           <>
@@ -154,77 +147,6 @@ function App() {
         )}
       </div>
 
-      {/* ── Status bar ───────────────────────────────────────────────────── */}
-      <motion.div
-        initial={{ y: 22 }}
-        animate={{ y: 0 }}
-        transition={{ delay: 0.1, ...springs.smooth }}
-        className="vscode-statusbar flex h-[22px] shrink-0 items-center justify-between text-[11px]"
-      >
-        <div className="flex min-w-0 flex-1 items-center overflow-hidden">
-          <button
-            type="button"
-            className="statusbar-item-interactive flex shrink-0 items-center gap-1.5 px-2"
-            style={{
-              background: "linear-gradient(135deg, #16825d, #1a9f6e)",
-              color: "#fff",
-            }}
-          >
-            <Radio className="h-3 w-3" />
-            <span className="font-medium">Operator</span>
-          </button>
-
-          <button
-            type="button"
-            className="statusbar-item-interactive flex items-center gap-1 truncate px-2"
-          >
-            <GitBranch className="h-3 w-3 shrink-0" />
-            <span className="truncate">{activeWs?.branch_name ?? "main"}</span>
-          </button>
-
-          <button
-            type="button"
-            className="statusbar-item-interactive hidden items-center gap-1 px-2 sm:flex"
-          >
-            <Cloud className="h-3 w-3" />
-          </button>
-
-          <button
-            type="button"
-            className="statusbar-item-interactive flex shrink-0 items-center gap-1.5 px-2"
-          >
-            <AlertCircle className="h-3 w-3" />
-            <span>0</span>
-            <AlertCircle className="h-3 w-3" style={{ color: "#cca700" }} />
-            <span>0</span>
-          </button>
-        </div>
-
-        <div className="flex shrink-0 items-center">
-          <AnimatePresence>
-            {activeWs && !isFullPage && (
-              <motion.span
-                key="workspace-status"
-                initial={{ opacity: 0, x: 10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 10 }}
-                transition={springs.snappy}
-                className="statusbar-item-interactive hidden items-center gap-1 px-2 sm:flex"
-              >
-                <CheckCircle2 className="h-3 w-3" style={{ color: "#4ec994" }} />
-                <span>{activeWs.city_name}</span>
-              </motion.span>
-            )}
-          </AnimatePresence>
-          <span className="statusbar-item-interactive flex items-center gap-1 px-2">
-            <Wifi className="h-3 w-3" />
-            <span className="hidden sm:inline">Connected</span>
-          </span>
-          <span className="statusbar-item-interactive px-2" style={{ opacity: 0.7 }}>
-            v0.1.0
-          </span>
-        </div>
-      </motion.div>
     </div>
   );
 }
