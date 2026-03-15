@@ -21,6 +21,7 @@ export function BottomPanel({ worktreePath: _worktreePath }: BottomPanelProps) {
   const [activeTab, setActiveTab] = useState<BottomTab>("setup");
   const [runningScript, setRunningScript] = useState<RunScript | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // ⌘R / Ctrl+R toggles the active run script
@@ -87,27 +88,23 @@ export function BottomPanel({ worktreePath: _worktreePath }: BottomPanelProps) {
       >
         {/* Left: collapse + tabs */}
         <div className="flex min-w-0 flex-1 items-stretch gap-4 pl-3">
-          <button
+          <motion.button
             type="button"
+            onClick={() => setCollapsed((v) => !v)}
             className="flex h-full items-center px-2 transition-colors duration-75 theme-hover-bg"
-            aria-label="Collapse panel"
+            aria-label={collapsed ? "Expand panel" : "Collapse panel"}
+            title={collapsed ? "Expand panel" : "Collapse panel"}
           >
-            <svg
-              width="10"
-              height="6"
-              viewBox="0 0 10 6"
-              fill="none"
-              style={{ color: "var(--vscode-panel-title-inactive-foreground)" }}
+            <motion.div
+              animate={{ rotate: collapsed ? 180 : 0 }}
+              transition={{ duration: 0.2, ease: "easeInOut" }}
             >
-              <path
-                d="M1 1L5 5L9 1"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+              <ChevronDown
+                className="h-[10px] w-[10px]"
+                style={{ color: "var(--vscode-panel-title-inactive-foreground)" }}
               />
-            </svg>
-          </button>
+            </motion.div>
+          </motion.button>
 
           {ALL_TABS.map((tab) => {
             const isActive = tab.id === activeTab;
@@ -303,26 +300,38 @@ export function BottomPanel({ worktreePath: _worktreePath }: BottomPanelProps) {
       </div>
 
       {/* Panel content */}
-      <div className="min-h-0 flex-1">
-        <AnimatePresence mode="wait">
+      <AnimatePresence initial={false}>
+        {!collapsed && (
           <motion.div
-            key={activeTab}
-            variants={tabContent}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            className="h-full"
+            key="panel-content"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.18, ease: "easeInOut" }}
+            className="min-h-0 flex-1 overflow-hidden"
+            style={{ minHeight: 0 }}
           >
-            {activeTab === "setup" && <SetupTab />}
-            {activeTab === "run" && (
-              <RunTab
-                runningScriptId={runningScript?.id ?? null}
-                onRunningChange={setRunningScript}
-              />
-            )}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                variants={tabContent}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                className="h-full"
+              >
+                {activeTab === "setup" && <SetupTab />}
+                {activeTab === "run" && (
+                  <RunTab
+                    runningScriptId={runningScript?.id ?? null}
+                    onRunningChange={setRunningScript}
+                  />
+                )}
+              </motion.div>
+            </AnimatePresence>
           </motion.div>
-        </AnimatePresence>
-      </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

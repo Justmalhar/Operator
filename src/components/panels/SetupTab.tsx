@@ -1,262 +1,190 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle2, Circle, Play, Plus, Trash2, RotateCcw } from "lucide-react";
-import { springs } from "@/lib/animations";
+import { Play, RotateCcw } from "lucide-react";
+import * as api from "@/lib/tauri";
 
-interface SetupStep {
+interface TerminalLine {
   id: string;
-  label: string;
-  command: string;
-  done: boolean;
-  running?: boolean;
+  type: "command" | "output" | "error";
+  text: string;
 }
 
-const DEFAULT_STEPS: SetupStep[] = [
-  { id: "1", label: "Install dependencies", command: "bun install", done: true },
-  { id: "2", label: "Configure environment", command: "cp .env.example .env", done: false },
-  { id: "3", label: "Migrate database", command: "bun run db:migrate", done: false },
-  { id: "4", label: "Compile CSS", command: "bun run build:css", done: false },
-];
+const DEFAULT_SCRIPT = `bun install
+cp .env.example .env
+bun run db:migrate
+bun run build:css`;
 
 export function SetupTab() {
-  const [steps, setSteps] = useState<SetupStep[]>(DEFAULT_STEPS);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editCommand, setEditCommand] = useState("");
-  const [editLabel, setEditLabel] = useState("");
+  const [script, setScript] = useState(DEFAULT_SCRIPT);
+  const [running, setRunning] = useState(false);
+  const [hasRun, setHasRun] = useState(false);
+  const [lines, setLines] = useState<TerminalLine[]>([]);
+  const bottomRef = useRef<HTMLDivElement>(null);
 
-  function toggleDone(id: string) {
-    setSteps((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, done: !s.done, running: false } : s)),
+  async function runSetup() {
+    if (running || !script.trim()) return;
+    setRunning(true);
+    setHasRun(true);
+
+    // Show each command line immediately
+    const scriptLines = script
+      .split("\n")
+      .map((l) => l.trim())
+      .filter(Boolean);
+
+    setLines(
+      scriptLines.map((cmd) => ({
+        id: crypto.randomUUID(),
+        type: "command" as const,
+        text: cmd,
+      })),
     );
-  }
 
-  function runStep(id: string) {
-    setSteps((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, running: true } : s)),
-    );
-    // Simulate completion after 1.5s (real impl would use api.runShellCommand)
-    setTimeout(() => {
-      setSteps((prev) =>
-        prev.map((s) => (s.id === id ? { ...s, running: false, done: true } : s)),
-      );
-    }, 1500);
-  }
+    try {
+      const result = await api.runShellScript(script);
+      const out: TerminalLine[] = [];
 
-  function startEdit(step: SetupStep) {
-    setEditingId(step.id);
-    setEditCommand(step.command);
-    setEditLabel(step.label);
-  }
+      if (result.stdout) {
+        for (const line of result.stdout.split("\n")) {
+          out.push({ id: crypto.randomUUID(), type: "output", text: line });
+        }
+      }
+      if (result.stderr) {
+        for (const line of result.stderr.split("\n")) {
+          out.push({ id: crypto.randomUUID(), type: "error", text: line });
+        }
+      }
 
-  function saveEdit(id: string) {
-    setSteps((prev) =>
-      prev.map((s) =>
-        s.id === id
-          ? { ...s, command: editCommand.trim() || s.command, label: editLabel.trim() || s.label }
-          : s,
-      ),
-    );
-    setEditingId(null);
-  }
+      setLines((prev) => [...prev, ...out]);
+    } catch (err) {
+      setLines((prev) => [
+        ...prev,
+        { id: crypto.randomUUID(), type: "error", text: String(err) },
+      ]);
+    }
 
-  function deleteStep(id: string) {
-    setSteps((prev) => prev.filter((s) => s.id !== id));
+    setRunning(false);
+    setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 50);
   }
-
-  function addStep() {
-    const id = `step-${Date.now()}`;
-    const newStep: SetupStep = {
-      id,
-      label: "New step",
-      command: "",
-      done: false,
-    };
-    setSteps((prev) => [...prev, newStep]);
-    setEditingId(id);
-    setEditCommand("");
-    setEditLabel("New step");
-  }
-
-  const completedCount = steps.filter((s) => s.done).length;
 
   return (
-    <div className="vscode-scrollable flex h-full flex-col overflow-y-auto">
-      <div className="px-3 py-3">
-        {/* Header with progress */}
-        <div className="mb-3 flex items-center justify-between">
-          <p className="text-[12px]" style={{ color: "var(--vscode-tab-inactive-foreground)" }}>
-            Setup scripts
-          </p>
-          <span className="text-[11px]" style={{ color: "var(--vscode-tab-inactive-foreground)" }}>
-            {completedCount}/{steps.length} done
-          </span>
-        </div>
-
-        {/* Steps */}
-        <div className="flex flex-col gap-1.5">
-          <AnimatePresence mode="popLayout">
-            {steps.map((step) => {
-              const isEditing = editingId === step.id;
-              return (
-                <motion.div
-                  key={step.id}
-                  layout
-                  initial={{ opacity: 0, y: -4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -4, height: 0 }}
-                  transition={springs.snappy}
-                  className="group flex flex-col rounded"
-                  style={{
-                    backgroundColor: isEditing ? "rgba(255,255,255,0.04)" : "transparent",
-                    border: isEditing ? "1px solid var(--vscode-panel-border)" : "1px solid transparent",
-                    padding: isEditing ? "8px" : "4px 2px",
-                  }}
-                >
-                  {isEditing ? (
-                    /* Edit mode */
-                    <div className="flex flex-col gap-2">
-                      <input
-                        className="w-full bg-transparent text-[12px] focus:outline-none"
-                        style={{
-                          color: "var(--vscode-sidebar-foreground)",
-                          borderBottom: "1px solid var(--vscode-panel-border)",
-                          paddingBottom: "4px",
-                        }}
-                        value={editLabel}
-                        onChange={(e) => setEditLabel(e.target.value)}
-                        placeholder="Step label"
-                        autoFocus
-                      />
-                      <input
-                        className="w-full bg-transparent font-mono text-[11px] focus:outline-none"
-                        style={{ color: "#4ec994" }}
-                        value={editCommand}
-                        onChange={(e) => setEditCommand(e.target.value)}
-                        placeholder="Command to run..."
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") saveEdit(step.id);
-                          if (e.key === "Escape") setEditingId(null);
-                        }}
-                      />
-                      <div className="flex justify-end gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setEditingId(null)}
-                          className="text-[11px] transition-opacity hover:opacity-70"
-                          style={{ color: "var(--vscode-tab-inactive-foreground)" }}
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => saveEdit(step.id)}
-                          className="text-[11px] font-medium transition-opacity hover:opacity-70"
-                          style={{ color: "#4ec994" }}
-                        >
-                          Save
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    /* View mode */
-                    <div className="flex items-start gap-2">
-                      {/* Done toggle */}
-                      <button
-                        type="button"
-                        onClick={() => toggleDone(step.id)}
-                        className="mt-0.5 shrink-0 transition-transform duration-75 hover:scale-110"
-                        aria-label={step.done ? "Mark incomplete" : "Mark complete"}
-                      >
-                        {step.done ? (
-                          <CheckCircle2 className="h-3.5 w-3.5" style={{ color: "#4ec994" }} />
-                        ) : (
-                          <Circle className="h-3.5 w-3.5" style={{ color: "var(--vscode-tab-inactive-foreground)" }} />
-                        )}
-                      </button>
-
-                      {/* Label + command */}
-                      <button
-                        type="button"
-                        className="min-w-0 flex-1 text-left"
-                        onClick={() => startEdit(step)}
-                      >
-                        <p
-                          className="text-[12px] leading-tight"
-                          style={{
-                            color: step.done
-                              ? "var(--vscode-tab-inactive-foreground)"
-                              : "var(--vscode-sidebar-foreground)",
-                            textDecoration: step.done ? "line-through" : undefined,
-                            opacity: step.done ? 0.6 : 1,
-                          }}
-                        >
-                          {step.label}
-                        </p>
-                        {step.command && (
-                          <code
-                            className="mt-0.5 block truncate text-[10px] font-mono"
-                            style={{ color: step.done ? "var(--vscode-tab-inactive-foreground)" : "#4ec994", opacity: step.done ? 0.5 : 0.8 }}
-                          >
-                            {step.command}
-                          </code>
-                        )}
-                      </button>
-
-                      {/* Action buttons */}
-                      <div className="flex shrink-0 items-center gap-1 opacity-0 transition-opacity duration-75 group-hover:opacity-100">
-                        {/* Run button */}
-                        <motion.button
-                          type="button"
-                          onClick={() => runStep(step.id)}
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          className="flex h-[22px] w-[22px] items-center justify-center rounded transition-colors duration-75 theme-hover-bg"
-                          aria-label="Run step"
-                          disabled={step.running}
-                        >
-                          {step.running ? (
-                            <motion.div
-                              animate={{ rotate: 360 }}
-                              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                            >
-                              <RotateCcw className="h-2.5 w-2.5" style={{ color: "#cca700" }} />
-                            </motion.div>
-                          ) : (
-                            <Play className="h-2.5 w-2.5" style={{ color: "#4ec994" }} />
-                          )}
-                        </motion.button>
-
-                        {/* Delete button */}
-                        <button
-                          type="button"
-                          onClick={() => deleteStep(step.id)}
-                          className="flex h-[22px] w-[22px] items-center justify-center rounded transition-colors duration-75 theme-hover-bg"
-                          aria-label="Delete step"
-                        >
-                          <Trash2 className="h-2.5 w-2.5" style={{ color: "#f48771" }} />
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </motion.div>
-              );
-            })}
-          </AnimatePresence>
-        </div>
-
-        {/* Add step button */}
-        <motion.button
-          type="button"
-          onClick={addStep}
-          whileHover={{ backgroundColor: "rgba(255,255,255,0.04)" }}
-          whileTap={{ scale: 0.97 }}
-          className="mt-3 flex w-full items-center gap-2 rounded px-2 py-1.5 text-[11px] transition-colors duration-75"
+    <div className="flex h-full flex-col overflow-hidden">
+      {/* Script editor */}
+      <div className="flex shrink-0 flex-col gap-2 px-3 py-3">
+        <p
+          className="text-[11px]"
           style={{ color: "var(--vscode-tab-inactive-foreground)" }}
         >
-          <Plus className="h-3 w-3" />
-          Add setup step
-        </motion.button>
+          Setup script
+        </p>
+
+        <textarea
+          className="w-full resize-none rounded font-mono text-[11px] focus:outline-none"
+          style={{
+            color: "#4ec994",
+            backgroundColor: "rgba(0,0,0,0.25)",
+            border: "1px solid var(--vscode-panel-border)",
+            padding: "8px 10px",
+            lineHeight: "1.7",
+            minHeight: "76px",
+          }}
+          value={script}
+          onChange={(e) => setScript(e.target.value)}
+          spellCheck={false}
+          rows={4}
+        />
+
+        <div className="flex justify-end">
+          <motion.button
+            type="button"
+            onClick={runSetup}
+            disabled={running || !script.trim()}
+            whileHover={!running ? { scale: 1.02 } : {}}
+            whileTap={!running ? { scale: 0.97 } : {}}
+            className="flex items-center gap-1.5 rounded px-3 py-1.5 text-[11px] font-medium transition-colors duration-75"
+            style={{
+              backgroundColor: running
+                ? "rgba(255,255,255,0.04)"
+                : "rgba(78,201,148,0.1)",
+              color: running
+                ? "var(--vscode-tab-inactive-foreground)"
+                : "#4ec994",
+              border: "1px solid",
+              borderColor: running
+                ? "var(--vscode-panel-border)"
+                : "rgba(78,201,148,0.3)",
+              cursor: running ? "not-allowed" : "pointer",
+            }}
+          >
+            {running ? (
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+              >
+                <RotateCcw className="h-3 w-3" />
+              </motion.div>
+            ) : hasRun ? (
+              <RotateCcw className="h-3 w-3" />
+            ) : (
+              <Play className="h-3 w-3" />
+            )}
+            <span>
+              {running ? "Running..." : hasRun ? "Rerun setup" : "Run setup"}
+            </span>
+          </motion.button>
+        </div>
       </div>
+
+      {/* Terminal output */}
+      <AnimatePresence>
+        {lines.length > 0 && (
+          <motion.div
+            key="terminal-output"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="min-h-0 flex-1 overflow-hidden"
+            style={{
+              borderTop: "1px solid var(--vscode-panel-border)",
+              backgroundColor: "rgba(0,0,0,0.2)",
+            }}
+          >
+            <div
+              className="vscode-scrollable h-full overflow-y-auto px-3 py-3 text-[11px]"
+              style={{
+                fontFamily:
+                  "'SF Mono', Menlo, Monaco, 'Cascadia Code', monospace",
+              }}
+            >
+              {lines.map((line) => (
+                <div
+                  key={line.id}
+                  className="leading-[1.7]"
+                  style={{
+                    whiteSpace: "pre-wrap",
+                    color:
+                      line.type === "command"
+                        ? "var(--vscode-editor-foreground)"
+                        : line.type === "error"
+                          ? "#f48771"
+                          : "var(--vscode-tab-inactive-foreground)",
+                  }}
+                >
+                  {line.type === "command" ? (
+                    <span>
+                      <span style={{ color: "#4ec994" }}>$ </span>
+                      {line.text}
+                    </span>
+                  ) : (
+                    line.text || "\u00A0"
+                  )}
+                </div>
+              ))}
+              <div ref={bottomRef} />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
